@@ -123,3 +123,19 @@ test('INPE completo substitui cache antigo e admite resultado vazio',async()=>{
   assert.equal(state.camadas.inpe.dados.focos.length,0);
   assert.equal(state.camadas.inpe.dados.recuperadosCache,0);
 });
+
+test('falha total no INPE identifica arquivo e causa real sem apagar cache',async()=>{
+  const fetchFn=async()=>http('sem arquivo',404);
+  await assert.rejects(collectINPE({fetchFn,now:NOW,municipios:sites}),err=>
+    err.code==='INPE_UNAVAILABLE'&&classifyError(err)==='fonte_indisponivel'&&
+    err.falhasArquivos?.length===2&&err.falhasArquivos.every(x=>x.tipo==='endereco_invalido'));
+  const previous=emptyState();
+  previous.camadas.inpe=layer(null,{focos:[{lat:-4.2637,lon:-55.9916,
+    data_hora_gmt:'2026-10-18T17:00:00.000Z',satelite:'NPP-375'}]},null,'inpe',NOW-3600000);
+  const state=await collectAll(previous,{fetchFn,now:NOW,municipios:sites,sources:[]});
+  assert.equal(state.camadas.inpe.estado,'cache_anterior');
+  assert.equal(state.camadas.inpe.dados.focos.length,1);
+  assert.equal(state.camadas.inpe.tipoErro,'fonte_indisponivel');
+  assert.equal(state.camadas.inpe.falhasArquivos.length,2);
+  assert.match(state.camadas.inpe.mensagem,/INPE/);
+});
