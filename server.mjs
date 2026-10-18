@@ -53,12 +53,14 @@ function summaries(){
     const obj=markStale(state.camadas[k],now,k)||{estado:'nao_consultado'};
     return [k,{estado:obj.estado,ultimaAtualizacao:obj.ultimaAtualizacao??null,
       ultimaTentativa:obj.ultimaTentativa??null,tipoErro:obj.tipoErro??null,
+      mensagem:obj.mensagem??null,
       usandoCache:obj.usandoCache??obj.estado==='cache_anterior',defasado:obj.defasado??false,
       parcial:k==='inpe'?Boolean(obj.dados?.parcial):Object.keys(obj.falhasMunicipais||{}).length>0,
       municipiosComFalha:k==='inpe'?null:Object.keys(obj.falhasMunicipais||{}).length,
       ...(k==='inpe'?{diagnostico:{
         arquivos:obj.dados?.arquivos??[],
         errosParciais:obj.dados?.errosParciais??[],
+        falhasUltimaTentativa:obj.falhasArquivos??[],
         recuperadosCache:obj.dados?.recuperadosCache??0,
         totalFocosEmCache:obj.dados?.focos?.length??null,
         ultimoFoco:obj.dados?.focos?.[0]?.data_hora_gmt??null,
