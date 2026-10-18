@@ -57,6 +57,7 @@ export function classifyError(err) {
   if(err?.code===401 || err?.code===403)return 'acesso_negado';
   if(err?.code===404)return 'endereco_invalido';
   if(err?.code==='OVERSIZE')return 'arquivo_excessivo';
+  if(err?.code==='INPE_UNAVAILABLE')return 'fonte_indisponivel';
   if(typeof err?.code==='number' && err.code>=500)return 'erro_servidor';
   if(err?.name==='TimeoutError'||err?.name==='AbortError')return 'tempo_esgotado';
   if(err?.code==='XML_INVALID'||err?.code==='CSV_INVALID'||err?.code==='API_INVALID')return 'resposta_invalida';
@@ -120,7 +121,11 @@ export async function collectINPE({fetchFn=globalThis.fetch,now=Date.now(),munic
       good.push({date,url,linhas:focos.length});all.push(...focos);
     } catch(err){errors.push({date,tipo:classifyError(err),detalhe:String(err.message).slice(0,100)});}
   }
-  if(!good.length)throw new HttpFailure('API_INVALID',`INPE indisponível: ${errors.map(x=>x.tipo).join(', ')}`);
+  if(!good.length){
+    const failure=new HttpFailure('INPE_UNAVAILABLE',`Nenhum CSV válido do INPE: ${errors.map(x=>x.date+': '+x.tipo).join('; ')}`);
+    failure.falhasArquivos=errors;
+    throw failure;
+  }
   const uniq=new Map();for(const f of all)uniq.set(`${f.lat}|${f.lon}|${f.data_hora_gmt}|${f.satelite}`,f);
   const list=[...uniq.values()].sort((a,b)=>b.data_hora_gmt.localeCompare(a.data_hora_gmt));
   return {origem:'INPE CSV oficial',consultaEm:new Date(now).toISOString(),janelaHoras:24,focos:list,arquivos:good,errosParciais:errors,parcial:errors.length>0};
@@ -304,7 +309,7 @@ const staleMs={ar:3*3600000,tempo:3*3600000,inpe:3*3600000};
 export function layer(oldLayer, fresh,err,kind,now=Date.now()) {
   const prior=oldLayer||{dados:null};
   if(err){
-    return {...prior,estado:prior.dados?'cache_anterior':'erro',tipoErro:classifyError(err),mensagem:err.message||String(err),ultimaTentativa:new Date(now).toISOString(),origemRecuperada:false};
+    return {...prior,estado:prior.dados?'cache_anterior':'erro',tipoErro:classifyError(err),mensagem:err.message||String(err),falhasArquivos:err.falhasArquivos??[],ultimaTentativa:new Date(now).toISOString(),origemRecuperada:false};
   }
   return {dados:fresh,estado:'atual',tipoErro:null,mensagem:null,ultimaTentativa:new Date(now).toISOString(),ultimaAtualizacao:new Date(now).toISOString(),origemRecuperada:true};
 }
