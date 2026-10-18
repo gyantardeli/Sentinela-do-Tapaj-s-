@@ -55,7 +55,15 @@ function summaries(){
       ultimaTentativa:obj.ultimaTentativa??null,tipoErro:obj.tipoErro??null,
       usandoCache:obj.usandoCache??obj.estado==='cache_anterior',defasado:obj.defasado??false,
       parcial:k==='inpe'?Boolean(obj.dados?.parcial):Object.keys(obj.falhasMunicipais||{}).length>0,
-      municipiosComFalha:k==='inpe'?null:Object.keys(obj.falhasMunicipais||{}).length}];
+      municipiosComFalha:k==='inpe'?null:Object.keys(obj.falhasMunicipais||{}).length,
+      ...(k==='inpe'?{diagnostico:{
+        arquivos:obj.dados?.arquivos??[],
+        errosParciais:obj.dados?.errosParciais??[],
+        recuperadosCache:obj.dados?.recuperadosCache??0,
+        totalFocosEmCache:obj.dados?.focos?.length??null,
+        ultimoFoco:obj.dados?.focos?.[0]?.data_hora_gmt??null,
+        janelaHoras:obj.dados?.janelaHoras??null
+      }}:{})}];
   }));
   return {versao:2,ultimaExecucao:state.ultimaExecucao,emExecucao:busy, fontesTotal:SOURCES.length,
     rssConfirmado:novos.filter(s=>['ok_rss','rss_sem_resultados'].includes(s.status)).length,
