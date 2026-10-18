@@ -35,13 +35,13 @@ jobs:
           node-version: '22'
       - name: Testes de regressão
         run: npm run check
-      - name: Commit de arquivos extraídos
+      - name: Commit dos fontes (sem arquivo de workflow)
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- . ':!Sentinela_Tapajos_Repositorio_GitHub_V2_2.zip'
+          git add -A -- . ':!Sentinela_Tapajos_Repositorio_GitHub_V2_2.zip' ':!.github/workflows/verificacao.yml'
           if git diff --cached --quiet; then
             echo "Arquivos já publicados"
             exit 0
