@@ -1,0 +1,16 @@
+services:
+  sentinela:
+    build: .
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8787
+      DATA_DIR: /app/data
+      ENABLE_AUTO_COLLECT: '1'
+      COLLECT_TOKEN: ${COLLECT_TOKEN:?Configure COLLECT_TOKEN em um arquivo .env seguro}
+    volumes:
+      - sentinela_data:/app/data
+    ports:
+      - '127.0.0.1:8787:8787' # use proxy HTTPS no servidor
+volumes:
+  sentinela_data:

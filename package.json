@@ -1,0 +1,16 @@
+{
+  "name": "sentinela-tapajos-integrado",
+  "version": "2.2.0",
+  "private": true,
+  "description": "Painel Sentinela Tapajos integrado ao coletor resiliente V2.1",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "once": "node server.mjs --once",
+    "test": "node --test",
+    "check": "node --check collector.mjs && node --check server.mjs && node --check environment-view.mjs && node --check frontend-adapter.mjs && npm test && node --check public/app.js && node --check public/sw.js"
+  }
+}

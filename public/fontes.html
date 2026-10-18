@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saúde das fontes · Sentinela Tapajós</title>
+<style>
+:root{font:15px/1.5 system-ui,Arial,sans-serif;color:#203529;background:#f4f7f5}*{box-sizing:border-box}body{margin:0}
+header{padding:22px max(20px,calc((100vw - 1020px)/2));background:#193b2b;color:white}h1{font-size:1.55rem;margin:3px 0}h2{font-size:1.15rem;margin:0 0 8px}header p{color:#dcece1;margin:0}
+main{max-width:1060px;margin:auto;padding:22px 16px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{background:white;border:1px solid #dbe4df;border-radius:12px;padding:16px;box-shadow:0 2px 8px #132d1a08}.stat{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}.muted{color:#63766a;font-size:.88rem}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:20px 0 10px;flex-wrap:wrap}button{border:1px solid #aac6b5;background:white;color:#24563a;border-radius:8px;padding:9px 12px;cursor:pointer}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:10px;border-bottom:1px solid #edf1ee;vertical-align:top}th{font-size:.82rem;color:#597064}td{font-size:.91rem}.pill{display:inline-block;border-radius:40px;padding:3px 9px;background:#eef2ef;color:#46574b;white-space:nowrap;font-size:.8rem}.pill.good{background:#e1f5e7;color:#19663b}.pill.partial{background:#fff1d1;color:#805b12}.pill.bad{background:#ffe7e4;color:#96372f}.detail{font-size:.82rem;color:#68796b}.legend{padding:12px 0;color:#526b5a;font-size:.88rem}.foot{margin-top:16px;color:#647b6a;font-size:.86rem}
+@media(max-width:620px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}th:nth-child(3),td:nth-child(3){display:none}}
+</style></head><body><header><div class="muted" style="color:#a5ceaf">SENTINELA TAPAJÓS / MONITORAMENTO</div><h1>Saúde das fontes</h1><p>Diagnóstico de coleta, integridade e cobertura — sem mascarar falhas como dados zero.</p></header>
+<main>
+  <section class="metrics"><div class="card"><div class="muted">RSS confirmado</div><div class="stat" id="rss">—</div></div><div class="card"><div class="muted">Índice parcial</div><div class="stat" id="partial">—</div></div><div class="card"><div class="muted">Falhas</div><div class="stat" id="errors">—</div></div><div class="card"><div class="muted">Não verificadas</div><div class="stat" id="pending">—</div></div></section>
+  <div class="controls"><h2>Fontes ambientais</h2><div class="muted" id="last">Aguardando primeira coleta</div><button id="reload">Consultar dados salvos</button></div>
+  <section class="metrics" id="env"></section>
+  <div class="controls"><h2>20 canais de notícias</h2><div class="muted">Cobertura real por serviço</div></div>
+  <div class="card tablewrap"><table><thead><tr><th>Fonte</th><th>Estado</th><th>Modo de acesso / erro</th><th>Última tentativa</th></tr></thead><tbody id="sources"><tr><td colspan="4">Carregando dados salvos…</td></tr></tbody></table></div>
+  <p class="legend">RSS direto = cobertura disponível no feed do veículo. Índice parcial = apenas matérias encontradas por indexador externo. Fonte em falha ou sem resultados não significa ausência de ocorrência ambiental.</p><div class="foot">Coleta automática requer servidor em execução. O painel consulta informações persistidas, não tenta raspar diretamente sites bloqueados a partir do navegador.</div>
+</main>
+<script>
+const labels={ok_rss:'RSS disponível',rss_sem_resultados:'RSS sem matérias relevantes',parcial_indice:'Índice parcial',indice_sem_resultados:'Índice sem matérias relevantes',erro:'Falha de coleta',nao_consultado:'Não verificada',atual:'Atual',cache_anterior:'Cache anterior',defasado:'Dados antigos',parcial:'Coleta parcial',sem_dados:'Sem dados'};
+function el(tag,cls,content){let e=document.createElement(tag);if(cls)e.className=cls;if(content!==undefined)e.textContent=content;return e;}
+function date(v){return v?new Date(v).toLocaleString('pt-BR',{timeZone:'America/Santarem'}):'—';}
+function badge(s){let type=s==='erro'?'bad':s.includes('indice')||s.includes('cache')||s==='defasado'||s==='parcial'?'partial':s.startsWith('ok_')||s==='atual'||s.startsWith('rss_')?'good':'';return el('span','pill '+type,labels[s]||s);}
+async function load(){
+ try{const r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();
+ for(const [id,value] of [['rss',j.rssConfirmado],['partial',j.indiceParcial],['errors',j.falhas],['pending',j.aindaNaoTestadas]])document.getElementById(id).textContent=value;
+ document.getElementById('last').textContent=j.ultimaExecucao?'Última coleta: '+date(j.ultimaExecucao)+' (UTC−3) · '+j.fontesDefasadas+' fontes com consulta antiga':'Nenhuma coleta realizada';
+ const env=document.getElementById('env');env.replaceChildren();for(const [k,title] of [['inpe','INPE · focos'],['ar','CAMS · ar'],['tempo','Open-Meteo · vento']]){const obj=j.camadas[k]||{};const card=el('div','card');card.append(el('h2','',title),badge(obj.estado||'nao_consultado'),el('div','detail','Última atualização da camada: '+date(obj.ultimaAtualizacao)),el('div','detail',[obj.tipoErro||'',obj.defasado?'Dados antigos':'',obj.usandoCache?'Usando cache':''].filter(Boolean).join(' · ')));env.append(card);}
+ const tbody=document.getElementById('sources');tbody.replaceChildren();for(const s of j.fontes){const tr=document.createElement('tr'),td1=el('td'),link=el('a','',s.nome);link.href=s.url;link.target='_blank';link.rel='noopener noreferrer';td1.append(link);tr.append(td1);const td2=el('td');td2.append(badge(s.status));tr.append(td2);tr.append(el('td','detail',[s.defasada?'Consulta antiga':'',s.modo||'',s.tipoErro||'',...(s.motivos||[]).slice(-1)].filter(Boolean).join(' · ')));tr.append(el('td','detail',date(s.atualizadoEm)));tbody.append(tr);}
+ }catch(err){document.getElementById('last').textContent='Falha de leitura: '+err.message;}
+}
+document.getElementById('reload').addEventListener('click',load);load();
+</script></body></html>

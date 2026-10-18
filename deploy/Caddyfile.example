@@ -1,0 +1,6 @@
+# Substitua dominio.example pelo seu domínio e configure DNS/HTTPS.
+# O Caddy faz HTTPS automático quando o domínio aponta para este servidor.
+dominio.example {
+    encode gzip
+    reverse_proxy 127.0.0.1:8787
+}

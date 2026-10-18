@@ -1,0 +1,14 @@
+Sentinela Tapajós V2.2 — versão integrada e implantável
+
+Executar: npm run check
+Iniciar local: ENABLE_AUTO_COLLECT=0 node server.mjs
+Acessar: http://127.0.0.1:8787/
+
+Para coleta automática: ENABLE_AUTO_COLLECT=1 node server.mjs com acesso externo,
+processo persistente e disco para o cache; o Docker Compose está incluído.
+
+ATENÇÃO: a versão publicada em sentinela-tapajos-ar.gyantardeli.chatgpt.site
+NÃO FOI SUBSTITUÍDA. Não foi fornecido acesso ao código-fonte desta
+publicação. Para atualizar a URL existente sem perda dos módulos anteriores,
+abra o projeto editável e integre os endpoints da V2.2; leia
+'README.md' e 'deploy/GUIA_PUBLICACAO.md'.
