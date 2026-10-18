@@ -79,3 +79,63 @@ test('falha no INPE não destrói dados anteriores quando meteorologia atualiza'
  assert.equal(ret.camadas.ar.dados.itaituba.pm25,0);
  assert.equal(ret.camadas.tempo.dados.itaituba.ventoKmh,0);
 });
+
+
+test('INPE parcial preserva focos recentes do cache, mas não os vencidos',async()=>{
+  const previous=emptyState();
+  previous.camadas.inpe=layer(null,{focos:[
+    {lat:-4.2637,lon:-55.9916,data_hora_gmt:'2026-10-17T23:00:00.000Z',satelite:'NPP-375'},
+    {lat:-4.2637,lon:-55.9916,data_hora_gmt:'2026-10-16T12:00:00.000Z',satelite:'NPP-375'}
+  ],parcial:false},null,'inpe',NOW-3600000);
+  const csv='id,lat,lon,data_hora_gmt,satelite\n1,-4.2637,-55.9916,2026-10-18 17:00:00,NPP-375\n';
+  const weather=[{current:{time:'2026-10-18T18:00:00Z',temperature_2m:28,wind_speed_10m:3}}];
+  const air=[{current:{time:'2026-10-18T18:00:00Z',pm2_5:3}}];
+  const fn=async url=>{
+    if(url.includes('20261018'))return http(csv);
+    if(url.includes('20261017'))return http('indisponível',404);
+    if(url.includes('air-quality-api.open-meteo'))return http(JSON.stringify(air));
+    if(url.includes('api.open-meteo'))return http(JSON.stringify(weather));
+    throw new Error('URL inesperada');
+  };
+  const state=await collectAll(previous,{fetchFn:fn,now:NOW,municipios:sites,sources:[]});
+  const inpe=state.camadas.inpe;
+  assert.equal(inpe.estado,'parcial');
+  assert.equal(inpe.dados.focos.length,2);
+  assert.equal(inpe.dados.recuperadosCache,1);
+  assert.ok(inpe.dados.focos.some(x=>x.data_hora_gmt.startsWith('2026-10-17')));
+  assert.ok(!inpe.dados.focos.some(x=>x.data_hora_gmt.startsWith('2026-10-16')));
+});
+
+test('INPE completo substitui cache antigo e admite resultado vazio',async()=>{
+  const previous=emptyState();
+  previous.camadas.inpe=layer(null,{focos:[{
+    lat:-4.2637,lon:-55.9916,data_hora_gmt:'2026-10-18T17:00:00.000Z',satelite:'NPP-375'
+  }]},null,'inpe',NOW-3600000);
+  const csv='id,lat,lon,data_hora_gmt,satelite\n';
+  const fn=async url=>{
+    if(url.includes('focos_diario_br_'))return http(csv);
+    if(url.includes('air-quality-api'))return http(JSON.stringify([{current:{time:'2026-10-18T18:00:00Z',pm2_5:0}}]));
+    if(url.includes('api.open-meteo'))return http(JSON.stringify([{current:{time:'2026-10-18T18:00:00Z',wind_speed_10m:0}}]));
+    throw new Error('URL inesperada');
+  };
+  const state=await collectAll(previous,{fetchFn:fn,now:NOW,municipios:sites,sources:[]});
+  assert.equal(state.camadas.inpe.estado,'atual');
+  assert.equal(state.camadas.inpe.dados.focos.length,0);
+  assert.equal(state.camadas.inpe.dados.recuperadosCache,0);
+});
+
+test('falha total no INPE identifica arquivo e causa real sem apagar cache',async()=>{
+  const fetchFn=async()=>http('sem arquivo',404);
+  await assert.rejects(collectINPE({fetchFn,now:NOW,municipios:sites}),err=>
+    err.code==='INPE_UNAVAILABLE'&&classifyError(err)==='fonte_indisponivel'&&
+    err.falhasArquivos?.length===2&&err.falhasArquivos.every(x=>x.tipo==='endereco_invalido'));
+  const previous=emptyState();
+  previous.camadas.inpe=layer(null,{focos:[{lat:-4.2637,lon:-55.9916,
+    data_hora_gmt:'2026-10-18T17:00:00.000Z',satelite:'NPP-375'}]},null,'inpe',NOW-3600000);
+  const state=await collectAll(previous,{fetchFn,now:NOW,municipios:sites,sources:[]});
+  assert.equal(state.camadas.inpe.estado,'cache_anterior');
+  assert.equal(state.camadas.inpe.dados.focos.length,1);
+  assert.equal(state.camadas.inpe.tipoErro,'fonte_indisponivel');
+  assert.equal(state.camadas.inpe.falhasArquivos.length,2);
+  assert.match(state.camadas.inpe.mensagem,/INPE/);
+});

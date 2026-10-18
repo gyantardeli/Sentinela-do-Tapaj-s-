@@ -57,6 +57,7 @@ export function classifyError(err) {
   if(err?.code===401 || err?.code===403)return 'acesso_negado';
   if(err?.code===404)return 'endereco_invalido';
   if(err?.code==='OVERSIZE')return 'arquivo_excessivo';
+  if(err?.code==='INPE_UNAVAILABLE')return 'fonte_indisponivel';
   if(typeof err?.code==='number' && err.code>=500)return 'erro_servidor';
   if(err?.name==='TimeoutError'||err?.name==='AbortError')return 'tempo_esgotado';
   if(err?.code==='XML_INVALID'||err?.code==='CSV_INVALID'||err?.code==='API_INVALID')return 'resposta_invalida';
@@ -120,10 +121,43 @@ export async function collectINPE({fetchFn=globalThis.fetch,now=Date.now(),munic
       good.push({date,url,linhas:focos.length});all.push(...focos);
     } catch(err){errors.push({date,tipo:classifyError(err),detalhe:String(err.message).slice(0,100)});}
   }
-  if(!good.length)throw new HttpFailure('API_INVALID',`INPE indisponível: ${errors.map(x=>x.tipo).join(', ')}`);
+  if(!good.length){
+    const failure=new HttpFailure('INPE_UNAVAILABLE',`Nenhum CSV válido do INPE: ${errors.map(x=>x.date+': '+x.tipo).join('; ')}`);
+    failure.falhasArquivos=errors;
+    throw failure;
+  }
   const uniq=new Map();for(const f of all)uniq.set(`${f.lat}|${f.lon}|${f.data_hora_gmt}|${f.satelite}`,f);
   const list=[...uniq.values()].sort((a,b)=>b.data_hora_gmt.localeCompare(a.data_hora_gmt));
   return {origem:'INPE CSV oficial',consultaEm:new Date(now).toISOString(),janelaHoras:24,focos:list,arquivos:good,errosParciais:errors,parcial:errors.length>0};
+}
+
+/**
+ * Em coleta parcial, preserva apenas detecções previamente confirmadas ainda
+ * dentro da janela de 24h. A contagem continua explicitamente INCOMPLETA.
+ * Uma coleta completa substitui o cache, inclusive quando o resultado é zero.
+ */
+export function mergeINPEOnPartial(previous, fresh, now=Date.now()) {
+  if (!fresh?.parcial || !Array.isArray(fresh.focos) || !Array.isArray(previous?.focos)) {
+    return {...fresh, recuperadosCache:0};
+  }
+  const minTime=now-24*3600000;
+  const valid=f=>{
+    const t=Date.parse(f?.data_hora_gmt??'');
+    return Number.isFinite(t) && t>=minTime && t<=now+300000 &&
+      typeof f.lat==='number' && Number.isFinite(f.lat) && Math.abs(f.lat)<=90 &&
+      typeof f.lon==='number' && Number.isFinite(f.lon) && Math.abs(f.lon)<=180 &&
+      typeof f.satelite==='string' && f.satelite.length>0;
+  };
+  const key=f=>[f.lat,f.lon,f.data_hora_gmt,f.satelite].join('|');
+  const results=new Map();
+  for(const focus of fresh.focos)if(valid(focus))results.set(key(focus),focus);
+  let recovered=0;
+  for(const focus of previous.focos){
+    if(!valid(focus)||results.has(key(focus)))continue;
+    results.set(key(focus),focus);recovered++;
+  }
+  return {...fresh,focos:[...results.values()].sort((a,b)=>b.data_hora_gmt.localeCompare(a.data_hora_gmt)),
+    recuperadosCache:recovered};
 }
 
 function validCurrent(c, names){
@@ -275,7 +309,7 @@ const staleMs={ar:3*3600000,tempo:3*3600000,inpe:3*3600000};
 export function layer(oldLayer, fresh,err,kind,now=Date.now()) {
   const prior=oldLayer||{dados:null};
   if(err){
-    return {...prior,estado:prior.dados?'cache_anterior':'erro',tipoErro:classifyError(err),mensagem:err.message||String(err),ultimaTentativa:new Date(now).toISOString(),origemRecuperada:false};
+    return {...prior,estado:prior.dados?'cache_anterior':'erro',tipoErro:classifyError(err),mensagem:err.message||String(err),falhasArquivos:err.falhasArquivos??[],ultimaTentativa:new Date(now).toISOString(),origemRecuperada:false};
   }
   return {dados:fresh,estado:'atual',tipoErro:null,mensagem:null,ultimaTentativa:new Date(now).toISOString(),ultimaAtualizacao:new Date(now).toISOString(),origemRecuperada:true};
 }
@@ -299,7 +333,8 @@ export async function collectAll(state,{fetchFn=globalThis.fetch,now=Date.now(),
     try{
       const fresh=await fn();
       if(kind==='inpe'){
-        const result=layer(base.camadas[kind],fresh,null,kind,now);
+        const merged=mergeINPEOnPartial(base.camadas[kind]?.dados,fresh,now);
+        const result=layer(base.camadas[kind],merged,null,kind,now);
         result.estado=fresh.parcial?'parcial':'atual';
         base.camadas[kind]=result;
       }else{

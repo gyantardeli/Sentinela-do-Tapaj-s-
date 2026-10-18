@@ -12,6 +12,29 @@ Versão web/PWA que **integra** o coletor resiliente V2.1 com um painel funciona
 
 Para passos operacionais, consulte [VINCULAR_CHATGPT_SITES.md](VINCULAR_CHATGPT_SITES.md).
 
+## Correções da Prioridade 1 — outubro de 2026
+
+- Quando o CSV diário do INPE falha **parcialmente**, o coletor combina as novas
+  detecções com registros válidos do cache, limitados às últimas 24 horas, por
+  coordenadas + horário + satélite. A situação permanece `parcial`; não representa
+  uma contagem completa.
+- Quando ambos os arquivos diários são recuperados, o INPE substitui o cache,
+  inclusive se o conjunto tiver zero detecções.
+- A rota `GET /api/health` mostra `camadas.inpe.diagnostico.arquivos`,
+  `errosParciais`, `falhasUltimaTentativa`, `recuperadosCache` e o foco mais
+  recente. Também disponibiliza `mensagem` e `tipoErro` por camada.
+- O teste `test/autocoleta.test.mjs` inicia um servidor em processo separado
+  com respostas simuladas, confirma gravação em disco **sem navegador** e
+  reinicia o servidor para verificar a recuperação do estado.
+
+**Validação:** `npm run check` (mock de rede, sem garantir disponibilidade
+atual dos serviços externos). Em produção, confirme separadamente a publicação
+do servidor, o volume persistente `DATA_DIR` e os horários reais das fontes.
+
+**Site original:** nenhuma alteração neste repositório publica automaticamente
+na URL anterior do ChatGPT Sites nem atualiza o APK; a implantação é uma etapa
+independente.
+
 ## Executar
 
 Requer Node.js 20+. Não necessita instalar pacotes.
