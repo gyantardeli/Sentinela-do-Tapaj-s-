@@ -87,7 +87,7 @@ test('INPE parcial preserva focos recentes do cache, mas não os vencidos',async
     {lat:-4.2637,lon:-55.9916,data_hora_gmt:'2026-10-17T23:00:00.000Z',satelite:'NPP-375'},
     {lat:-4.2637,lon:-55.9916,data_hora_gmt:'2026-10-16T12:00:00.000Z',satelite:'NPP-375'}
   ],parcial:false},null,'inpe',NOW-3600000);
-  const csv='id,lat,lon,data_hora_gmt,satelite\\n1,-4.2637,-55.9916,2026-10-18 17:00:00,NPP-375\\n';
+  const csv='id,lat,lon,data_hora_gmt,satelite\n1,-4.2637,-55.9916,2026-10-18 17:00:00,NPP-375\n';
   const weather=[{current:{time:'2026-10-18T18:00:00Z',temperature_2m:28,wind_speed_10m:3}}];
   const air=[{current:{time:'2026-10-18T18:00:00Z',pm2_5:3}}];
   const fn=async url=>{
@@ -111,7 +111,7 @@ test('INPE completo substitui cache antigo e admite resultado vazio',async()=>{
   previous.camadas.inpe=layer(null,{focos:[{
     lat:-4.2637,lon:-55.9916,data_hora_gmt:'2026-10-18T17:00:00.000Z',satelite:'NPP-375'
   }]},null,'inpe',NOW-3600000);
-  const csv='id,lat,lon,data_hora_gmt,satelite\\n';
+  const csv='id,lat,lon,data_hora_gmt,satelite\n';
   const fn=async url=>{
     if(url.includes('focos_diario_br_'))return http(csv);
     if(url.includes('air-quality-api'))return http(JSON.stringify([{current:{time:'2026-10-18T18:00:00Z',pm2_5:0}}]));
