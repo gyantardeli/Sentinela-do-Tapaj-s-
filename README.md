@@ -2,6 +2,16 @@
 
 Versão web/PWA que **integra** o coletor resiliente V2.1 com um painel funcional de visualização e diagnóstico. O frontend é uma implementação nova baseada na estrutura funcional documentada do projeto. **Não modifica o site antigo automaticamente.**
 
+## Projeto publicado e integração com ChatGPT Sites
+
+- **Site original:** [Sentinela Tapajós — Queimadas e qualidade do ar](https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/)
+- **Repositório de desenvolvimento:** [gyantardeli/Sentinela-do-Tapaj-s-](https://github.com/gyantardeli/Sentinela-do-Tapaj-s-)
+- **Situação:** associação documentada; **não existe sincronização automática ou implantação deste GitHub no Site original**.
+- **Código neste repositório:** implementação independente V2.2. Não equivale ao código completo da publicação original (faltam Mapa 3D, áreas de interesse e alertas).
+- **Próxima integração:** abrir o Site existente no ChatGPT Sites/Work, referenciar este repositório e integrar seletivamente coletor e APIs; revisar prévia e banco antes de publicar na mesma URL. Não substituir o frontend original pela V2.2 inteira sem auditoria.
+
+Para passos operacionais, consulte [VINCULAR_CHATGPT_SITES.md](VINCULAR_CHATGPT_SITES.md).
+
 ## Executar
 
 Requer Node.js 20+. Não necessita instalar pacotes.
