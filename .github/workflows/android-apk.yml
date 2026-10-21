@@ -56,6 +56,18 @@ jobs:
           path: sdk-portable/
           if-no-files-found: error
           retention-days: 1
+      - name: Separar biblioteca nativa C++ do zipalign
+        shell: bash
+        run: |
+          mkdir -p sdk-cpp-runtime
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib64/libc++.so" sdk-cpp-runtime/libc++.so
+      - name: Exportar biblioteca nativa para build local
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-libcxx-36-temporario
+          path: sdk-cpp-runtime/libc++.so
+          if-no-files-found: error
+          retention-days: 1
       - name: Publicar arquivo de teste
         uses: actions/upload-artifact@v4
         with:
