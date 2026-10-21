@@ -24,10 +24,16 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Plataforma Android 35
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      # O runner ubuntu-latest já contém Android SDK. A action
+      # setup-android@v3 tenta instalar o pacote obsoleto "tools"
+      # e falha nos repositórios atuais do SDK.
+      - name: Instalar plataforma Android 35
+        shell: bash
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -type f -name sdkmanager | sort -V | tail -n 1)"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - name: Compilar APK de teste (assinatura DEBUG)
         run: gradle -p android --no-daemon :app:assembleDebug
       - name: Publicar arquivo de teste
