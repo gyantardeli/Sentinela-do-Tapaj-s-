@@ -36,6 +36,26 @@ jobs:
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - name: Compilar APK de teste (assinatura DEBUG)
         run: gradle -p android --no-daemon :app:assembleDebug
+      # Artefato temporário de ferramentas públicas para compilar LOCALMENTE
+      # o projeto Android original V1.2.1, sem expor keystore nem código privado.
+      - name: Preparar SDK de compilação local 36
+        shell: bash
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -type f -name sdkmanager | sort -V | tail -n 1)"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+          mkdir -p sdk-portable/build-tools/36.0.0/lib sdk-portable/platforms/android-36
+          cp "$ANDROID_HOME/build-tools/36.0.0/aapt2" sdk-portable/build-tools/36.0.0/
+          cp "$ANDROID_HOME/build-tools/36.0.0/zipalign" sdk-portable/build-tools/36.0.0/
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib/d8.jar" sdk-portable/build-tools/36.0.0/lib/
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" sdk-portable/build-tools/36.0.0/lib/
+          cp "$ANDROID_HOME/platforms/android-36/android.jar" sdk-portable/platforms/android-36/
+      - name: Exportar ferramentas SDK para compilação privada
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-portable-36-temporario
+          path: sdk-portable/
+          if-no-files-found: error
+          retention-days: 1
       - name: Publicar arquivo de teste
         uses: actions/upload-artifact@v4
         with:
