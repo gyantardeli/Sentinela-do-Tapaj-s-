@@ -5,20 +5,20 @@
 ## Estado da conta Cloudflare (informado pelo proprietário em 22/10/2026)
 
 - **Zero Trust Team domain:** `https://sentinela-tapajos.cloudflareaccess.com` (identificador público configurado no build isolado).
-- **Política de acesso:** criada no Zero Trust, conforme confirmação do proprietário. **Criar uma política isolada não vincula automaticamente um futuro Worker a ela.**
+- **Política de acesso:** `Sentinela Tapajos - Administradores` confirmada diretamente pela API Cloudflare como reutilizável, ação `allow`, 8h, restrita ao e-mail autorizado. **Ainda não foi vinculada a nenhum Access Application ou ao Worker de staging.**
 - **Application Audience (AUD):** não informado; será obtido ao criar/vincular a aplicação Access ao Worker. Não existe placeholder aceito como identidade válida.
-- **D1 staging database ID:** ainda não informado. Nenhum banco remoto foi criado pelo ChatGPT.
-- **Deploy remoto:** proibido até validar Worker-level Access **All traffic**, D1 de testes, variáveis e teste anônimo de páginas, APIs e arquivos estáticos.
+- **D1 staging:** banco `sentinela-tapajos-staging` conferido diretamente na conta Cloudflare. Em 22/10/2026 foram aplicadas as migrações SQL `0000`–`0003`, criando 9 tabelas de aplicação e 6 índices. O identificador real é mantido fora do repositório público. Dados e tabelas de produção não foram importados.
+- **Deploy remoto do Sentinela V2.3:** não executado. Worker existente `sentinela-do-tapajos` identificado na conta e preservado; não confundir com o Worker isolado `sentinela-tapajos-staging` planejado. É obrigatório validar Worker-level Access **All traffic**, D1 de testes, variáveis e teste anônimo de páginas, APIs e arquivos estáticos antes de disponibilizar uma URL.
 - **Rotas externas:** `workers_dev:false`, `preview_urls:false`, sem domínio/route pública configurada no código. Proteção adicional: `assets.run_worker_first:true`. Mesmo assim, **é obrigatório ativar Access na plataforma antes de conectar qualquer domínio**.
 - **CI:** a compilação e os testes de gateway são executados sem tokens, sem banco remoto e sem `wrangler deploy`.
 
 ### Próxima operação no painel da Cloudflare
 
-1. **Storage & Databases → D1 → Create Database**: nome `sentinela-tapajos-staging`; copie o UUID. Não use o D1 atual do ChatGPT Sites.
+1. **D1 concluído:** banco `sentinela-tapajos-staging` validado; migrações `0000`–`0003` aplicadas e verificadas (9 tabelas, 6 índices). Não repetir as migrações, pois contêm `CREATE TABLE` sem `IF NOT EXISTS`. Não usar o D1 do ChatGPT Sites.
 2. **Workers & Pages**: ainda não publique. Quando existir um Worker de staging, abra a proteção Cloudflare Access desse Worker e escolha **All traffic**, associando a política `Sentinela Tapajos - Administradores`. A opção Worker-level protege URLs de produção e prévia, independentemente de hostname. Documentação oficial: https://developers.cloudflare.com/workers/configuration/cloudflare-access/
 3. Anote o **Application Audience (AUD)** exibido na aplicação Access. O AUD identifica a aplicação; não é senha. A aplicação continua bloqueada se `ACCESS_AUD` não tiver sido configurado no ambiente Worker.
 4. **Não ative integrações GitHub de auto-deploy** para a pasta do site recuperado. O repositório é público e contém duas aplicações distintas. Mantenha `main` e a PR #3 intocados até validar as diferenças com V24.
-5. Quando houver UUID e AUD, conclua o arquivo de implantação isolado e teste um build com o binding `DB` real **sem executar deploy**. Variáveis e tokens de administração do Cloudflare não devem ser publicados no repositório.
+5. O UUID está confirmado na conta Cloudflare; **a aplicação Access e o AUD ainda não existem**. Primeiro criar um Worker de staging isolado sem conteúdo público, associar Access `All traffic`, verificar as regras e configurar `ACCESS_AUD`. Só depois montar/deployar o bundle completo do Vinext e executar testes remotos. Nunca usar o Worker preexistente `sentinela-do-tapajos` como alvo da migração automática. Variáveis e tokens de administração do Cloudflare não devem ser publicados no repositório.
 
 ## Arquitetura
 
