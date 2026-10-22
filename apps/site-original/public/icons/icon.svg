@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256"><rect width="256" height="256" rx="48" fill="#061f1b"/><g transform="translate(24 18) scale(.81)">
+  <defs>
+    <linearGradient id="river" x1="90" y1="88" x2="146" y2="221" gradientUnits="userSpaceOnUse"><stop stop-color="#b7efea"/><stop offset="1" stop-color="#14938e"/></linearGradient>
+    <linearGradient id="leaf" x1="198" y1="83" x2="151" y2="176" gradientUnits="userSpaceOnUse"><stop stop-color="#c8e79e"/><stop offset="1" stop-color="#359b79"/></linearGradient>
+  </defs>
+  <path d="M151 85C115 85 76 92 72 113C67 134 112 144 122 159C138 182 91 201 48 216C106 232 162 222 166 193C172 160 121 145 108 129C95 112 121 95 151 85Z" fill="url(#river)"/>
+  <path d="M166 181C196 166 207 133 207 84C174 92 145 113 146 142C147 155 153 164 157 168L190 112L166 181Z" fill="url(#leaf)"/>
+  <circle cx="155" cy="83" r="5" fill="#edc16f"/>
+  <path d="M154 60C169 63 179 72 185 83M154 37C182 41 204 60 214 81" stroke="#f3be65" stroke-width="7" stroke-linecap="round"/>
+</g></svg>

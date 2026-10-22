@@ -1,0 +1,38 @@
+{
+  "projectId": "appgprj_6ad394eb7be48191a994993ead538987",
+  "savedVersion": 21,
+  "versionId": "appgprj_6ad394eb7be48191a994993ead538987~appgver_ca6451dcce548191a7eb689f6629caf7",
+  "sourceCommit": "47a756229a639db1017c485a92b2e0904ea13348",
+  "baselineCommit": "ed5c99c0a5659289c24316bc44ccafbdb5669deb",
+  "specificationCommit": "fa1250aa55669d45de464adff6ba5d08eacd7ed7",
+  "referenceCommit": "b000690b9c354c6ccc7badef90a1c2972f765fa0",
+  "deploymentId": null,
+  "published": false,
+  "archiveHashReturnedBySites": "sha256:2752631f3e520a71f407f821f5419e74f26086474f0ed1858b8355d5bcfef385",
+  "localArchiveSha256": "00ed038642fb2f754c47108012bc83e4e4da6cd72cc1f8a433f117e34e95fbd2",
+  "preserved": {
+    "project": "appgprj_6ad394eb7be48191a994993ead538987",
+    "version": 21,
+    "liveUrl": "https://sentinela-tapajos-ar.gyantardeli.chatgpt.site",
+    "previewUrl": null,
+    "accessUnchanged": true,
+    "automationsUnchanged": true
+  },
+  "checks": {
+    "githubTests": 35,
+    "v23Groups": 20,
+    "priority1Groups": 14,
+    "originalSuites": 6,
+    "typeScript": true,
+    "productionBuild": true,
+    "uiFilesByteIdenticalToVersion20": true
+  },
+  "limits": {
+    "navigablePreview": false,
+    "browserQA": false,
+    "androidQA": false,
+    "completeProductionDatabaseBackup": false,
+    "newWriterVerifiedOnHostedRuntime": false
+  },
+  "productionWritesPerformedByThisTask": 0
+}
