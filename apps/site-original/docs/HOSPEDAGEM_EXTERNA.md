@@ -42,6 +42,19 @@ A aplicação isolada **`sentinela-tapajos-staging`** foi criada diretamente na 
 4. Planejar migração autorizada de dados do ChatGPT Sites. O banco externo atual não contém os registros anteriores.
 5. Não abrir endereço público nem usar este Worker como produção sem inspeção de segurança e testes de funcionamento.
 
+## Implantação técnica V2.3 de staging — 22/10/2026
+
+- **Origem:** branch independente `deploy/sentinela-tapajos-staging-v23`, commit `431dbe0e0059b0ef6eee947d2a064630fe8bf97d`; `main` e site original intocados.
+- **Cloudflare Workers Builds:** repositório GitHub vinculado à conta; gatilho exclusivo `Staging Sentinela v23` (UUID `90719e8c-8565-4cfa-853c-f02eff2b92a8`), diretório raiz `/apps/site-original`, branch única de staging. O gatilho pode realizar novos deployments em push dessa branch; **não promover código para essa branch sem revisão**.
+- **Build Cloudflare:** execução `0f020b6a-d716-4459-ba06-65ab18192602` concluída com `status=stopped`, `build_outcome=success` em 22/10/2026.
+- **Deploy real:** Worker isolado `sentinela-tapajos-staging` recebeu versão `9e180fcb-6a02-4068-910e-2c84ee8073f0`, deployment `6fe54e01-9897-42ad-a369-6879062db009`; a API Cloudflare confirmou `has_modules=true` e `has_assets=true`.
+- **Vínculos retidos após publicação:** `DB` é o D1 de staging existente; `ACCESS_TEAM_DOMAIN` e `ACCESS_AUD` presentes. Aplicação Access `Sentinela Tapajos - Staging Privado` vinculada ao Worker integralmente e política `Sentinela Tapajos - Administradores` associada.
+- **Sem tráfego público:** `workers.dev` permanece `enabled=false`; `previews_enabled=false`; nenhuma custom domain/route vinculada. O Worker anterior `sentinela-do-tapajos` não foi alterado.
+- **D1 real:** consultas SQL à API Cloudflare funcionam e tabelas criadas. Teste de escrita temporária com limpeza passou. Leitura posterior confirmou zero registros nas tabelas de coleta/histórico citadas, como esperado para banco novo, não migrado.
+- **Não aprovado para uso funcional:** sem rota HTTP habilitada, testes autenticados com navegador/HTTP do mapa 3D, assets, previsão do tempo, APIs e login/logout **ainda não foram executados**. Build/deploy bem-sucedido não prova que todas as funcionalidades operam na plataforma.
+- **Próxima decisão:** efetuar revisão de equivalência com versão V24, definir URL de testes protegida, habilitá-la apenas com autorização expressa e verificar login permitido/negado, páginas estáticas e SSR, D1, mapas e APIs antes de qualquer produção. Coletor automatizado continua pendente de adaptação.
+- **Aviso operacional:** o gatilho do Cloudflare executa `wrangler deploy` após compilação na branch autorizada, apesar de não haver domínio de acesso habilitado. Não alterar sua branch de deploy sem controlar essa automação.
+
 ## Arquitetura
 
 - **Frontend/API:** Vinext / Cloudflare Workers, com `vite.external.config.ts` isolado da configuração do ChatGPT Sites.
