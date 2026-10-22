@@ -1,0 +1,27 @@
+name: Validar preparação de hospedagem externa
+on:
+  pull_request:
+    paths:
+      - 'apps/site-original/build/external-worker.ts'
+      - 'apps/site-original/lib/external-access.*'
+      - 'apps/site-original/vite.external.config.ts'
+      - 'apps/site-original/scripts/check-external.mjs'
+      - 'apps/site-original/test/external-access.test.mjs'
+      - '.github/workflows/validar-hospedagem-externa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verificacao-sem-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Conferir arquitetura e proteção
+        run: node apps/site-original/scripts/check-external.mjs
+      - name: Testar validação JWT e headers
+        run: node --test apps/site-original/test/external-access.test.mjs
+      - name: Sem deploy ou migração de banco
+        run: echo 'Verificação estática concluída. Não publica em Cloudflare.'
