@@ -28,12 +28,12 @@ export async function runWatchdog(mode:WatchdogCheck["mode"],now=Math.floor(Date
 }
 export async function readWatchdog(now=Math.floor(Date.now()/1000)):Promise<WatchdogData>{
   const [latest,independent,recent,schedule]=await Promise.all([
-    db().prepare("SELECT value FROM watchdog_checks ORDER BY checked_at DESC LIMIT 1").first<{value:string}>(),
+    db().prepare("SELECT value FROM watchdog_checks WHERE mode IN ('manual','independent') ORDER BY checked_at DESC LIMIT 1").first<{value:string}>(),
     db().prepare("SELECT value FROM watchdog_checks WHERE mode=? ORDER BY checked_at DESC LIMIT 1").bind("independent").first<{value:string}>(),
-    db().prepare("SELECT value FROM watchdog_checks ORDER BY checked_at DESC LIMIT 48").all<{value:string}>(),
+    db().prepare("SELECT value FROM watchdog_checks WHERE mode IN ('manual','independent') ORDER BY checked_at DESC LIMIT 48").all<{value:string}>(),
     db().prepare("SELECT value FROM radar_settings WHERE key=?").bind("watchdog:schedule").first<{value:string}>(),
   ]);
   const last=independent?JSON.parse(independent.value) as WatchdogCheck:null;
-  return {now,latest:latest?JSON.parse(latest.value):null,independent:last,overdue:!last||now-last.checkedAt>90*60,checks:recent.results.map(r=>JSON.parse(r.value)),schedule:schedule?JSON.parse(schedule.value):null};
+  return {now,latest:latest?JSON.parse(latest.value):null,independent:last,overdue:!last||now-last.checkedAt>90*60,checks:recent.results.map(r=>JSON.parse(r.value)),schedule:schedule?JSON.parse(schedule.value):last?{id:"cloudflare:sentinela-tapajos-staging",enabled:true,cadence:"A cada hora, minuto 27 (UTC)",timezone:"America/Bahia"}:null};
 }
 export async function saveWatchdogSchedule(value:unknown){const s=value as Record<string,unknown>;if(!s||typeof s.id!=="string"||s.id.length>100||typeof s.enabled!=="boolean"||typeof s.cadence!=="string"||s.cadence.length>150||s.timezone!=="America/Bahia")throw new Error("Metadados do monitor inválidos.");await db().prepare("INSERT INTO radar_settings (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at").bind("watchdog:schedule",JSON.stringify({id:s.id,enabled:s.enabled,cadence:s.cadence,timezone:s.timezone}),Math.floor(Date.now()/1000)).run();}

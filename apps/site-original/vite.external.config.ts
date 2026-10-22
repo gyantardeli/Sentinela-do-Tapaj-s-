@@ -28,7 +28,7 @@ export default defineConfig({
         compatibility_flags: ['nodejs_compat'],
         workers_dev: false,
         preview_urls: false,
-        triggers: { crons: ['7 * * * *', '17 */3 * * *'] },
+        triggers: { crons: ['7 * * * *', '17 */3 * * *', '27 * * * *'] },
         // Worker-level Cloudflare Access authorizes all requests, including static assets.
         // Vinext must serve hashed CSS/JS directly from Workers Static Assets:
         // run_worker_first=true causes /_next/static/* to return 404.

@@ -6,6 +6,7 @@ import { collectFirePacket } from '../lib/fire-snapshot';
 import { saveFireSnapshot } from '../lib/fire-store';
 import { collectAndSave } from '../lib/radar-store';
 import { runScheduledCycle } from '../lib/scheduled-core.mjs';
+import { runWatchdog } from '../lib/watchdog-store';
 import { accessSettings, verifyAccessJwt, withVerifiedIdentity, accessDenied } from '../lib/external-access.mjs';
 
 type ExternalEnv = Cloudflare.Env & { ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string };
@@ -13,6 +14,11 @@ type ExternalEnv = Cloudflare.Env & { ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: 
 export default {
   async scheduled(controller: ScheduledController, env: ExternalEnv, ctx: ExecutionContext) {
     if (!env.DB) throw new Error('D1 staging obrigatorio no coletor');
+    // A dedicated Cron checks persisted data independently of the fetch collectors.
+    if (controller.cron === '27 * * * *') {
+      ctx.waitUntil(runWatchdog('independent'));
+      return;
+    }
     const now = () => Math.floor(Date.now() / 1000);
     const tasks = controller.cron === '17 */3 * * *'
       ? [{
