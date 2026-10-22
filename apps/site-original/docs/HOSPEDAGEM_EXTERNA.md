@@ -1,6 +1,6 @@
 # Sentinela Tapajós — preparação de hospedagem Cloudflare (staging privado)
 
-**Status: preparado em código; NÃO implantado.** Branch de revisão, **snapshot original V2.3**. Versões posteriores V24 precisam ser comparadas antes de publicação. Nunca importar a raiz V2.2 como se fosse o site original.
+**Status: preparação e compilação de staging verificadas em CI; NÃO implantado.** Branch de revisão, **snapshot original V2.3**. Versões posteriores V24 precisam ser comparadas antes de publicação. Nunca importar a raiz V2.2 como se fosse o site original.
 
 ## Arquitetura
 
@@ -15,7 +15,7 @@
 1. Crie sua conta [Cloudflare](https://dash.cloudflare.com) e configure **Cloudflare One / Access** com uma política de acesso limitada aos operadores autorizados. Exija MFA. Crie aplicação Access para proteger o Worker **All traffic** (inclusive previews). Registre o Team domain `https://NOME-DO-TIME.cloudflareaccess.com` e o **Application Audience (AUD)**; não copie credenciais para GitHub.
 2. Crie um banco D1 vazio **separado**: `npx wrangler d1 create sentinela-tapajos-staging`. Guarde o UUID gerado. Não aponte ao D1 de produção do ChatGPT Sites.
 3. No clone do repositório, mude para a branch de revisão e entre em `apps/site-original/`. Instale dependências segundo o gerenciador fixado no `package.json` e o lockfile, em Node >=22.13.
-4. Execute `node scripts/check-external.mjs` e `node --test test/external-access.test.mjs`. Depois rode `npm run check:v23` e ajuste falhas de portabilidade. **Build externo ainda precisa ser executado em ambiente com rede/Dependências**; não declarar sucesso sem saída real do compilador.
+4. Execute `node scripts/check-external.mjs` e `node --test test/external-access.test.mjs`. Depois rode `npm run check:v23` e ajuste falhas de portabilidade. **Build externo em CI passou em 22/10/2026**, usando as dependências do lockfile e sem credenciais Cloudflare. Isso não substitui os testes integrados com D1 real nem validação operacional.
 5. Para prévia de compilação, informe ID e nome do banco localmente (não no repositório):
 
    ```sh
@@ -29,6 +29,12 @@
 6. Revise cada migração em `drizzle/0000...0003...sql` antes de aplicá-la ao D1 de staging. Elas são do Drizzle original e podem depender da estrutura de produção; use `wrangler d1 execute ... --remote --file` individualmente conforme o esquema e os dados presentes. Faça backup antes de qualquer migração; não execute migrações automaticamente em CI.
 7. Configure as variáveis de ambiente do Worker `ACCESS_TEAM_DOMAIN` e `ACCESS_AUD` (a aplicação falha com **503** se ausentes). O gateway retorna **401** se o JWT Access faltar ou for inválido. Valide login, logout via Cloudflare Access, filtros e autenticação de **todas** as APIs. Confira que uploads/escritas de visitante anônimo devolvem 401 e que `oai-authenticated-*` falsificados não liberam acesso.
 8. **Antes de expor qualquer URL:** ative Access para o Worker inteiro na Cloudflare e limite a política a operadores autorizados. Só depois configure domínio dedicado `staging.seu-dominio.com`. Confirme que usuários não autorizados não acessam endpoints, assets de campo e previews. Verifique a versão de `wrangler` e a compatibilidade do build gerado antes de fazer deploy manual.
+
+## Validação GitHub Actions
+
+- Execução: [Validar preparação de hospedagem externa — GitHub Actions](https://github.com/gyantardeli/Sentinela-do-Tapaj-s-/actions/runs/39785388429).
+- Teste de gateway/JWT (4 cenários), verificação estática (9 rotas de gravação), instalação de dependências e **build externo isolado: aprovados**.
+- Nenhum deploy, criação remota de banco D1 ou teste de migração foi executado pela Action. A compilação não comprova compatibilidade com a versão do site publicada posteriormente ao snapshot V2.3.
 
 ## Pontos críticos antes da produção
 
