@@ -28,8 +28,15 @@ export default defineConfig({
         compatibility_flags: ['nodejs_compat'],
         workers_dev: false,
         preview_urls: false,
-        // Defence in depth: assets must not bypass the authenticated Worker entrypoint.
-        assets: { run_worker_first: true },
+        // Worker-level Cloudflare Access authorizes all requests, including static assets.
+        // Vinext must serve hashed CSS/JS directly from Workers Static Assets:
+        // run_worker_first=true causes /_next/static/* to return 404.
+        // Non-hashed public files and all API routes still enter the JWT gateway.
+        assets: {
+          html_handling: 'none',
+          not_found_handling: 'none',
+          run_worker_first: ['/*', '!/_next/static/*', '!/*/_next/static/*'],
+        },
         // The team domain is public metadata; the application audience is NOT stored in Git.
         vars: {
           ACCESS_TEAM_DOMAIN: 'https://sentinela-tapajos.cloudflareaccess.com',
