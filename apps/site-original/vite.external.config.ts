@@ -6,6 +6,10 @@ import { cloudflare } from '@cloudflare/vite-plugin';
 const databaseId = process.env.SENTINELA_D1_ID ?? '';
 const databaseName = process.env.SENTINELA_D1_NAME ?? 'sentinela-tapajos-staging';
 const deployment = process.env.SENTINELA_EXTERNAL_DEPLOY === '1';
+const accessAud = process.env.ACCESS_AUD?.trim() ?? '';
+if (deployment && !/^[a-zA-Z0-9_-]{16,128}$/.test(accessAud)) {
+  throw new Error('ACCESS_AUD ausente/invalido. O deploy externo foi bloqueado.');
+}
 if (deployment && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(databaseId)) {
   throw new Error('Defina SENTINELA_D1_ID com UUID válido. A publicação externa foi bloqueada.');
 }
@@ -27,7 +31,10 @@ export default defineConfig({
         // Defence in depth: assets must not bypass the authenticated Worker entrypoint.
         assets: { run_worker_first: true },
         // The team domain is public metadata; the application audience is NOT stored in Git.
-        vars: { ACCESS_TEAM_DOMAIN: 'https://sentinela-tapajos.cloudflareaccess.com' },
+        vars: {
+          ACCESS_TEAM_DOMAIN: 'https://sentinela-tapajos.cloudflareaccess.com',
+          ...(accessAud ? { ACCESS_AUD: accessAud } : {}),
+        },
         d1_databases: [{ binding: 'DB', database_name: databaseName,
           database_id: databaseId || '00000000-0000-4000-8000-000000000000' }],
       },
