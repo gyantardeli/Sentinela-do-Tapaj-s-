@@ -25,3 +25,22 @@ jobs:
         run: node --test apps/site-original/test/external-access.test.mjs
       - name: Sem deploy ou migração de banco
         run: echo 'Verificação estática concluída. Não publica em Cloudflare.'
+  compilacao-staging-sem-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/site-original
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
+      - name: Instalar dependências do site original
+        run: pnpm install --frozen-lockfile
+      - name: Compilar Worker externo isolado (sem credenciais e sem deploy)
+        run: pnpm exec vite build --config vite.external.config.ts
+      - name: Garantir que nenhuma publicação foi solicitada
+        run: echo 'Build local concluído. Deploy/D1 remotos não executados.'
