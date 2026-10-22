@@ -23,6 +23,11 @@ export default defineConfig({
         compatibility_date: '2026-10-20',
         compatibility_flags: ['nodejs_compat'],
         workers_dev: false,
+        preview_urls: false,
+        // Defence in depth: assets must not bypass the authenticated Worker entrypoint.
+        assets: { run_worker_first: true },
+        // The team domain is public metadata; the application audience is NOT stored in Git.
+        vars: { ACCESS_TEAM_DOMAIN: 'https://sentinela-tapajos.cloudflareaccess.com' },
         d1_databases: [{ binding: 'DB', database_name: databaseName,
           database_id: databaseId || '00000000-0000-4000-8000-000000000000' }],
       },

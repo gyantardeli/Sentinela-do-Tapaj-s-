@@ -2,12 +2,30 @@
 
 **Status: preparação e compilação de staging verificadas em CI; NÃO implantado.** Branch de revisão, **snapshot original V2.3**. Versões posteriores V24 precisam ser comparadas antes de publicação. Nunca importar a raiz V2.2 como se fosse o site original.
 
+## Estado da conta Cloudflare (informado pelo proprietário em 22/10/2026)
+
+- **Zero Trust Team domain:** `https://sentinela-tapajos.cloudflareaccess.com` (identificador público configurado no build isolado).
+- **Política de acesso:** criada no Zero Trust, conforme confirmação do proprietário. **Criar uma política isolada não vincula automaticamente um futuro Worker a ela.**
+- **Application Audience (AUD):** não informado; será obtido ao criar/vincular a aplicação Access ao Worker. Não existe placeholder aceito como identidade válida.
+- **D1 staging database ID:** ainda não informado. Nenhum banco remoto foi criado pelo ChatGPT.
+- **Deploy remoto:** proibido até validar Worker-level Access **All traffic**, D1 de testes, variáveis e teste anônimo de páginas, APIs e arquivos estáticos.
+- **Rotas externas:** `workers_dev:false`, `preview_urls:false`, sem domínio/route pública configurada no código. Proteção adicional: `assets.run_worker_first:true`. Mesmo assim, **é obrigatório ativar Access na plataforma antes de conectar qualquer domínio**.
+- **CI:** a compilação e os testes de gateway são executados sem tokens, sem banco remoto e sem `wrangler deploy`.
+
+### Próxima operação no painel da Cloudflare
+
+1. **Storage & Databases → D1 → Create Database**: nome `sentinela-tapajos-staging`; copie o UUID. Não use o D1 atual do ChatGPT Sites.
+2. **Workers & Pages**: ainda não publique. Quando existir um Worker de staging, abra a proteção Cloudflare Access desse Worker e escolha **All traffic**, associando a política `Sentinela Tapajos - Administradores`. A opção Worker-level protege URLs de produção e prévia, independentemente de hostname. Documentação oficial: https://developers.cloudflare.com/workers/configuration/cloudflare-access/
+3. Anote o **Application Audience (AUD)** exibido na aplicação Access. O AUD identifica a aplicação; não é senha. A aplicação continua bloqueada se `ACCESS_AUD` não tiver sido configurado no ambiente Worker.
+4. **Não ative integrações GitHub de auto-deploy** para a pasta do site recuperado. O repositório é público e contém duas aplicações distintas. Mantenha `main` e a PR #3 intocados até validar as diferenças com V24.
+5. Quando houver UUID e AUD, conclua o arquivo de implantação isolado e teste um build com o binding `DB` real **sem executar deploy**. Variáveis e tokens de administração do Cloudflare não devem ser publicados no repositório.
+
 ## Arquitetura
 
 - **Frontend/API:** Vinext / Cloudflare Workers, com `vite.external.config.ts` isolado da configuração do ChatGPT Sites.
 - **Gateway:** `build/external-worker.ts`, valida o JWT `Cf-Access-Jwt-Assertion` por **assinatura RS256**, emissor, audience, expiração e identidade; rejeita requisições não autenticadas, inclusive leituras e escritas. Nunca confia em cabeçalhos `oai-authenticated-*` de visitantes. Os headers internos de compatibilidade são criados somente a partir da identidade autenticada do Access.
 - **Banco:** Cloudflare D1 **novo e separado** do banco original, binding `DB`. Nenhum registro de produção foi importado.
-- **Exposição:** `workers_dev:false`; usar Cloudflare Access com política **Worker-level All traffic**, inclusive previews, e adicionar domínio customizado após conferir o acesso. A proteção do Worker deve ser ligada no painel Cloudflare antes de direcionar tráfego real.
+- **Exposição:** `workers_dev:false`, `preview_urls:false`, `assets.run_worker_first:true`; usar Cloudflare Access com política **Worker-level All traffic**, inclusive previews, e adicionar domínio customizado após conferir o acesso. A proteção do Worker deve ser ligada no painel Cloudflare antes de direcionar tráfego real.
 - **Coletor de notícias/histórico:** a rotina anterior requer bypass interno exclusivo do Sites, portanto **não é operacional externamente** nesta entrega. Não habilitar jobs externos nem expor tokens. Recriar integração com Cloudflare Access service tokens e autorização servidor a servidor numa etapa posterior.
 
 ## Passo a passo para ativar um ambiente separado (sem dados de produção)

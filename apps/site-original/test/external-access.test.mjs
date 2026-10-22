@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { webcrypto as crypto } from 'node:crypto';
 import { accessSettings, verifyAccessJwt, withVerifiedIdentity } from '../lib/external-access.mjs';
 
-const env={ ACCESS_TEAM_DOMAIN:'https://sentinela-team.cloudflareaccess.com', ACCESS_AUD:'a2345678901234567890123456789012' };
+const env={ ACCESS_TEAM_DOMAIN:'https://sentinela-tapajos.cloudflareaccess.com', ACCESS_AUD:'a2345678901234567890123456789012' };
 const now=Date.UTC(2026,9,22,12);
 const b64url=bytes=>Buffer.from(bytes).toString('base64url');
 const encode=object=>b64url(JSON.stringify(object));

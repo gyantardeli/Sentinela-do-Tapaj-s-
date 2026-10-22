@@ -1,0 +1,24 @@
+/**
+ * Audit the generated staging Wrangler metadata before any remote operation.
+ * Node-only: does not connect to Cloudflare and never deploys.
+ */
+import { readFile } from 'node:fs/promises';
+const file = new URL('../dist/server/wrangler.json', import.meta.url);
+const invalid = (message) => { console.error('STAGING BLOQUEADO:', message); process.exitCode = 1; };
+let cfg;
+try { cfg = JSON.parse(await readFile(file, 'utf8')); }
+catch (error) { invalid('Configuração dist/server/wrangler.json ausente ou inválida: ' + error.message); process.exit(); }
+const team = 'https://sentinela-tapajos.cloudflareaccess.com';
+const db = cfg.d1_databases?.find(x => x.binding === 'DB');
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const deployMode = process.env.SENTINELA_EXTERNAL_DEPLOY === '1';
+if (cfg.name !== 'sentinela-tapajos-staging') invalid('Nome do Worker incorreto');
+if (cfg.workers_dev !== false) invalid('workers.dev precisa permanecer desativado');
+if (cfg.preview_urls !== false) invalid('URLs de preview precisam permanecer desativadas');
+if (cfg.assets?.run_worker_first !== true) invalid('Assets públicos podem ignorar a autenticação do Worker');
+if (cfg.vars?.ACCESS_TEAM_DOMAIN !== team) invalid('Domínio da equipe Zero Trust não corresponde ao esperado');
+if (cfg.routes?.length || cfg.route || cfg.custom_domains?.length) invalid('Não publicar rotas/domínios no staging preparado');
+if (!db || db.database_name !== 'sentinela-tapajos-staging') invalid('D1 staging não encontrado');
+if (deployMode && !uuid.test(db.database_id ?? '')) invalid('D1 staging precisa ter UUID válido antes de deploy');
+if (deployMode && db.database_id === '00000000-0000-4000-8000-000000000000') invalid('D1 placeholder não pode ser publicado');
+if (!process.exitCode) console.log('STAGING OK: build isolado, autenticação antes dos assets, URLs públicas desabilitadas e D1 identificado. Nenhum deploy executado.');

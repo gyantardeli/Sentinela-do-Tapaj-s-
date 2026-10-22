@@ -6,6 +6,7 @@ on:
       - 'apps/site-original/lib/external-access.*'
       - 'apps/site-original/vite.external.config.ts'
       - 'apps/site-original/scripts/check-external.mjs'
+      - 'apps/site-original/scripts/check-staging-build.mjs'
       - 'apps/site-original/test/external-access.test.mjs'
       - '.github/workflows/validar-hospedagem-externa.yml'
   workflow_dispatch:
@@ -42,5 +43,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Compilar Worker externo isolado (sem credenciais e sem deploy)
         run: pnpm exec vite build --config vite.external.config.ts
+      - name: Verificar artefato e isolamento do staging
+        run: node scripts/check-staging-build.mjs
       - name: Garantir que nenhuma publicação foi solicitada
         run: echo 'Build local concluído. Deploy/D1 remotos não executados.'
