@@ -55,6 +55,15 @@ A aplicação isolada **`sentinela-tapajos-staging`** foi criada diretamente na 
 - **Próxima decisão:** efetuar revisão de equivalência com versão V24, definir URL de testes protegida, habilitá-la apenas com autorização expressa e verificar login permitido/negado, páginas estáticas e SSR, D1, mapas e APIs antes de qualquer produção. Coletor automatizado continua pendente de adaptação.
 - **Aviso operacional:** o gatilho do Cloudflare executa `wrangler deploy` após compilação na branch autorizada, apesar de não haver domínio de acesso habilitado. Não alterar sua branch de deploy sem controlar essa automação.
 
+## Endereço de homologação protegido habilitado — 22/10/2026
+
+- URL: `https://sentinela-tapajos-staging.gyantardeli.workers.dev/`.
+- Cloudflare API confirmou `workers.dev enabled=true`, com `previews_enabled=false`.
+- Cloudflare Access `Sentinela Tapajos - Staging Privado` mantém destino de tipo `worker`, abrangendo **todo o tráfego** do Worker de staging. Política reutilizável `Sentinela Tapajos - Administradores` com `allow` exclusivo para o e-mail administrador conectado. A grafia da regra foi normalizada e validada por GET após atualização.
+- `ACCESS_AUD`, `ACCESS_TEAM_DOMAIN` e binding `DB` estavam configurados e foram conferidos antes da ativação.
+- **Limitação verificada:** a tentativa de requisição HTTP anônima externa não pôde ser concluída neste ambiente (falha de resolução DNS/conectividade); portanto, **não afirmar que o teste de bloqueio anônimo, login real ou renderização do mapa tenha passado**. É necessário testar a URL em navegador em sessão anônima e autenticada, verificando autenticação, assets, APIs e dados.
+- Produção e o Worker `sentinela-do-tapajos` não foram alterados. O endereço de homologação não é uma aprovação para publicação pública.
+
 ## Arquitetura
 
 - **Frontend/API:** Vinext / Cloudflare Workers, com `vite.external.config.ts` isolado da configuração do ChatGPT Sites.
