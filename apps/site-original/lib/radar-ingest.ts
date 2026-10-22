@@ -18,7 +18,7 @@ export function validateCollection(input: unknown, now: number) {
     const source = RADAR_SOURCES.find(s => s.id === raw.sourceId), url = typeof raw.url === "string" ? canonicalUrl(raw.url) : null;
     if (!source || !url || typeof raw.id !== "string" || !/^[a-f0-9]{64}$/.test(raw.id) || typeof raw.title !== "string" || raw.title.length < 14 || raw.title.length > 240) throw new Error("Publicação inválida.");
     if (raw.mode !== "rss" && raw.mode !== "index") throw new Error("Modo de coleta inválido.");
-    if (raw.mode === "index" ? new URL(url).hostname !== "news.google.com" : !acceptsPublisher({ title: raw.title, url, date: "", text: "", sourceUrl: null }, source, "rss")) throw new Error("Link incompatível com a fonte.");
+    if (raw.mode === "index" ? !(new URL(url).hostname === "news.google.com" || acceptsPublisher({ title: raw.title, url, date: "", text: "", sourceUrl: null }, source, "rss")) : !acceptsPublisher({ title: raw.title, url, date: "", text: "", sourceUrl: null }, source, "rss")) throw new Error("Link incompatível com a fonte.");
     if (!Number.isInteger(raw.publishedAt) || raw.publishedAt > now + 300 || raw.publishedAt < now - 30 * 86400) throw new Error("Data da publicação inválida.");
     if (!Array.isArray(raw.places) || raw.places.some((p: string) => !localities.has(p)) || !Array.isArray(raw.regions) || raw.regions.some((r: string) => !allowedRegions.has(r)) || (!raw.places.length && !raw.regions.length) || !topics.has(raw.topic)) throw new Error("Classificação inválida.");
     if (!Array.isArray(raw.tags) || raw.tags.some((t: string) => !allowedTags.has(t))) throw new Error("Etiquetas inválidas.");

@@ -96,5 +96,5 @@ export function canonicalUrl(raw: string) {
   try { const url = new URL(raw); if (url.protocol !== "https:" && url.protocol !== "http:") return null; if (url.username || url.password) return null; for (const key of [...url.searchParams.keys()]) if (/^(utm_|fbclid|gclid|trk)/.test(key)) url.searchParams.delete(key); url.hash = ""; return url.toString(); } catch { return null; }
 }
 export function acceptsPublisher(entry: FeedEntry, source: RadarSource, mode: FeedMode) {
-  try { const wanted = source.domain.split("/")[0], raw = mode === "index" ? entry.sourceUrl : entry.url; if (!raw) return false; const url = new URL(raw), host = url.hostname.replace(/^www\./, ""); return host === wanted || host.endsWith("." + wanted); } catch { return false; }
+  try { const [wanted,...path] = source.domain.split("/"), raw = mode === "index" ? entry.sourceUrl : entry.url; if (!raw) return false; const url = new URL(raw), host = url.hostname.replace(/^www\./, ""); const hostMatches = host === wanted || host.endsWith("." + wanted); const pathMatches = wanted === "gov.br" && path.length ? url.pathname.startsWith("/" + path[0] + "/") : true; return hostMatches && pathMatches; } catch { return false; }
 }
