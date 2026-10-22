@@ -20,6 +20,28 @@
 4. **Não ative integrações GitHub de auto-deploy** para a pasta do site recuperado. O repositório é público e contém duas aplicações distintas. Mantenha `main` e a PR #3 intocados até validar as diferenças com V24.
 5. O UUID está confirmado na conta Cloudflare; **a aplicação Access e o AUD ainda não existem**. Primeiro criar um Worker de staging isolado sem conteúdo público, associar Access `All traffic`, verificar as regras e configurar `ACCESS_AUD`. Só depois montar/deployar o bundle completo do Vinext e executar testes remotos. Nunca usar o Worker preexistente `sentinela-do-tapajos` como alvo da migração automática. Variáveis e tokens de administração do Cloudflare não devem ser publicados no repositório.
 
+## Cloudflare staging criado em 22/10/2026
+
+A aplicação isolada **`sentinela-tapajos-staging`** foi criada diretamente na conta Cloudflare do proprietário.
+
+- Worker tag (ID): `2f8fb30b413041789ccc03a258bf8491`.
+- Banco: `sentinela-tapajos-staging`, binding **`DB`** vinculado ao banco D1 de testes existente, já inicializado com 9 tabelas e 6 índices.
+- Cloudflare Access self-hosted app: `Sentinela Tapajos - Staging Privado`, ID `6855b0ee-f664-48f0-98fe-ee2c7061e2da`.
+- Escopo: destino **`worker`** (todo o tráfego do Worker e suas prévias), vinculado à política reutilizável **`Sentinela Tapajos - Administradores`**, sessão de 8h.
+- `ACCESS_TEAM_DOMAIN` e `ACCESS_AUD` configurados como bindings do Worker. O AUD real está na Cloudflare, sem ser publicado nesta documentação ou no Git.
+- `workers.dev`: desativado; `previews_enabled`: desativado; nenhum domínio externo ou rota foi configurado nesta operação.
+- Estado do código remoto: **Worker temporário de bloqueio, retorna 503**. Não é ainda o painel Vinext completo recuperado da V2.3; não foi publicada funcionalidade de produção.
+- Worker anteriormente existente `sentinela-do-tapajos`: **não alterado**.
+- Autorização da política e vinculação confirmados via API Cloudflare. Não foi feito teste de login em navegador porque não há rota pública habilitada.
+
+### Pendência para ativação funcional
+
+1. Comparar código recuperado V2.3 com alterações posteriores da aplicação publicada V24.
+2. Revisar build e integrações da API, coletor e autenticação; o Worker placeholder deve ser substituído somente após testes.
+3. Validar o bundle completo em staging com binding D1 real, política Access associada e testes de acesso negativo e positivo.
+4. Planejar migração autorizada de dados do ChatGPT Sites. O banco externo atual não contém os registros anteriores.
+5. Não abrir endereço público nem usar este Worker como produção sem inspeção de segurança e testes de funcionamento.
+
 ## Arquitetura
 
 - **Frontend/API:** Vinext / Cloudflare Workers, com `vite.external.config.ts` isolado da configuração do ChatGPT Sites.
