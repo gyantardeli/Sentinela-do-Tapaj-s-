@@ -3,7 +3,7 @@
  * binding; it is tested independently with a D1-like stub.
  */
 export async function runScheduledCycle({ db, mode, tasks, now = () => Math.floor(Date.now() / 1000), id = () => crypto.randomUUID(), logger = console }) {
-  if (!db || !['environment', 'radar'].includes(mode) || !Array.isArray(tasks) || !tasks.length) throw new Error('Invalid scheduled collection context');
+  if (!db || !['environment', 'radar', 'history'].includes(mode) || !Array.isArray(tasks) || !tasks.length) throw new Error('Invalid scheduled collection context');
   const startedAt = now(), results = [];
   for (const task of tasks) {
     const started = now();
