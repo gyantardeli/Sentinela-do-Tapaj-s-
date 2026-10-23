@@ -16,7 +16,7 @@ const expectedId = process.env.SENTINELA_D1_ID?.trim() ?? '';
 const audience = process.env.ACCESS_AUD?.trim() ?? '';
 if (cfg.name !== 'sentinela-tapajos-staging') invalid('Nome do Worker incorreto');
 if (cfg.workers_dev !== false) invalid('workers.dev precisa permanecer desativado');
-if (JSON.stringify(cfg.triggers?.crons) !== JSON.stringify(['7 * * * *','17 */3 * * *','27 * * * *'])) invalid('Agendamento staging ausente ou alterado');
+if (JSON.stringify(cfg.triggers?.crons) !== JSON.stringify(['7 * * * *','17 */3 * * *','27 * * * *','41 */6 * * *'])) invalid('Agendamento staging ausente ou alterado');
 if (cfg.preview_urls !== false) invalid('URLs de preview precisam permanecer desativadas');
 const expectedAssetRoutes = ['/*', '!/_next/static/*', '!/*/_next/static/*'];
 if (JSON.stringify(cfg.assets?.run_worker_first) !== JSON.stringify(expectedAssetRoutes)) invalid('Rotas asset precisam excluir CSS/JS de /_next/static do gateway e manter rotas de API nele');

@@ -18,8 +18,9 @@ assert(external.includes("run_worker_first: ['/*', '!/_next/static/*', '!/*/_nex
 assert(external.includes("html_handling: 'none'") && external.includes("not_found_handling: 'none'"),'Evitar fallback de HTML estático em rotas dinamicas');
 assert(external.includes("ACCESS_TEAM_DOMAIN: 'https://sentinela-tapajos.cloudflareaccess.com'"),'Domínio Zero Trust divergente');
 assert(external.includes("SENTINELA_EXTERNAL_DEPLOY"),'Deploy deve ter verificação de configuração');
-assert(external.includes("triggers: { crons: ['7 * * * *', '17 */3 * * *', '27 * * * *'] }"),'Triggers staging ambiental e radar devem existir');
+assert(external.includes("triggers: { crons: ['7 * * * *', '17 */3 * * *', '27 * * * *', '41 */6 * * *'] }"),'Triggers staging ambiental e radar devem existir');
 assert(worker.includes('async scheduled(')&&worker.includes('runScheduledCycle'),'Worker sem handler de coleta agendada');
+assert(worker.includes("mode: 'history'") && worker.includes('collectFireDay') && worker.includes('validateHistoryPacket'),'Cron de histórico não arquiva ou valida o arquivo INPE');
 assert(worker.includes("runWatchdog('independent')") && worker.includes("controller.cron === '27 * * * *'"),'Cron independente do monitor nao esta vinculado');
 assert(worker.includes('verifyAccessJwt')&&worker.includes('accessDenied()'),'Gateway não exige Access');
 assert(worker.includes('withVerifiedIdentity')&&auth.includes("headers.delete(name)"),'Headers de identidade não são higienizados');

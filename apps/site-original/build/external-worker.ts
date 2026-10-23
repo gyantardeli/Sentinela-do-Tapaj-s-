@@ -7,6 +7,9 @@ import { saveFireSnapshot } from '../lib/fire-store';
 import { collectAndSave } from '../lib/radar-store';
 import { runScheduledCycle } from '../lib/scheduled-core.mjs';
 import { runWatchdog } from '../lib/watchdog-store';
+import { collectFireDay } from '../lib/history-collector';
+import { saveHistoryPacket, validateHistoryPacket } from '../lib/monitoring-store';
+import { planFireArchiveDays } from '../lib/history-scheduler.mjs';
 import { accessSettings, verifyAccessJwt, withVerifiedIdentity, accessDenied } from '../lib/external-access.mjs';
 
 type ExternalEnv = Cloudflare.Env & { ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string };
@@ -20,6 +23,28 @@ export default {
       return;
     }
     const now = () => Math.floor(Date.now() / 1000);
+    if (controller.cron === '41 */6 * * *') {
+      // Stay within the D1 32-day retention window; do not overwrite missing data with zero.
+      const current = now();
+      const after = new Date((current-32*86400)*1000).toISOString().slice(0,10);
+      const archive = await env.DB.prepare("SELECT day_utc,collected_at,json_extract(value,'$.closed') AS closed FROM fire_archive_days WHERE day_utc>=? ORDER BY day_utc").bind(after).all<{day_utc:string;collected_at:number;closed:number}>();
+      const due = planFireArchiveDays(current, archive.results);
+      const tasks = due.length ? due.map(day => ({
+        name: 'inpe-day:' + day,
+        run: async () => {
+          const packet = await collectFireDay(day, now());
+          const validated = validateHistoryPacket(packet, now());
+          await saveHistoryPacket(validated);
+          return { status: 'ok', accepted: 1, dataAt: packet.last,
+            detail: 'Arquivo diario INPE UTC ' + day + '; ' + packet.parts.length + ' recortes; encerrado=' + packet.closed };
+        },
+      })) : [{
+        name: 'inpe-history-idle',
+        run: async () => ({status:'ok',accepted:0,detail:'Arquivo diario atualizado; sem dias pendentes nesta execução.'}),
+      }];
+      ctx.waitUntil(runScheduledCycle({db: env.DB, mode: 'history', tasks, now}));
+      return;
+    }
     const tasks = controller.cron === '17 */3 * * *'
       ? [{
           name: 'radar', run: async () => {

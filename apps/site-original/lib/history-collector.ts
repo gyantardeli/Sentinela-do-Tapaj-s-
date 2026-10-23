@@ -14,7 +14,7 @@ export function summarizeFireDay(fires: Fire[], dayUtc: string, collectedAt: num
     for (const f of unique) if (localDay(f.time) === day && distance(place, f) <= radius) { counts.all++; counts[f.satellite] = (counts[f.satellite] ?? 0) + 1; }
     return { day, placeId: place.id, radius, counts };
   })));
-  return { revision: HISTORY_REVISION, kind: "fire-day", collectedAt, dayUtc, closed: dayUtc < utcDay(collectedAt), last: unique.length ? Math.max(...unique.map(f => f.time)) : null, parts };
+  return { revision: HISTORY_REVISION, kind: "fire-day", collectedAt, dayUtc, closed: dayUtc < utcDay(collectedAt), last: unique.length ? unique.reduce((m,f)=>Math.max(m,f.time),0) : null, parts };
 }
 export async function collectFireDay(dayUtc: string, collectedAt: number, fetcher: typeof fetch = fetch) {
   const parsed=parseInpeCsv(await sourceText(INPE_DAILY+"focos_diario_br_"+dayUtc.replaceAll("-","")+".csv",{fetcher,timeoutMs:25000,maxBytes:20*1024*1024}),collectedAt);
