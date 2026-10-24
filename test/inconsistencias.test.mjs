@@ -79,23 +79,25 @@ test('notícia estadual genérica não recebe classificação local',()=>{
 test('adaptador rejeita resposta em que o cartão discorda da lista regional',async()=>{
   const view=buildEnvironmentView(testState(),{municipios:cities,now:NOW});
   view.indicadores.pm25=7;
-  const result=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response(view),storage:{getItem:()=>null,setItem:()=>{}}});
+  const result=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response(view),timeoutMs:1000});
   assert.equal(result.indisponivel,true);
   assert.match(result.erroConsulta,/indicadores/i);
 });
-test('modo offline recupera exatamente o último snapshot do filtro selecionado',async()=>{
+test('consulta do painel exige resposta válida do servidor e não reutiliza dados locais',async()=>{
   const view=buildEnvironmentView(testState(),{municipios:cities,now:NOW});
-  const db=new Map();const storage={setItem:(k,v)=>db.set(k,v),getItem:k=>db.get(k)||null};
-  const online=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response(view),storage});
-  const offline=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response('falha',503),storage});
-  assert.equal(online.modoOffline,false);assert.equal(offline.modoOffline,true);
-  assert.equal(indicadorPrincipal(offline).pm25,0);assert.ok(offline.salvoEm);
-  assert.match(offline.aviso,/não representam leitura em tempo real/i);
+  const online=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response(view)});
+  const indisponivel=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response('falha',503)});
+  assert.equal(indicadorPrincipal(online).pm25,0);
+  assert.equal(online.modoOffline,undefined);
+  assert.equal(indisponivel.indisponivel,true);
+  assert.equal(indicadorPrincipal(indisponivel).pm25,null);
+  assert.match(indisponivel.aviso,/servidor indisponível/i);
 });
-test('sem cache offline e sem servidor mostra indisponível, nunca zero inventado',async()=>{
-  const payload=await consultarColetor({municipio:'itaituba',fetchFn:async()=>response('erro',500),storage:{getItem:()=>null}});
+test('erro de rede deixa leitura indisponível em vez de inventar zero',async()=>{
+  const payload=await consultarColetor({municipio:'itaituba',fetchFn:async()=>{throw new Error('sem conexão');}});
   assert.equal(indicadorPrincipal(payload).pm25,null);
   assert.equal(payload.indisponivel,true);
+  assert.match(payload.erroConsulta,/sem conexão/i);
 });
 test('cache do INPE antigo não transforma ausência de registros em zero atual',()=>{
   const s=testState();

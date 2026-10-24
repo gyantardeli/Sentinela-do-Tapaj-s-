@@ -5,7 +5,7 @@ const COORD={itaituba:[-4.2637,-55.9916],jacareacanga:[-6.222,-57.754], 'novo-pr
 const NAMES={itaituba:'Itaituba',jacareacanga:'Jacareacanga','novo-progresso':'Novo Progresso',ruropolis:'Rurópolis',placas:'Placas',aveiro:'Aveiro',trairao:'Trairão',santarem:'Santarém'};
 const CITY_WORDS={itaituba:/itaituba|miritituba/i,jacareacanga:/jacareacanga|cururu/i,'novo-progresso':/novo progresso|moraes almeida|castelo dos sonhos/i,ruropolis:/rur[oó]polis/i,placas:/\bplacas\b/i,aveiro:/aveiro|fordl[aâ]ndia/i,trairao:/trair[aã]o/i,santarem:/santar[eé]m/i};
 const estados={atual:'Atual',parcial:'Parcial',cache_anterior:'Cache anterior',defasado:'Desatualizado',erro:'Erro',sem_dados:'Sem dados',nao_consultado:'Não consultado'};
-let env=null,radar=null,health=null, radarOffline=false,healthOffline=false;
+let env=null,radar=null,health=null,radarError=null,healthError=null;
 const num=(x,d=1)=>typeof x==='number'&&Number.isFinite(x)?x.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:d}):'—';
 const time=s=>{if(!s||!Number.isFinite(Date.parse(s)))return 'sem horário';return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Santarem',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(s))+' (UTC−3)';};
 const node=(t,cls,text)=>{const n=document.createElement(t);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -77,35 +77,61 @@ function renderNews(){const list=$('newsList');clear(list);const hours=Number($(
  const relevant=items.filter(a=>CITY_WORDS[city].test([a.titulo,a.local].join(' ')));
  const first=relevant.length?relevant:items;
  const visible=first.slice(0,4);
- if(!visible.length){list.append(node('div','panel empty','Nenhuma notícia válida no recorte disponível. Isso não comprova ausência de ocorrências.'));}
+ if(!visible.length){list.append(node('div','panel empty',radarError?'Não foi possível consultar as notícias no servidor.':'Nenhuma notícia válida no recorte disponível. Isso não comprova ausência de ocorrências.'));}
  for(const a of visible){const card=node('article','panel story');card.append(node('div','meta',`${a.fonte||'Fonte não identificada'} · ${time(a.publicadoEm)} · ${a.modoColeta==='indice_parcial'?'Índice parcial':'RSS direto'}`));const heading=node('h3'),link=node('a','',a.titulo);link.href=a.link;link.target='_blank';link.rel='noopener noreferrer';heading.append(link);card.append(heading);card.append(node('small','',a.local||'Região monitorada'));list.append(card);}
- const f=health;if(f){const total=f.fontesTotal||20;const feeds=f.rssConfirmado||0;const parcial=f.indiceParcial||0;$('newsCoverage').textContent=`${feeds} RSS direto(s) · ${parcial} índice(s) parcial(is) · ${total-feeds-parcial} não confirmadas · ${radarOffline||healthOffline?'cache salvo':'consulta salva no servidor'}`;}
+ const f=health;if(f){const total=f.fontesTotal||20;const feeds=f.rssConfirmado||0;const parcial=f.indiceParcial||0;$('newsCoverage').textContent=`${feeds} RSS direto(s) · ${parcial} índice(s) parcial(is) · ${total-feeds-parcial} não confirmadas · consulta ao servidor`;}
  else $('newsCoverage').textContent='Cobertura das fontes não verificada nesta consulta';
 }
-async function getCached(url,key){try{const resp=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!resp.ok)throw new Error(`HTTP ${resp.status}`);const data=await resp.json();localStorage.setItem(key,JSON.stringify({salvoEm:new Date().toISOString(),data}));return {data,offline:false};}
- catch(e){try{const data=JSON.parse(localStorage.getItem(key)||'null');if(data?.data)return {data:data.data,offline:true,salvoEm:data.salvoEm};}catch{}return {data:null,offline:true};}}
+async function getOnline(url){
+ try{
+   const resp=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(10000)});
+   if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
+   return {data:await resp.json(),erro:null};
+ }catch(error){return {data:null,erro:String(error?.message||error)};}
+}
 let seq=0;
 async function change(){const id=++seq;const o=getOpt();$('refresh').disabled=true;setConnection('Consultando o histórico disponível…');
- const [e,r,h]=await Promise.all([consultarColetor(o),getCached('/api/radar?limit=500','sentinela-radar-v22'),getCached('/api/health','sentinela-health-v22')]);
- if(id!==seq)return;env=e;radar=r.data;health=h.data;radarOffline=r.offline;healthOffline=h.offline;
+ const [e,r,h]=await Promise.all([consultarColetor(o),getOnline('/api/radar?limit=500'),getOnline('/api/health')]);
+ if(id!==seq)return;env=e;radar=r.data;health=h.data;radarError=r.erro;healthError=h.erro;
  $('refresh').disabled=false;
  const problems=[];
- if(e.indisponivel)problems.push('Sem snapshot ambiental para este município e filtros.');
- if(e.modoOffline)problems.push(`Ambiente em modo offline. ${e.salvoEm?'Snapshot salvo em '+time(e.salvoEm)+'. ':''}Não é dado em tempo real.`);
+ if(e.indisponivel)problems.push('Consulta ambiental indisponível no servidor. Verifique a conexão.');
  if(e.focos?.parcial)problems.push('INPE: cobertura incompleta ou defasada; não interpretar ausência de focos como zero.');
- if(r.offline)problems.push('Notícias: consulta atual indisponível; exibindo cache local quando existente.');
- if(h.offline)problems.push('Diagnóstico das fontes: sem resposta do servidor nesta consulta.');
+ if(r.erro)problems.push('Notícias: consulta ao servidor indisponível.');
+ if(h.erro)problems.push('Diagnóstico das fontes: sem resposta do servidor nesta consulta.');
  if(e.cidade && !verificarConsistencia(e).coerente)problems.push('Inconsistência entre cartão principal e panorama; dados recusados.');
  showBanner(problems.join(' '));
- setConnection(e.indisponivel?'Sem dados ambientais locais':e.modoOffline?'Offline · último recorte salvo':`Histórico disponível · ${time(e.ultimaExecucao)}`,Boolean(e.modoOffline));
+ setConnection(e.indisponivel?'Servidor indisponível':`Histórico no servidor · ${time(e.ultimaExecucao)}`,Boolean(e.indisponivel));
  renderCards(e);drawPoints(e);renderTrend(e);renderWindContext(e);renderRegion(e);renderNews();if(e.cidade)selectSatellites(e);
  updateWindy(e);
 }
 $('refresh').addEventListener('click',change);
 for(const id of ['city','radius','hours','sat'])$(id).addEventListener('change',change);
 $('newsPeriod').addEventListener('change',renderNews);
-$('copySummary').addEventListener('click',async()=>{const c=indicadorPrincipal(env);const content=`SENTINELA TAPAJÓS — ${env?.cidade?.nome||'Área não disponível'}\nConsulta: ${time(env?.ultimaExecucao)}\nPM2,5 modelo: ${num(c.pm25)} µg/m³ (${time(c.referenciaAr)}; ${c.estadoAr})\nVento modelo: ${num(c.ventoKmh)} km/h (${time(c.referenciaVento)}; ${c.estadoVento})\nFocos INPE: ${env?.focos?.contagemCompleta?num(c.detecoes,0):env?.focos?.limiteInferior!=null?'ao menos '+num(env.focos.limiteInferior,0):'sem contagem confirmada'}\nModo offline: ${env?.modoOffline?'sim':'não'}\nDetecção não equivale a incêndio independente.`;
+$('copySummary').addEventListener('click',async()=>{const c=indicadorPrincipal(env);const content=`SENTINELA TAPAJÓS — ${env?.cidade?.nome||'Área não disponível'}\nConsulta: ${time(env?.ultimaExecucao)}\nPM2,5 modelo: ${num(c.pm25)} µg/m³ (${time(c.referenciaAr)}; ${c.estadoAr})\nVento modelo: ${num(c.ventoKmh)} km/h (${time(c.referenciaVento)}; ${c.estadoVento})\nFocos INPE: ${env?.focos?.contagemCompleta?num(c.detecoes,0):env?.focos?.limiteInferior!=null?'ao menos '+num(env.focos.limiteInferior,0):'sem contagem confirmada'}\nDetecção não equivale a incêndio independente.`;
  try{await navigator.clipboard.writeText(content);$('copySummary').textContent='Resumo copiado';}catch{$('copySummary').textContent='Cópia indisponível';}setTimeout(()=>$('copySummary').textContent='Copiar resumo',1800);});
 $('print').addEventListener('click',()=>window.print());
-if('serviceWorker' in navigator && window.isSecureContext)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+// Remove o cache offline antigo sem apagar histórico nem preferências mantidas no servidor.
+async function desativarOfflineLegado(){
+  if('serviceWorker' in navigator){
+    try{
+      const regs=await navigator.serviceWorker.getRegistrations();
+      const antigos=regs.filter(r=>[r.active,r.waiting,r.installing].some(w=>w && new URL(w.scriptURL,location.href).pathname==='/sw.js'));
+      await Promise.all(antigos.map(r=>r.unregister()));
+    }catch{}
+  }
+  if('caches' in window){
+    try{
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(k=>k.startsWith('sentinela-shell-')).map(k=>caches.delete(k)));
+    }catch{}
+  }
+  try{
+    for(let i=localStorage.length-1;i>=0;i--){
+      const key=localStorage.key(i);
+      if(key && (/^sentinela-env-v21:/.test(key)||key==='sentinela-radar-v22'||key==='sentinela-health-v22'))localStorage.removeItem(key);
+    }
+  }catch{}
+}
+void desativarOfflineLegado();
 change();
