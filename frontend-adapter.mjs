@@ -1,5 +1,4 @@
 /* Integração de leitura para o site/APK: cartão e panorama exibem o mesmo snapshot. */
-const chave=({municipio,raioKm,horas,satelite})=>`sentinela-env-v21:${municipio}:${raioKm}:${horas}:${satelite}`;
 const numero=(x)=>typeof x==='number'&&Number.isFinite(x)?x:null;
 export function indicadorPrincipal(payload){
   if(payload?.indisponivel||!payload?.cidade)return {pm25:null,aqiEUA:null,ventoKmh:null,detecoes:null,estadoAr:'sem_dados',estadoVento:'sem_dados',estadoINPE:'sem_dados'};
@@ -14,7 +13,7 @@ export function indicadorPrincipal(payload){
     estadoINPE:fromAPI?.estadoINPE??payload.focos?.estado??'sem_dados',
     referenciaAr:fromAPI?.referenciaAr??payload.ar?.observadoEm??null,
     referenciaVento:fromAPI?.referenciaVento??payload.tempo?.observadoEm??null,
-    contagemCompleta:payload.focos?.contagemCompleta===true&&!payload.modoOffline,
+    contagemCompleta:payload.focos?.contagemCompleta===true,
     limiteInferior:payload.focos?.limiteInferior??null};
 }
 export function municipioNoPanorama(payload){
@@ -32,8 +31,7 @@ export function verificarConsistencia(payload){
     iguais(selected.referenciaVento,row.referenciaVento??null);
   return {coerente,motivo:coerente?null:'Indicadores não correspondem ao panorama regional'};
 }
-export async function consultarColetor({apiBase='',municipio='itaituba',raioKm=100,horas=24,satelite='todos',fetchFn=globalThis.fetch,storage=globalThis.localStorage,timeoutMs=10000}={}){
-  const options={municipio,raioKm,horas,satelite},cacheKey=chave(options);
+export async function consultarColetor({apiBase='',municipio='itaituba',raioKm=100,horas=24,satelite='todos',fetchFn=globalThis.fetch,timeoutMs=10000}={}){
   const endpoint=`${apiBase}/api/environment?${new URLSearchParams({municipio,raioKm:String(raioKm),horas:String(horas),satelite})}`;
   try{
     const response=await fetchFn(endpoint,{cache:'no-store',signal:AbortSignal.timeout(timeoutMs)});
@@ -43,17 +41,10 @@ export async function consultarColetor({apiBase='',municipio='itaituba',raioKm=1
     if(payload.cidade.id!==municipio)throw new Error('A API devolveu município diferente do solicitado');
     const check=verificarConsistencia(payload);
     if(!check.coerente)throw new Error(check.motivo);
-    try{storage?.setItem(cacheKey,JSON.stringify({salvoEm:new Date().toISOString(),payload}));}catch{}
-    return {...payload,modoOffline:false,cacheLocal:false};
+    return payload;
   }catch(error){
-    try{
-      const old=JSON.parse(storage?.getItem(cacheKey)||'null');
-      if(old?.payload&&verificarConsistencia(old.payload).coerente){
-        return {...old.payload,modoOffline:true,cacheLocal:true,salvoEm:old.salvoEm??null,
-          aviso:'Dados salvos no aparelho: consulta atual indisponível. Não representam leitura em tempo real.',erroConsulta:String(error.message||error)};
-      }
-    }catch{}
-    return {modoOffline:true,indisponivel:true,indicadores:indicadorPrincipal(null),
-      aviso:'Sem dados disponíveis para o município e filtros selecionados.',erroConsulta:String(error?.message||error)};
+    return {indisponivel:true,indicadores:indicadorPrincipal(null),
+      aviso:'Consulta ao servidor indisponível. Verifique a conexão e tente novamente.',
+      erroConsulta:String(error?.message||error)};
   }
 }
