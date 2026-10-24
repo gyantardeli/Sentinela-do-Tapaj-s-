@@ -1,6 +1,6 @@
 # Sentinela Tapajós — Projeto integrado V2.2
 
-Versão web/PWA que **integra** o coletor resiliente V2.1 com um painel funcional de visualização e diagnóstico. O frontend é uma implementação nova baseada na estrutura funcional documentada do projeto. **Não modifica o site antigo automaticamente.**
+Versão web instalável, com acesso **somente online**, que **integra** o coletor resiliente V2.1 com um painel funcional de visualização e diagnóstico. O frontend é uma implementação nova baseada na estrutura funcional documentada do projeto. **Não modifica o site antigo automaticamente.**
 
 ## Projeto publicado e integração com ChatGPT Sites
 
@@ -48,14 +48,20 @@ ENABLE_AUTO_COLLECT=0 node server.mjs
 Para coletar informações públicas (servidor conectado): `ENABLE_AUTO_COLLECT=1 node server.mjs`.
 Para implantação estável com Docker e volume persistente, consulte `deploy/GUIA_PUBLICACAO.md`.
 
+## Simplificação do funcionamento — 24/10/2026
+
+O repositório deixa de oferecer modo offline: as consultas do painel dependem do servidor e não são recuperadas de `localStorage` ou `CacheStorage`. O service worker legado é desativado, com limpeza dos caches locais gerados pela aplicação. O histórico do coletor no servidor, com estados de atualização e registros anteriores, **não é excluído**.
+
+O "Modo Campo" não integra o frontend desta implementação V2.2; deve ser retirado separadamente do Site original no momento da integração, pois seu código não está neste repositório. **Nenhuma publicação no Site original ou APK ocorre a partir desta alteração.**
+
 ## O que está integrado
 
 - **Visão geral:** filtros de município, raio, período e satélite; cartões de focos INPE, PM2,5 estimado, vento modelado e status de medição física; dados ausentes não equivalem a zero.
 - **Mapas:** iframe externo Windy, quando houver conexão, e representação esquemática dos focos INPE carregados (sem carta-base, portanto não é mapa topográfico nem satélite).
 - **Panorama regional:** oito municípios e mesma referência do indicador principal, sem dividir a origem do cache.
-- **Notícias:** mostra até quatro matérias válidas, separa RSS direto de índice parcial, destaca se o cache de notícias está offline.
+- **Notícias:** mostra até quatro matérias válidas, separa RSS direto de índice parcial e informa indisponibilidade do servidor sem recorrer a dados locais.
 - **Diagnóstico:** 20 fontes detalhadas, status das três camadas, erros e frescor em `/fontes`.
-- **Offline/PWA:** a interface é armazenada pelo service worker e leituras pelo adaptador com identificação do snapshot.
+- **Instalação no dispositivo:** mantém o manifesto e os ícones; exige internet para abrir e consultar informações. O service worker antigo é desativado e os caches locais do Sentinela são eliminados. O histórico persistido no servidor permanece disponível.
 - **Backend:** três endpoints de leitura e comando POST protegido por `COLLECT_TOKEN`, rotina horária em processo ativo e estado JSON persistente.
 
 ## Contratos API
@@ -76,10 +82,10 @@ O projeto não possui o código-fonte do Site publicado. A versão hospedada em 
 - `server.mjs` — servidor web e API.
 - `collector.mjs` — consultas e tratamento de falhas.
 - `environment-view.mjs` — contrato unificado do painel e panorama.
-- `frontend-adapter.mjs` — validação e fallback offline.
+- `frontend-adapter.mjs` — consulta online e validação do contrato de dados, sem fallback local.
 - `registry.mjs` — municípios e 20 fontes.
 - `public/index.html`, `public/app.js`, `public/app.css` — painel integrado.
 - `public/fontes.html` — monitor detalhado.
-- `public/sw.js`, `public/manifest.webmanifest` — PWA.
+- `public/sw.js` — rotina de desativação de service worker legado; `public/manifest.webmanifest` — manifesto de instalação.
 - `deploy/GUIA_PUBLICACAO.md` — implantação/atualização da URL.
 - `test/` — testes automatizados.
