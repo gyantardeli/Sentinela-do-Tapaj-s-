@@ -2,12 +2,16 @@
 
 Versão web instalável, com acesso **somente online**, que **integra** o coletor resiliente V2.1 com um painel funcional de visualização e diagnóstico. O frontend é uma implementação nova baseada na estrutura funcional documentada do projeto. **Não modifica o site antigo automaticamente.**
 
+## Projeto original recuperado na branch de consolidação
+
+O código do ChatGPT Sites recuperado do snapshot **V2.3 / Prioridade 1** está separado em [`apps/site-original/`](apps/site-original/). A pasta raiz continua sendo o painel independente **Node/PWA V2.2**. A importação dos 248 itens foi verificada byte a byte em 22/10/2026. O estado posterior **V24**, dados do banco D1 e credenciais não foram migrados. Consulte [`docs/CONSOLIDACAO_SITE_ORIGINAL.md`](docs/CONSOLIDACAO_SITE_ORIGINAL.md) e a [PR #3](https://github.com/gyantardeli/Sentinela-do-Tapaj-s-/pull/3).
+
 ## Projeto publicado e integração com ChatGPT Sites
 
 - **Site original:** [Sentinela Tapajós — Queimadas e qualidade do ar](https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/)
 - **Repositório de desenvolvimento:** [gyantardeli/Sentinela-do-Tapaj-s-](https://github.com/gyantardeli/Sentinela-do-Tapaj-s-)
 - **Situação:** associação documentada; **não existe sincronização automática ou implantação deste GitHub no Site original**.
-- **Código neste repositório:** implementação independente V2.2. Não equivale ao código completo da publicação original (faltam Mapa 3D, áreas de interesse e alertas).
+- **Código na raiz:** implementação independente V2.2. Seus módulos não são equivalentes ao original. **Snapshot V2.3 do site recuperado em `apps/site-original/` somente nesta branch de revisão**, preservando mapa 3D, áreas, alertas e histórico daquele snapshot.
 - **Próxima integração:** abrir o Site existente no ChatGPT Sites/Work, referenciar este repositório e integrar seletivamente coletor e APIs; revisar prévia e banco antes de publicar na mesma URL. Não substituir o frontend original pela V2.2 inteira sem auditoria.
 
 Para passos operacionais, consulte [VINCULAR_CHATGPT_SITES.md](VINCULAR_CHATGPT_SITES.md).
@@ -75,7 +79,7 @@ O "Modo Campo" não integra o frontend desta implementação V2.2; deve ser reti
 
 `npm run check` executa os testes do coletor, das regras de consistência e de integração HTTP. Os testes unitários usam provedores simulados e os testes HTTP usam servidor com coleta desabilitada. **Não há validação de conectividade real das 20 fontes nesta entrega.** A automação de screenshot/browser foi impedida pelas restrições de acesso local do navegador de testes; layout deve ser inspecionado no ambiente de implantação.
 
-O projeto não possui o código-fonte do Site publicado. A versão hospedada em `sentinela-tapajos-ar.gyantardeli.chatgpt.site` continua intacta e não deve ser anunciada como atualizada. Faltam os módulos antigos não reproduzidos na nova Visão geral (por exemplo Mapa 3D e Áreas de Interesse); para preservá-los, integra-se o coletor no código original assim que o acesso for disponibilizado.
+A raiz V2.2 não contém os módulos originais; o snapshot V2.3 foi importado separadamente em `apps/site-original/` nesta branch. A versão hospedada em `sentinela-tapajos-ar.gyantardeli.chatgpt.site` continua intacta e não deve ser anunciada como atualizada. Faltam os módulos antigos não reproduzidos na nova Visão geral (por exemplo Mapa 3D e Áreas de Interesse); para preservá-los, integra-se o coletor no código original assim que o acesso for disponibilizado.
 
 ## Arquivos
 

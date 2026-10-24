@@ -1,0 +1,45 @@
+/* Sentinela Tapajós: river, forest and observation. The maps retain a clear canvas. */
+.brand { margin-bottom: 22px; }
+.brand-mark { width: 43px; height: 49px; flex-shrink: 0; background: transparent; border: 0; border-radius: 0; }
+.brand-mark img { display: block; width: 43px; height: 49px; object-fit: contain; }
+.brand small { letter-spacing: .3em; }
+.page-heading::before {
+  background-color: #071f1c;
+  background-image: linear-gradient(90deg, rgba(4, 24, 21, .14) 0%, rgba(4, 24, 21, .08) 58%, rgba(4, 24, 21, .25) 100%), url("/branding/tapajos-panel-v1.webp");
+  background-position: center;
+  background-size: cover;
+}
+.page-heading::after { display: none; }
+.page-heading > div { max-width: min(76%, 790px); }
+.page-heading h1 { text-shadow: 0 2px 14px #03181380; }
+.page-heading p { color: #e0eae4; text-shadow: 0 1px 7px #031813; }
+.page-heading .eyebrow { color: #c4e8d9; }
+.page-heading .eyebrow > span { background: #79d5b2; }
+.heading-chips > span { background: #06241db3; color: #e0eee6; border-color: #c8e8d74d; }
+.heading-chips > span + span { color: #d0e6da; background: #06241d80; }
+.page-heading .refresh-button { background: #082d25df; border-color: #afd4c078; }
+.footer > div > img { width: 24px; height: 28px; object-fit: contain; padding: 2px; background: #102c24; border-radius: 5px; }
+.app-opening {
+  position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+  background: #061f1b; padding: 0; isolation: isolate;
+}
+.app-opening-art { display: block; width: 100%; height: 100%; object-fit: contain; }
+.app-opening-enter {
+  position: absolute; bottom: max(28px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; justify-content: center; gap: 16px; white-space: nowrap;
+  min-height: 48px; border: 1px solid #c0ded26b; border-radius: 999px; padding: 12px 23px;
+  color: #f4fff9; background: #062a23ed; font-size: 14px; font-weight: 600;
+  box-shadow: 0 8px 25px #02130f40; cursor: pointer;
+}
+.app-opening-enter:hover { background: #12483a; }
+.app-opening-enter:focus-visible { outline: 3px solid #f3be65; outline-offset: 5px; }
+@media (max-width: 1250px) {
+  .brand-mark, .brand-mark img { width: 37px; height: 43px; }
+}
+@media (max-width: 720px) {
+  .page-heading::before { background-image: linear-gradient(90deg, rgba(4, 24, 21, .64), rgba(4, 24, 21, .48)), url("/branding/tapajos-panel-v1.webp"); background-position: 68% center; }
+  .page-heading > div { max-width: 100%; }
+}
+@media print {
+  .app-opening { display: none !important; }
+}
