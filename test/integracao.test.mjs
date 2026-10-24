@@ -11,7 +11,7 @@ async function port(){const s=createServer();await new Promise(r=>s.listen(0,'12
 const root=fileURLToPath(new URL('../',import.meta.url));
 let server,dir,url;
 
-// Servidor real, porém sem consultar serviços externos: teste de integração offline.
+// Servidor real, sem consultar serviços externos: teste de integração HTTP.
 test.before(async()=>{
  dir=await mkdtemp(join(tmpdir(),'sentinela-http-'));const p=await port();url=`http://127.0.0.1:${p}`;
  server=spawn(process.execPath,['server.mjs'],{cwd:root,env:{...process.env,HOST:'127.0.0.1',PORT:String(p),DATA_DIR:dir,ENABLE_AUTO_COLLECT:'0'},stdio:'ignore'});
@@ -29,9 +29,17 @@ test('painel principal e monitor de fontes são servidos em rotas separadas',asy
  r=await fetch(url+'/fontes');assert.equal(r.status,200);assert.match(await r.text(),/Saúde das fontes/);
 });
 
-test('arquivos estáticos, adaptador e recursos offline são entregues pelo backend',async()=>{
+test('arquivos estáticos e manifesto de instalação online são entregues pelo backend',async()=>{
  const types=new Map([['/app.js','text/javascript'],['/app.css','text/css'],['/frontend-adapter.mjs','text/javascript'],['/sw.js','text/javascript'],['/manifest.webmanifest','application/manifest+json'],['/icon-192.png','image/png']]);
  for(const [path,type] of types){const r=await fetch(url+path);assert.equal(r.status,200,path);assert.ok((r.headers.get('content-type')||'').startsWith(type),path);assert.ok((await r.arrayBuffer()).byteLength>100);}
+});
+test('service worker legado não armazena arquivos e a interface não o registra',async()=>{
+ const worker=await (await fetch(url+'/sw.js')).text();
+ const painel=await (await fetch(url+'/app.js')).text();
+ assert.doesNotMatch(worker,/addEventListener\(['"]fetch['"]/);
+ assert.doesNotMatch(worker,/caches\.open\(/);
+ assert.doesNotMatch(painel,/serviceWorker\.register\(/);
+ assert.match(painel,/desativarOfflineLegado/);
 });
 
 test('campos vazios não aparecem como zeros, municípios coerentes na API',async()=>{
