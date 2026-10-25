@@ -6,6 +6,7 @@
   if (window.__sentinelaEggsMounted) return;
   window.__sentinelaEggsMounted = true;
   let overlay = null, stopSound = null, lastFocus = null, heldTimer = null;
+  let diaryPanel = null, diaryTabButton = null, diaryTabOpen = false;
   let keyBuffer = "", keyAt = 0;
   const counts = new Map();
   const el=(tag,props={},text="")=>{
@@ -23,7 +24,116 @@
   const names={guardiao:"O Despertar do Sentinela",floresta:"A Floresta Fala",diario:"Diário do Explorador",criador:"Mensagem do Criador"};
   const clearChildren=n=>n.replaceChildren();
   const add=(parent,...children)=>{parent.append(...children);return parent;};
-  function dismiss(){
+
+  /*
+   * Diário: aba autônoma no menu da prévia, fora da árvore React do painel.
+   * Conserva o mapa no DOM e mantém todas as consultas do backend intocadas.
+   */
+  function getDiaryNav(){
+    return document.querySelector('nav[aria-label="Navegação principal"]');
+  }
+  function mountDiaryNav(){
+    const nav=getDiaryNav();
+    if(!nav)return;
+    if(!diaryTabButton){
+      diaryTabButton=el("button",{
+        id:"st-diary-tab-button",
+        type:"button",
+        class:"st-diary-nav-tab",
+        "aria-controls":"st-diary-tab-panel",
+        "aria-pressed":"false",
+        title:"Abrir Diário do Explorador — oito capítulos e bibliografia"
+      },"📖 Diário do Explorador");
+      diaryTabButton.addEventListener("click",event=>{
+        event.preventDefault();
+        event.stopPropagation();
+        openDiaryTab();
+      });
+    }
+    if(diaryTabButton.parentElement!==nav)nav.append(diaryTabButton);
+    diaryTabButton.setAttribute("aria-pressed",String(diaryTabOpen));
+    diaryTabButton.classList.toggle("st-diary-nav-tab-active",diaryTabOpen);
+  }
+  function updateDiaryPosition(){
+    if(!diaryPanel || !diaryTabOpen)return;
+    const header=getDiaryNav()?.closest("header");
+    const bottom=header?.getBoundingClientRect().bottom??0;
+    const top=Math.max(0,Math.min(window.innerHeight-180,Math.ceil(bottom)));
+    diaryPanel.style.top=top+"px";
+  }
+  function ensureDiaryPanel(){
+    if(diaryPanel)return diaryPanel;
+    const panel=el("section",{
+      id:"st-diary-tab-panel",
+      class:"st-diary-tab-panel",
+      role:"region",
+      "aria-label":"Diário do Explorador — aba independente",
+      hidden:""
+    });
+    const heading=el("div",{class:"st-diary-tab-heading"});
+    const name=el("div",{class:"st-diary-tab-name"},"Diário do Explorador");
+    const subtitle=el("span",{class:"st-diary-tab-subtitle"},"8 capítulos · 24 referências · expedições pelo Tapajós");
+    const close=el("button",{class:"st-diary-tab-return",type:"button"},"← Voltar ao painel");
+    close.addEventListener("click",closeDiaryTab);
+    const external=el("a",{class:"st-diary-tab-expand",href:"/__egg/diario",target:"_blank",rel:"noopener noreferrer"},"Tela inteira ↗");
+    const controls=el("div",{class:"st-diary-tab-controls"});
+    add(controls,external,close);
+    const caption=el("div",{class:"st-diary-tab-caption"});
+    add(caption,name,subtitle);
+    add(heading,caption,controls);
+    const frame=el("iframe",{
+      class:"st-diary-tab-frame",
+      title:"Diário do Explorador — oito páginas interativas",
+      src:"/__egg/diario",
+      loading:"eager",
+      referrerpolicy:"no-referrer"
+    });
+    add(panel,heading,frame);
+    document.body.append(panel);
+    diaryPanel=panel;
+    return panel;
+  }
+  function openDiaryTab(){
+    dismiss();
+    mountDiaryNav();
+    const panel=ensureDiaryPanel();
+    panel.hidden=false;
+    diaryTabOpen=true;
+    diaryTabButton?.setAttribute("aria-pressed","true");
+    diaryTabButton?.classList.add("st-diary-nav-tab-active");
+    document.body.classList.add("st-diary-tab-open");
+    updateDiaryPosition();
+  }
+  function closeDiaryTab(){
+    if(!diaryTabOpen)return;
+    diaryTabOpen=false;
+    diaryPanel.hidden=true;
+    diaryTabButton?.setAttribute("aria-pressed","false");
+    diaryTabButton?.classList.remove("st-diary-nav-tab-active");
+    document.body.classList.remove("st-diary-tab-open");
+    diaryTabButton?.focus({preventScroll:true});
+  }
+  document.addEventListener("click",event=>{
+    if(!diaryTabOpen)return;
+    const navButton=event.target.closest?.('nav[aria-label="Navegação principal"] button,nav[aria-label="Navegação principal"] a');
+    if(navButton && navButton!==diaryTabButton)closeDiaryTab();
+    else if(event.target.closest?.('a.brand'))closeDiaryTab();
+  },true);
+  window.addEventListener("resize",updateDiaryPosition);
+  // React pode recriar os botões do menu; remontar apenas quando o menu mudar.
+  const menuObserver=new MutationObserver(mutations=>{
+    for(const m of mutations){
+      const isMenu=m.target instanceof Element &&
+        (m.target.matches?.('nav[aria-label="Navegação principal"]')||
+         (m.target.closest?.('header') && (m.target.closest?.("header")?.contains(getDiaryNav()))));
+      const newMenu=[...m.addedNodes].some(n=>n.nodeType===1 &&
+        (n.matches?.('nav[aria-label="Navegação principal"]')||n.querySelector?.('nav[aria-label="Navegação principal"]')));
+      if(isMenu||newMenu){mountDiaryNav();updateDiaryPosition();break;}
+    }
+  });
+  menuObserver.observe(document.body,{childList:true,subtree:true});
+  mountDiaryNav();
+    function dismiss(){
     if(stopSound){stopSound();stopSound=null;}
     if(overlay){overlay.remove();overlay=null;}
     document.body.classList.remove("st-eggs-open");
@@ -188,20 +298,7 @@
     });
   }
     function diary(){
-    const p=shell("diario","Caderno de expedição interativo: oito capítulos, pesquisa e 24 referências bibliográficas, com mapas e bússolas no fundo.");
-    p.classList.add("st-egg-diary-dialog");
-    const frame=el("iframe",{
-      class:"st-egg-diary-frame",
-      title:"Diário do Explorador — oito páginas interativas do Tapajós",
-      src:"/__egg/diario",
-      loading:"eager",
-      referrerpolicy:"no-referrer"
-    });
-    const footer=el("div",{class:"st-egg-diary-footer"});
-    add(footer,
-      el("span",{class:"st-egg-diary-hint"},"A navegação, a pesquisa e a bibliografia funcionam dentro do caderno."),
-      el("a",{class:"st-egg-diary-external",href:"/__egg/diario",target:"_blank",rel:"noopener noreferrer"},"Abrir em tela inteira ↗"));
-    add(p,frame,footer);
+    openDiaryTab();
   }
   function creator(){
     const p=shell("criador","Registro reservado — Sentinela Tapajós");
@@ -288,6 +385,8 @@
     target.addEventListener("pointercancel",clear,{once:true});
     target.addEventListener("pointerleave",clear,{once:true});
   },true);
-  const requested=new URLSearchParams(location.search).get("egg");
-  if(VALID.has(requested)) window.setTimeout(()=>open(requested),350);
+  const params=new URLSearchParams(location.search);
+  const requested=params.get("egg");
+  if(VALID.has(requested))window.setTimeout(()=>open(requested),350);
+  if(params.get("tab")==="diario")window.setTimeout(openDiaryTab,350);
 })();
