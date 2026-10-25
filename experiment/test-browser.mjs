@@ -65,6 +65,7 @@ try{
  }
  await check("terminal abre digitando SENTINELA",async()=>{
    await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
+   await page.evaluate(() => {if(document.activeElement instanceof HTMLElement)document.activeElement.blur();});
    await page.keyboard.type("SENTINELA",{delay:65});
    await page.locator(".st-egg-dialog").waitFor({timeout:15000});
    assert.match(await page.locator("#st-egg-heading").innerText(),/Terminal Secreto/);
