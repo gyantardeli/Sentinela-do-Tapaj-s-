@@ -234,21 +234,43 @@
     function creator(){
     const p=shell("criador","Registro reservado — Sentinela Tapajós");
     const art=el("div",{class:"st-egg-credits-art","aria-hidden":"true"},"SENTINELA\nTAPAJÓS");
-    const letter=el("article",{class:"st-egg-creator-letter"});
-    add(letter,el("h3",{},"UMA MENSAGEM DO CRIADOR"),
-      el("p",{class:"st-egg-creator-subtitle"},"Registro reservado — Sentinela Tapajós"),
-      el("p",{},"“Há lugares no mundo que não precisam de mais olhos. Precisam de pessoas que realmente enxerguem."),
-      el("p",{},"A Amazônia respira, muda, sofre e resiste. Cada rio carrega uma história. Cada árvore sustenta uma vida. Cada sinal no horizonte pode revelar algo que merece nossa atenção."),
-      el("p",{},"O Sentinela nasceu de uma ideia simples: não podemos proteger aquilo que não conhecemos, nem cuidar daquilo que escolhemos ignorar."),
-      el("p",{},"Este projeto não foi criado apenas para reunir mapas, satélites e informações. Foi criado para transformar dados em consciência e observação em responsabilidade."),
-      el("p",{},"A tecnologia pode ampliar nossa visão. Mas somente o ser humano pode decidir o que fazer com aquilo que vê."),
-      el("p",{},"Se você encontrou esta mensagem, descobriu algo que não aparece nos mapas:"));
-    add(letter,el("strong",{class:"st-egg-creator-emphasis"},"O verdadeiro Sentinela não é o sistema. É quem está diante dele."));
-    add(letter,el("p",{},"Continue observando."),
-      el("p",{},"A floresta ainda tem muito a nos contar.”"),
-      el("p",{class:"st-egg-creator-signature"},"— O Criador"),
+    const letter=el("article",{class:"st-egg-creator-letter",lang:"pt-BR"});
+    const paragraph=(text,props={})=>el("p",props,text);
+    const intro=paragraph();
+    add(intro,
+      document.createTextNode("O Sentinela nasceu de uma ideia simples: "),
+      el("strong",{},"não podemos proteger aquilo que não conhecemos, nem cuidar daquilo que escolhemos ignorar."));
+    add(letter,
+      el("h3",{},"UMA MENSAGEM DO CRIADOR"),
+      paragraph("Registro reservado — Sentinela Tapajós",{class:"st-egg-creator-subtitle"}),
+      paragraph("“Há lugares no mundo que não precisam de mais olhos. Precisam de pessoas que realmente enxerguem."),
+      paragraph("A Amazônia respira, muda, sofre e resiste. Cada rio carrega uma história. Cada árvore sustenta uma vida. Cada sinal no horizonte pode revelar algo que merece nossa atenção."),
+      intro,
+      paragraph("Este projeto não foi criado apenas para reunir mapas, satélites e informações. Foi criado para transformar dados em consciência, conhecimento em responsabilidade e observação em atitudes que façam a diferença."),
+      paragraph("A tecnologia pode ampliar nossa visão, revelar o que está distante e nos ajudar a compreender o que antes parecia invisível. Mas somente o ser humano pode decidir o que fazer com aquilo que vê."),
+      paragraph("E, por trás de cada ideia, de cada desafio superado e de cada passo desta jornada, existe algo ainda maior."),
+      el("strong",{class:"st-egg-creator-emphasis"},"Minha primeira e mais profunda gratidão é a Deus."),
+      paragraph("A Ele, Criador dos céus, da terra, dos rios e das florestas, agradeço pela vida, pela sabedoria concedida, pela força nos momentos difíceis e pela oportunidade de transformar uma simples ideia em algo que possa contribuir para o bem."),
+      paragraph("Ao contemplar a imensidão da Amazônia, é impossível não reconhecer a grandeza de Sua criação. Cada árvore, cada rio e cada forma de vida revelam uma beleza que nenhuma tecnologia será capaz de reproduzir plenamente."),
+      paragraph("Que este projeto seja também uma expressão de gratidão a Deus e um lembrete de que recebemos não apenas a capacidade de conhecer o mundo, mas também a responsabilidade de cuidar dele."),
+      paragraph("Agradeço igualmente a todos que, de alguma forma, contribuíram para que esta ideia ganhasse vida, aos que acreditam na importância da preservação e àqueles que dedicam seus esforços, muitas vezes silenciosamente, à proteção da nossa Amazônia."),
+      el("strong",{class:"st-egg-creator-affirmation"},"Que todo conhecimento nos torne mais humildes, toda descoberta nos torne mais conscientes e toda capacidade recebida seja utilizada para fazer o bem."));
+    const scripture=el("blockquote",{class:"st-egg-creator-scripture"});
+    add(scripture,
+      el("em",{},"“Do Senhor é a terra e tudo o que nela existe, o mundo e os que nele vivem.”"),
+      el("cite",{},"— Salmos 24:1"));
+    add(letter,
+      scripture,
+      paragraph("Se você encontrou esta mensagem, descobriu algo que não aparece nos mapas:"),
+      el("strong",{class:"st-egg-creator-emphasis"},"O verdadeiro Sentinela não é o sistema. É quem está diante dele."),
+      paragraph("Porque proteger não é apenas observar o que acontece. É reconhecer o valor daquilo que nos foi confiado."),
+      paragraph("Continue observando."),
+      paragraph("A floresta ainda tem muito a nos contar."),
+      paragraph("E que, acima de tudo, Deus seja glorificado em cada boa obra realizada.”"),
+      paragraph("— O Criador",{class:"st-egg-creator-signature"}),
+      el("hr",{class:"st-egg-creator-divider"}),
       el("strong",{class:"st-egg-creator-brand"},"SENTINELA TAPAJÓS"),
-      el("p",{class:"st-egg-creator-motto"},"Vigiar para conhecer. Conhecer para proteger."));
+      paragraph("Vigiar para conhecer. Conhecer para proteger.",{class:"st-egg-creator-motto"}));
     add(p,art,letter);
   }
   const actions={guardiao:guardian,floresta:forest,diario:diary,criador:creator};
