@@ -11,6 +11,6 @@
     "start": "node server.mjs",
     "once": "node server.mjs --once",
     "test": "node --test",
-    "check": "node --check collector.mjs && node --check server.mjs && node --check environment-view.mjs && node --check frontend-adapter.mjs && npm test && node --check public/app.js && node --check public/sw.js"
+    "check": "node --check collector.mjs && node --check server.mjs && node --check environment-view.mjs && node --check frontend-adapter.mjs && npm test && node --check public/app.js && node --check public/sw.js && node --check support.mjs && node --check public/apoie.js"
   }
 }
