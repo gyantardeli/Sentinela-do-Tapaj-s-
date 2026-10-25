@@ -277,7 +277,7 @@
     if(!brand || harpyTarget(target))return false;
     const mark=brand.querySelector(".brand-mark");
     if(mark?.contains(target))return false;
-    return /SENTINELA\s+TAPAJÓS/i.test((brand.textContent||"").replace(/\s+/g," "));
+    return /SENTINELA\s*TAPAJÓS/i.test((brand.textContent||"").replace(/\s+/g," "));
   }
   document.addEventListener("click",event=>{
     if(overlay||event.target.closest?.("#st-eggs-root"))return;
