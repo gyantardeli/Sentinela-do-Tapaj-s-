@@ -22,7 +22,10 @@ test('configuração não ativa apenas por adicionar chave sem autorização exp
 });
 test('página informa que contribuição não concede acesso exclusivo',async()=>{
   const html=await readFile(new URL('../public/apoie.html',import.meta.url),'utf8');
-  assert.match(html,/não depende de contribuição/i);
+  assert.match(html,/continuam <strong>gratuitos<\/strong>/i);
+  assert.match(html,/Me paga um café\?/i);
+  assert.match(html,/cafezinho simbólico/i);
+  assert.match(html,/não é campanha beneficente/i);
   assert.match(html,/Pagamentos desativados nesta prévia/i);
   assert.doesNotMatch(html,/https:\/\/.*?(?:checkout|pix)/i);
 });
