@@ -3,7 +3,9 @@
 **Status:** preparado em ramificação isolada; **não publicar, não unir à main e não habilitar pagamentos** sem validação e autorização.
 
 ## Escopo
-- Navegação: link discreto “♡ Apoie o Sentinela”; não adiciona cartões, filtros ou camadas ao mapa.
+- Navegação: link discreto “☕ Me paga um café?”; não adiciona cartões, filtros ou camadas ao mapa.
+- Tom: leve e bem-humorado, com “cafezinho simbólico” e referências à Amazônia, sem esconder que se trata de contribuição voluntária, sem contrapartida.
+- A mensagem declara que a metáfora do café não significa compra literal de café e que o apoio financia manutenção e desenvolvimento.
 - Página `GET /apoie`, usando folha de estilos do projeto e CSS isolado.
 - `GET /api/apoie`: resposta JSON sem cache, sem gravações e sem depender das fontes ambientais.
 - Default seguro: `ativo=false`, `chavePix=null`, `beneficiario=null`.
