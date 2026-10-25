@@ -84,6 +84,8 @@ try {
         assert.equal(await frame.count(),0);
       }
       if(id==="diario"){
+        const debug=await page.evaluate(()=>({dialog:document.querySelector(".st-egg-dialog")?.outerHTML.slice(0,1600),scriptText:[...document.scripts].filter(s=>s.src.includes("overlay.js")).map(s=>s.src),modalClass:document.querySelector(".st-egg-dialog")?.className,scriptSources:[...document.scripts].slice(-3).map(s=>s.src),location:location.href}));
+        console.log("DIARIO DIAGNOSTICS",JSON.stringify(debug));
         const iframe=page.locator(".st-egg-diary-frame");
         assert.equal(await iframe.count(),1);
         assert.match(await iframe.getAttribute("src"),/\/__egg\/diario/);
