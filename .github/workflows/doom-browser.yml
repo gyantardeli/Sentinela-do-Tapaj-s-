@@ -1,0 +1,37 @@
+name: Homologar DOOM em Chromium
+on:
+  push:
+    branches: [feature/doom-easter-egg]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/doom*'
+      - 'public/index.html'
+      - 'public/app.css'
+      - 'server.mjs'
+      - 'test-browser/**'
+      - '.github/workflows/doom-browser.yml'
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar Playwright e Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Iniciar jogo e validar fluxo em navegador real
+        run: node test-browser/doom-browser.mjs
+      - name: Preservar capturas para auditoria
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-chromium-screenshots
+          path: artifacts/
+          if-no-files-found: ignore
