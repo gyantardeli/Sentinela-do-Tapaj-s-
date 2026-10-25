@@ -90,6 +90,8 @@ async function handle(req,res){
   const paginas = new Map([
     ['/','index.html'], ['/painel','index.html'], ['/fontes','fontes.html'],
     ['/app.js','app.js'], ['/app.css','app.css'],
+    ['/doom','doom.html'], ['/doom.html','doom.html'],
+    ['/doom.js','doom.js'], ['/doom.css','doom.css'], ['/doom-unlock.js','doom-unlock.js'],
     ['/frontend-adapter.mjs','../frontend-adapter.mjs'],
     ['/manifest.webmanifest','manifest.webmanifest'], ['/icon-192.png','icon-192.png'], ['/icon-512.png','icon-512.png'], ['/sw.js','sw.js']
   ]);
