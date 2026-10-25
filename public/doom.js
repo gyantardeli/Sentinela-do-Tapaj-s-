@@ -57,7 +57,7 @@ async function startGame() {
     screen.replaceChildren();
     player = window.Dos(screen, {
       url: GAME_URL,
-      pathPrefix: 'https://v8.js-dos.com/latest/',
+      pathPrefix: 'https://v8.js-dos.com/latest/emulators/',
       autoStart: true,
       autoSave: false,
       fsChanges: { local: false },
