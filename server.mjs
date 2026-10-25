@@ -5,6 +5,7 @@ import { dirname, resolve, join } from 'node:path';
 import { collectAll, emptyState, markStale } from './collector.mjs';
 import { buildEnvironmentView } from './environment-view.mjs';
 import { SOURCES, MUNICIPIOS, CONSULTAS_MANUAIS } from './registry.mjs';
+import { obterConfiguracaoApoio } from './support.mjs';
 
 const ROOT=dirname(fileURLToPath(import.meta.url));
 const DATA_DIR=resolve(process.env.DATA_DIR||join(ROOT,'data'));
@@ -88,8 +89,8 @@ function readEnv(url){
 async function handle(req,res){
   const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
   const paginas = new Map([
-    ['/','index.html'], ['/painel','index.html'], ['/fontes','fontes.html'],
-    ['/app.js','app.js'], ['/app.css','app.css'],
+    ['/','index.html'], ['/painel','index.html'], ['/fontes','fontes.html'], ['/apoie','apoie.html'],
+    ['/app.js','app.js'], ['/app.css','app.css'], ['/apoie.js','apoie.js'], ['/apoie.css','apoie.css'],
     ['/frontend-adapter.mjs','../frontend-adapter.mjs'],
     ['/manifest.webmanifest','manifest.webmanifest'], ['/icon-192.png','icon-192.png'], ['/icon-512.png','icon-512.png'], ['/sw.js','sw.js']
   ]);
@@ -106,6 +107,7 @@ async function handle(req,res){
     });res.end(bytes);}catch{res.writeHead(404);res.end();}
     return;
   }
+  if(req.method==='GET'&&url.pathname==='/api/apoie'){respond(res,200,obterConfiguracaoApoio());return;}
   if(req.method==='GET'&&url.pathname==='/api/health'){respond(res,200,summaries());return;}
   if(req.method==='GET'&&url.pathname==='/api/environment'){respond(res,200,readEnv(url));return;}
   if(req.method==='GET'&&url.pathname==='/api/radar'){
