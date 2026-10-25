@@ -1,4 +1,4 @@
-name: Diagnosticar aba Diário e CSS
+name: Diagnosticar Diário após correção CSS
 on:
   push:
     branches: [feature/easter-eggs-five]
