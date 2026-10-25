@@ -89,3 +89,13 @@ O projeto não possui o código-fonte do Site publicado. A versão hospedada em 
 - `public/sw.js` — rotina de desativação de service worker legado; `public/manifest.webmanifest` — manifesto de instalação.
 - `deploy/GUIA_PUBLICACAO.md` — implantação/atualização da URL.
 - `test/` — testes automatizados.
+
+## Apoie o Sentinela — prévia isolada (25/10/2026)
+
+Rota `/apoie` e API `GET /api/apoie` disponíveis apenas após implantação desta versão em um ambiente **de homologação**. O mapa, os dados e o coletor não foram alterados.
+
+- Estado padrão: **contribuições desativadas**, sem dados Pix, QR Code ou link de pagamento.
+- Para ativação posterior e **após validação da conta empresarial**: configurar no ambiente do servidor `SENTINELA_PIX_ENABLED=true`, `SENTINELA_PIX_CNPJ` e `SENTINELA_PIX_BENEFICIARIO`.
+- A chave CNPJ e o favorecido são apresentados publicamente apenas com a ativação explícita. Não inserir valores reais em commit ou arquivo público.
+- A contribuição não compra recursos nem libera funcionalidades. Este protótipo **não gera BR Code, QR Code, cobrança, transação ou comprovante**.
+- O Site original ChatGPT Sites e o APK permanecem **inalterados**. Ver `docs/APOIE_SENTINELA_HOMOLOGACAO.md` antes de integrar.
