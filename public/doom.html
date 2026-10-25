@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14382c">
+  <meta name="robots" content="noindex, nofollow">
+  <title>DOOM · Sentinela Tapajós</title>
+  <link rel="stylesheet" href="/doom.css">
+</head>
+<body>
+  <main class="game-page">
+    <header class="game-top">
+      <div><span class="game-tag">SENTINELA TAPAJÓS</span><h1>DOOM <small>1993 · SHAREWARE</small></h1></div>
+      <a class="back" href="/">← Voltar ao painel</a>
+    </header>
+    <section class="intro" aria-label="Informações do jogo">
+      <p>Você encontrou o jogo secreto. Esta é a edição demonstrativa original do DOOM, executada no navegador via js-dos. O monitoramento ambiental funciona independentemente deste jogo.</p>
+      <div class="actions">
+        <button type="button" id="startDoom">▶ Iniciar DOOM</button>
+        <button type="button" id="fullscreenDoom" disabled>Tela cheia</button>
+        <button type="button" id="stopDoom" disabled>Encerrar jogo</button>
+      </div>
+      <p id="gameStatus" role="status" aria-live="polite">O jogo só será carregado quando você clicar em Iniciar. É necessário estar conectado à internet.</p>
+    </section>
+    <section class="game-shell" aria-label="Tela do DOOM">
+      <div id="dos" class="game-screen"><div id="idle" class="idle">DOOM<br><small>APERTE INICIAR</small></div></div>
+    </section>
+    <section class="help" aria-label="Controles">
+      <h2>Controles</h2>
+      <p><strong>Computador:</strong> setas para mover e girar, Ctrl para atirar, Espaço para abrir portas, Shift para correr e Esc para abrir o menu.</p>
+      <p><strong>Celular:</strong> use o teclado virtual do js-dos. O suporte a controles sensíveis ao toque depende do navegador e será validado no APK.</p>
+      <p class="credits">DOOM © id Software. Somente a edição shareware, hospedada externamente; não inclui o jogo completo. Emulador: <a href="https://js-dos.com/" target="_blank" rel="noopener noreferrer">js-dos</a>. Nenhum arquivo do jogo é gravado no repositório do Sentinela. O carregamento usa serviços externos.</p>
+    </section>
+  </main>
+  <script type="module" src="/doom.js"></script>
+</body>
+</html>
