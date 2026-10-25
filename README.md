@@ -89,3 +89,15 @@ O projeto não possui o código-fonte do Site publicado. A versão hospedada em 
 - `public/sw.js` — rotina de desativação de service worker legado; `public/manifest.webmanifest` — manifesto de instalação.
 - `deploy/GUIA_PUBLICACAO.md` — implantação/atualização da URL.
 - `test/` — testes automatizados.
+
+## Easter egg DOOM (branch experimental)
+
+A rota `GET /doom` apresenta a edição **shareware** (demonstrativa) do DOOM de 1993 por meio do js-dos v8. Para descobri-la, ative cinco vezes o símbolo **ST** no painel dentro de um intervalo aproximado de 4,5 segundos entre ativações. É possível abrir a rota diretamente para homologação.
+
+- Dependências de terceiros são carregadas **somente após clicar em Iniciar DOOM**: `https://v8.js-dos.com/latest/js-dos.js`, `js-dos.css` e `https://v8.js-dos.com/bundles/doom.jsdos`. Caso o serviço externo fique indisponível, o jogo não abre, mas o painel permanece funcional.
+- Sem copiar binários `.WAD` ou executáveis comerciais ao repositório. A edição shareware não representa o jogo completo; DOOM é propriedade intelectual da id Software.
+- O módulo não usa os endpoints ambientais, não registra service worker nem ativa funcionamento offline. O jogador é iniciado explicitamente; autosave e armazenamento local do js-dos foram desativados na configuração do emulador.
+- Compatibilidade com **Android/WebView/APK** ainda exige homologação em dispositivo real. Os controles móveis usam teclado virtual configurado, sujeitos à execução do pacote remoto.
+- Esta alteração é apenas na branch experimental do **repositório independente V2.2**. Não publica nem modifica o site original em ChatGPT Sites/Work e não produz APK por si só.
+
+Teste rápido: `npm run check`, depois `ENABLE_AUTO_COLLECT=0 npm start`, acessar `http://127.0.0.1:8787/doom` e clicar em **Iniciar DOOM**. Testar teclado, áudio, uso de memória, retorno ao painel e controles de celular antes de aprovação e publicação.
