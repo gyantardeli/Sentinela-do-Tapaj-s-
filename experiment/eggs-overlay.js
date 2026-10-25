@@ -265,23 +265,29 @@
   document.addEventListener("keydown",e=>{
     if(e.key==="Escape"&&overlay){dismiss();}
   });
-    function logoTarget(t){
-    if(!t?.closest)return false;
-    // Não depender apenas do texto clicado: SVGs/logotipos aninhados não expõem o texto.
-    if(t.closest('#sentinela-symbol,.brand-mark,[class*="brand-mark"],[aria-label*="Sentinela"],[aria-label*="SENTINELA"]'))return true;
-    const candidate=t.closest('button,a,strong,b,span,h1,h2,[aria-label],img,div');
-    if(!candidate)return false;
-    const label=(candidate.getAttribute("aria-label")||candidate.getAttribute("alt")||candidate.textContent||"").replace(/\s+/g," ").toUpperCase().trim();
-    return label==="ST"||label==="SENTINELA TAPAJÓS"||label==="SENTINELA";
+
+  // A imagem da harpia no cabeçalho é /branding/mark.svg, dentro de .brand-mark.
+  // O texto do cabeçalho é um alvo diferente para preservar o Guardião.
+  function harpyTarget(target){
+    const mark=target?.closest?.(".brand-mark");
+    return Boolean(mark?.querySelector('img[src$="/branding/mark.svg"]'));
   }
-  document.addEventListener("click",e=>{
-    if(overlay||e.target.closest?.("#st-eggs-root"))return;
-    if(e.target.closest?.("footer")&&(e.target.textContent||"").length<100){advance("criador",3);return;}
-    if(logoTarget(e.target)){advance("guardiao",7);}
+  function guardianTitleTarget(target){
+    const brand=target?.closest?.('a.brand[aria-label*="Sentinela Tapajós"]');
+    if(!brand || harpyTarget(target))return false;
+    const mark=brand.querySelector(".brand-mark");
+    if(mark?.contains(target))return false;
+    return /SENTINELA\s+TAPAJÓS/i.test((brand.textContent||"").replace(/\s+/g," "));
+  }
+  document.addEventListener("click",event=>{
+    if(overlay||event.target.closest?.("#st-eggs-root"))return;
+    if(event.target.closest?.("footer")&&(event.target.textContent||"").length<100){advance("criador",3);return;}
+    if(harpyTarget(event.target)){advance("diario",7);return;}
+    if(guardianTitleTarget(event.target)){advance("guardiao",7);}
   },true);
-    document.addEventListener("pointerdown",e=>{
-    if(overlay||!logoTarget(e.target))return;
-    const target=e.target;
+  document.addEventListener("pointerdown",event=>{
+    if(overlay||!harpyTarget(event.target))return;
+    const target=event.target;
     heldTimer=window.setTimeout(()=>{if(!overlay)open("floresta");heldTimer=null;},5000);
     const clear=()=>{if(heldTimer){clearTimeout(heldTimer);heldTimer=null;}};
     target.addEventListener("pointerup",clear,{once:true});
