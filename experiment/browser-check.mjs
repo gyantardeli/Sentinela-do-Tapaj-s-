@@ -28,7 +28,7 @@ try {
   await check("espelho ambiental disponível e protegido",async()=>{
     const r=await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
     assert.equal(r.status(),200);
-    assert.equal(r.headers()["x-sentinela-preview"],"easter-eggs-four-v2");
+    assert.equal(r.headers()["x-sentinela-preview"],"easter-eggs-four-v3");
     await page.waitForTimeout(3000);
     const title=await page.title();
     assert.match(title,/Sentinela Tapajós/i);
