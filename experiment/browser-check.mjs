@@ -114,16 +114,33 @@ try {
       assert.equal(await page.locator(".st-egg-dialog").count(),0);
     });
   }
-  await check("atalho 7 toques no símbolo revela Guardião",async()=>{
+  await check("sete toques na harpia abrem Diário, sem abrir Guardião",async()=>{
     await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
-    await page.waitForTimeout(1000);
-    const logo=page.locator("#sentinela-symbol,.brand-mark").first();
-    assert.ok(await logo.count(),"símbolo ST indisponível");
-    for(let n=0;n<7;n++)await logo.dispatchEvent("click");
+    await page.waitForTimeout(900);
+    const harpy=page.locator('a.brand .brand-mark img[src$="/branding/mark.svg"]').first();
+    assert.equal(await harpy.count(),1,"Imagem da harpia do painel não encontrada");
+    for(let n=0;n<6;n++)await harpy.dispatchEvent("click");
+    assert.equal(await page.locator(".st-egg-dialog").count(),0,"Diário abriu prematuramente");
+    await harpy.dispatchEvent("click");
+    await page.locator(".st-egg-dialog").waitFor({timeout:6000});
+    assert.match(await page.locator("#st-egg-heading").innerText(),/Diário do Explorador/);
+    assert.equal(await page.locator(".st-egg-diary-entry").count(),4);
+    await page.screenshot({path:"artifacts/eggs-preview/diario-harpia-sete-toques.png"});
+    await page.locator(".st-egg-close").click();
+  });
+  await check("sete toques no nome do projeto preservam Despertar do Sentinela",async()=>{
+    await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
+    await page.waitForTimeout(800);
+    const brandName=page.locator('a.brand[aria-label*="Sentinela Tapajós"]').first();
+    assert.equal(await brandName.count(),1);
+    const title=brandName.locator('span:not(.brand-mark)').first();
+    assert.ok(await title.count(),"Texto da marca não encontrado");
+    for(let n=0;n<7;n++)await title.dispatchEvent("click");
     await page.locator(".st-egg-dialog").waitFor({timeout:6000});
     assert.match(await page.locator("#st-egg-heading").innerText(),/Despertar do Sentinela/);
+    await page.locator(".st-egg-close").click();
   });
-  await check("opções antigas não reabrem via query",async()=>{
+    await check("opções antigas não reabrem via query",async()=>{
     await page.goto(BASE+"/?egg=terminal",{waitUntil:"domcontentloaded",timeout:40000});
     await page.waitForTimeout(850);
     assert.equal(await page.locator(".st-egg-dialog").count(),0);
