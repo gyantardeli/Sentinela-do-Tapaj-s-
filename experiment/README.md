@@ -1,28 +1,35 @@
-# Easter Eggs experimentais — prévia isolada
+# Easter Eggs experimentais — Sentinela Tapajós (versão revisada)
 
-Projeto **Sentinela Tapajós**. Cinco módulos de curiosidade e entretenimento adicionados **somente** na infraestrutura de testes Cloudflare, usando como base um **proxy de leitura** do site original.
+> **Prévia independente:** https://sentinela-eggs-preview.gyantardeli.workers.dev/__egg/test
+>
+> **Painel espelhado de consulta:** https://sentinela-eggs-preview.gyantardeli.workers.dev/
+>
+> **Site original:** https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/ — não foi alterado.
 
-## Endereços
-- Central de testes: https://sentinela-eggs-preview.gyantardeli.workers.dev/__egg/test
-- Painel experimental: https://sentinela-eggs-preview.gyantardeli.workers.dev/
-- Site original preservado: https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/
+## Quatro experiências
 
-## Arquitetura
-- Worker separado: `sentinela-eggs-preview`, no subdomínio `gyantardeli.workers.dev`.
-- Rotas `/__egg/overlay.js`, `/__egg/overlay.css`, `/__egg/test` servidas localmente pelo Worker.
-- Demais GET/HEAD são enviados ao domínio público do Sentinela original, sem retransmitir cookies ou credenciais; mutações são rejeitadas com 405.
-- Apenas na prévia, `HTMLRewriter` acrescenta JS e CSS externos à árvore principal, sem modificar registros operacionais, backend, D1 ou repositório do site original.
-- Não registra cache ou service worker próprio, usa respostas com `Cache-Control: no-store`.
-- **Limitações:** é um espelho de leitura do site publicado; qualquer alteração no site original pode impactá-lo. Funcionalidades que dependem de ações POST, autenticação ou sessão não são reproduzidas. O site original publicado ainda contém interface herdada de offline, que não integra os módulos novos.
+1. **Despertar do Sentinela**: animação CSS de 6,5 segundos com lua, olhos, feixe de luz e título; botão **Repetir animação** e tratamento de `prefers-reduced-motion`. Disponível em `/?egg=guardiao`; sete ativações rápidas do emblema ST.
+2. **A Floresta Fala**: paisagem sonora sintetizada e opt-in, ou player oficial do vídeo `https://www.youtube.com/watch?v=DNwvIQEXHP4`. Botões exclusivos para evitar reproduzir duas fontes simultaneamente. Incorporação via `youtube-nocookie.com`, sem copiar mídia nem baixar faixas; link externo se incorporação for bloqueada. Disponível em `/?egg=floresta`; long press do logotipo.
+3. **Diário do Explorador**: quatro passagens histórico-documentais (ocupação indígena pré-colonial, formação de Santarém, livro de Barbosa Rodrigues de 1875, expedição da Embrapa de 1986). Fontes Arquivo Nacional, Prefeitura de Santarém, Biblioteca Brasiliana USP e Embrapa; trata-se de notas curadas, não diário ficcional nem documento original. Disponível em `/?egg=diario`.
+4. **Mensagem do Criador**: transcrição integral da mensagem enviada pelo responsável pelo projeto, com destaque para a afirmação “O verdadeiro Sentinela não é o sistema. É quem está diante dele.” Disponível em `/?egg=criador`; três ativações no rodapé.
 
-## Easter Eggs
-1. **Despertar**: animação simbólica com olhos iluminados. Disparado com 7 toques no logotipo, ou `/?egg=guardiao`.
-2. **A Floresta Fala**: áudio procedural sintetizado (não é gravação real de animais), ligado pelo usuário; pressão longa no símbolo, ou `/?egg=floresta`.
-3. **Terminal Secreto**: digitar `SENTINELA` fora de formulários, ou `/?egg=terminal`. Comandos limitados a texto educativo, nunca comandos reais.
-4. **Portal do Tempo**: duas faixas 1985–2025 com links oficiais para mapas anuais MapBiomas. Não produz falsa comparação de dados; `/?egg=tempo`.
-5. **Mensagem do Criador**: créditos e propósito do projeto; `/?egg=criador`.
+**Removidos:** Terminal Secreto e Portal do Tempo, inclusive das rotas de consulta, menu de experiências e gatilhos de teclado/data.
 
-## Homologação
-Executar workflow `Validar cinco Easter Eggs na prévia`, usando Chromium Playwright. Comparar capturas desktop/mobile e usar Android físico antes de aplicar ao projeto original por ChatGPT Work.
+## Proteção do ambiente
 
-**Não publicar nem mesclar estes arquivos no site original sem adaptação ao seu código verdadeiro.**
+- Worker `sentinela-eggs-preview` separado do original; GET/HEAD apenas, com recusa dos métodos mutáveis.
+- Recursos próprios servidos em `/__egg/overlay.js`, `/__egg/overlay.css` e `/__egg/test`; o HTML original é consultado e a sobreposição é injetada no fluxo. Nenhuma integração com D1, nenhuma edição de dados ambientais nem do APK.
+- A experiência `A Floresta Fala` carrega YouTube somente após clique; o player pode estar indisponível segundo a política de incorporação do proprietário.
+- O painel espelhado pode não reproduzir funções autenticadas ou mutáveis do site original; seus dados originais continuam sob responsabilidade das fontes.
+- Todo recurso é opcional e fecha sem alterar os gráficos, o mapa 3D e os alertas. Nenhum service worker novo ou modo offline foi incluído.
+
+## Testes
+
+- Chromium headless em GitHub Actions: `.github/workflows/five-eggs-preview.yml` (nome de workflow legado, testes atualizados para quatro experiências).
+- O teste dedicado é `experiment/browser-check.mjs`, intencionalmente fora da descoberta automática do `node --test`.
+- Verificar carregamento, animação e replay, modal de vídeo, diário com fontes, transcrição textual completa, remoção de recursos anteriores, viewport mobile e bloqueio de POST.
+- Teste em Android físico e disponibilidade efetiva do streaming YouTube ainda requerem validação humana.
+
+## Controle de mudanças
+
+**Não promover esta branch ao domínio original, ao APK ou ao GitHub `main` sem uma homologação específica da integração no site original.**
