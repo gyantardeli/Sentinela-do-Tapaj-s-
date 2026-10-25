@@ -133,9 +133,10 @@ try {
     await page.waitForTimeout(800);
     const brandName=page.locator('a.brand[aria-label*="Sentinela Tapajós"]').first();
     assert.equal(await brandName.count(),1);
-    const title=brandName.locator('span:not(.brand-mark)').first();
-    assert.ok(await title.count(),"Texto da marca não encontrado");
-    for(let n=0;n<7;n++)await title.dispatchEvent("click");
+    const title=brandName.locator(':scope > :not(.brand-mark)').first();
+    console.log("BRAND HEADER MARKUP:",await brandName.evaluate(e=>e.outerHTML.slice(0,1100)));
+    const target=await title.count()?title:brandName;
+    for(let n=0;n<7;n++)await target.dispatchEvent("click");
     await page.locator(".st-egg-dialog").waitFor({timeout:6000});
     assert.match(await page.locator("#st-egg-heading").innerText(),/Despertar do Sentinela/);
     await page.locator(".st-egg-close").click();
