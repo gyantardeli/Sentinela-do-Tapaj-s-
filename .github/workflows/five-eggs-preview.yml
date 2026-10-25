@@ -1,4 +1,4 @@
-name: Validar cinco Easter Eggs na prévia
+name: Validar quatro Easter Eggs na prévia
 on:
   push:
     branches: [feature/easter-eggs-five]
@@ -24,6 +24,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cinco-easter-eggs-preview
+          name: quatro-easter-eggs-preview
           path: artifacts/eggs-preview/
           if-no-files-found: warn
