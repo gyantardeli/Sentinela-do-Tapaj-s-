@@ -28,7 +28,7 @@ try {
   await check("espelho ambiental disponível e protegido",async()=>{
     const r=await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
     assert.equal(r.status(),200);
-    assert.equal(r.headers()["x-sentinela-preview"],"easter-eggs-four-v5-tab");
+    assert.equal(r.headers()["x-sentinela-preview"],"easter-eggs-four-v6-tab");
     await page.waitForTimeout(3000);
     const title=await page.title();
     assert.match(title,/Sentinela Tapajós/i);
@@ -67,7 +67,12 @@ try {
         assert.equal(await page.locator("#st-diary-tab-panel:not([hidden])").count(),0);
         return;
       }
-      await page.locator(".st-egg-dialog").waitFor({timeout:15000});
+      await page.waitForTimeout(600);
+      if(await page.locator(".st-egg-dialog").count()===0){
+        const debug=await page.evaluate(()=>({eggParam:new URLSearchParams(location.search).get("egg"),root:document.querySelector("#st-eggs-root")?.outerHTML.slice(0,1300),tab:document.querySelector("#st-diary-tab-panel")?.outerHTML.slice(0,700),js:window.__sentinelaEggsMounted,errors:"see pageerror"}));
+        console.log("EASTER EGG DIAG:",id,JSON.stringify(debug));
+      }
+      await page.locator(".st-egg-dialog").waitFor({timeout:12000});
       assert.equal(await page.locator("h1").count()>0,true);
       assert.equal(await page.locator(".st-egg-dialog").count(),1);
       await page.screenshot({path:"artifacts/eggs-preview/"+id+"-v2.png",fullPage:false});
