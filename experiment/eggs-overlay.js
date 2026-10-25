@@ -1,8 +1,8 @@
-/* Sentinela Tapajós — cinco easter eggs demonstrativos, estritamente client-side.
+/* Sentinela Tapajós — quatro easter eggs demonstrativos, estritamente client-side.
    Não modifica dados operacionais, mapas, endpoints ou armazenamentos locais. */
 (() => {
   "use strict";
-  const VALID = new Set(["guardiao","floresta","terminal","tempo","criador"]);
+  const VALID = new Set(["guardiao","floresta","diario","criador"]);
   if (window.__sentinelaEggsMounted) return;
   window.__sentinelaEggsMounted = true;
   let overlay = null, stopSound = null, lastFocus = null, heldTimer = null;
@@ -20,7 +20,7 @@
   };
   const root=el("div",{id:"st-eggs-root","aria-live":"off"});
   document.body.append(root);
-  const names={guardiao:"O Despertar do Sentinela",floresta:"A Floresta Fala",terminal:"Terminal Secreto",tempo:"Portal do Tempo",criador:"Mensagem do Criador"};
+  const names={guardiao:"O Despertar do Sentinela",floresta:"A Floresta Fala",diario:"Diário do Explorador",criador:"Mensagem do Criador"};
   const clearChildren=n=>n.replaceChildren();
   const add=(parent,...children)=>{parent.append(...children);return parent;};
   function dismiss(){
@@ -60,39 +60,67 @@
     return dialog;
   }
   function guardian(){
-    const p=shell("guardiao","Uma homenagem simbólica à vigilância e à proteção da floresta. Apenas uma animação — não é um indicador ambiental.");
-    const scene=el("div",{class:"st-egg-guardian",role:"img","aria-label":"Guardião estilizado entre árvores, olhos iluminados e rio Tapajós."});
-    add(scene,el("div",{class:"st-egg-moon"}),el("div",{class:"st-egg-canopy"}),
-      el("div",{class:"st-egg-eyes"}),el("div",{class:"st-egg-river"}));
-    add(p,scene,el("p",{class:"st-egg-quote"},"“Observar para compreender. Compreender para proteger.”"),
-      el("p",{class:"st-egg-muted"},"Experiência artística fictícia. Nenhuma leitura, alerta ou dado do monitoramento foi alterado."));
+    const p=shell("guardiao","O guardião da floresta desperta em uma sequência visual de seis segundos. Uma representação artística, sem relação com alertas reais.");
+    const scene=el("div",{class:"st-egg-guardian st-egg-animate",role:"img","aria-label":"Animação: luz da lua ilumina a selva, o guardião abre os olhos e observa o rio."});
+    add(scene,
+      el("div",{class:"st-egg-stars"}),
+      el("div",{class:"st-egg-moon"}),
+      el("div",{class:"st-egg-tree-back"}),
+      el("div",{class:"st-egg-guardian-face"}),
+      el("div",{class:"st-egg-eyes"}),
+      el("div",{class:"st-egg-tree-front"}),
+      el("div",{class:"st-egg-river"}),
+      el("div",{class:"st-egg-beam"}),
+      el("div",{class:"st-egg-guardian-title"},"O SENTINELA DESPERTOU"));
+    const replay=el("button",{class:"st-egg-action",type:"button"},"↻ Repetir animação");
+    const status=el("p",{class:"st-egg-muted",role:"status"},"O guardião está despertando.");
+    const start=()=>{
+      scene.classList.remove("st-egg-animate");
+      void scene.offsetWidth; // reinicia as animações CSS de forma determinística
+      scene.classList.add("st-egg-animate");
+      status.textContent="A animação foi reiniciada. Observe os olhos e a luz na floresta.";
+    };
+    replay.addEventListener("click",start);
+    add(p,scene,replay,status,
+      el("p",{class:"st-egg-quote"},"“Observar para compreender. Compreender para proteger.”"),
+      el("p",{class:"st-egg-muted"},"Cena ilustrativa, sem leitura de sensores e sem afetar o mapa ou os alertas."));
   }
-  function forest(){
-    const p=shell("floresta","Uma paisagem sonora sintetizada de chuva, brisa e canto de aves. Não se trata de gravação real da fauna amazônica.");
-    const art=el("div",{class:"st-egg-forest",role:"img","aria-label":"Ilustração abstrata de copa de árvores e chuva."});
+    function forest(){
+    const p=shell("floresta","Uma experiência sonora com duas opções: paisagem sintética local ou reprodução oficial de um vídeo do YouTube indicado para o projeto.");
+    const art=el("div",{class:"st-egg-forest",role:"img","aria-label":"Ilustração de uma floresta sob chuva fina."});
     add(art,el("div",{class:"st-egg-forest-rain"}),el("div",{class:"st-egg-forest-trees"}));
-    const btn=el("button",{class:"st-egg-action",type:"button"},"▶ Ouvir a floresta");
-    const status=el("p",{class:"st-egg-muted",role:"status"},"Áudio desligado por padrão.");
-    add(p,art,btn,status);
+    const buttons=el("div",{class:"st-egg-actions"});
+    const btn=el("button",{class:"st-egg-action",type:"button"},"▶ Sons sintetizados");
+    const youtube=el("button",{class:"st-egg-action st-egg-youtube",type:"button"},"▶ Ouvir vídeo do YouTube");
+    add(buttons,btn,youtube);
+    const playerHolder=el("div",{class:"st-egg-media-slot"});
+    const status=el("p",{class:"st-egg-muted",role:"status"},"O áudio inicia somente após você escolher uma fonte.");
+    const external=el("a",{href:"https://www.youtube.com/watch?v=DNwvIQEXHP4",target:"_blank",rel:"noopener noreferrer",class:"st-egg-source-link"},"Abrir o vídeo original no YouTube ↗");
+    add(p,art,buttons,playerHolder,status,external,
+      el("p",{class:"st-egg-muted"},"Reprodução por incorporação oficial do YouTube. Se o criador tiver desativado a incorporação ou seu navegador bloquear o player, utilize o link externo. Nenhum áudio do vídeo é copiado para o servidor. Ao ativar o vídeo, a plataforma poderá receber dados de acesso."));
     let playing=false;
+    const stopSynth=()=>{
+      if(stopSound){stopSound();stopSound=null;}
+      playing=false;btn.textContent="▶ Sons sintetizados";
+    };
+    const stopYoutube=()=>{playerHolder.replaceChildren();youtube.textContent="▶ Ouvir vídeo do YouTube";};
     btn.addEventListener("click",()=>{
-      if(playing){
-        if(stopSound) stopSound();
-        stopSound=null;playing=false;btn.textContent="▶ Ouvir a floresta";status.textContent="Áudio encerrado.";return;
-      }
+      if(playing){stopSynth();status.textContent="Sons sintetizados encerrados.";return;}
+      stopYoutube();
       try{
         const AudioContextType=window.AudioContext||window.webkitAudioContext;
-        if(!AudioContextType)throw Error("Áudio não suportado neste navegador.");
+        if(!AudioContextType)throw Error("Áudio indisponível neste navegador.");
         const ctx=new AudioContextType();
         const len=Math.round(ctx.sampleRate*2);
         const buffer=ctx.createBuffer(1,len,ctx.sampleRate);
         const data=buffer.getChannelData(0);
-        for(let i=0;i<len;i++) data[i]=(Math.random()*2-1)*.36;
+        for(let i=0;i<len;i++)data[i]=(Math.random()*2-1)*.36;
         const rain=ctx.createBufferSource();rain.buffer=buffer;rain.loop=true;
         const filter=ctx.createBiquadFilter();filter.type="lowpass";filter.frequency.value=950;
         const gain=ctx.createGain();gain.gain.value=.055;
         rain.connect(filter);filter.connect(gain);gain.connect(ctx.destination);rain.start();
-        let active=true;const interval=window.setInterval(()=>{
+        let active=true;
+        const interval=window.setInterval(()=>{
           if(!active)return;
           const osc=ctx.createOscillator(),g=ctx.createGain();
           osc.type="sine";osc.frequency.setValueAtTime(900+Math.random()*350,ctx.currentTime);
@@ -104,81 +132,95 @@
         },2400);
         stopSound=()=>{if(!active)return;active=false;clearInterval(interval);try{rain.stop();}catch{}void ctx.close();};
         void ctx.resume();
-        playing=true;btn.textContent="■ Parar sons";status.textContent="Chuva e aves sintetizadas em execução. O volume é reduzido.";
-      }catch(error){status.textContent="Não foi possível ativar o áudio: "+error.message;}
+        playing=true;btn.textContent="■ Parar sons sintetizados";
+        status.textContent="Chuva e aves sintetizadas em execução.";
+      }catch(error){status.textContent="Falha ao ativar sons sintéticos: "+error.message;}
     });
-  }
-  function terminal(){
-    const p=shell("terminal","Um terminal de exploração fictício e somente leitura. Seus comandos não executam ações reais no Sentinela.");
-    const consoleBox=el("div",{class:"st-egg-console",role:"log","aria-label":"Saída do terminal"});
-    const intro=el("pre",{},"SENTINELA / TAPAJÓS\nTerminal educacional · somente leitura\nDigite AJUDA para ver comandos.\n");
-    consoleBox.append(intro);
-    const form=el("form",{class:"st-egg-console-form"});
-    const inp=el("input",{type:"text",placeholder:"Digite um comando...",autocomplete:"off",autocapitalize:"characters","aria-label":"Comando do terminal",maxlength:"32"});
-    add(form,inp,el("button",{type:"submit"},"Enviar"));add(p,consoleBox,form);
-    const responses={
-      AJUDA:"AJUDA · FLORESTA · FONTES · TEMPO · DOOM · CREDITOS · LIMPAR · SAIR",
-      FLORESTA:"A Amazônia abriga ecossistemas diversos. Consulte dados ambientais nas camadas oficiais do painel.",
-      FONTES:"INPE, serviços meteorológicos e redes de qualidade do ar. Consulte sempre a origem, a data e a cobertura de cada leitura.",
-      TEMPO:"Portal do Tempo disponível em /__egg/test. Mapas históricos verificáveis devem ser consultados no MapBiomas.",
-      DOOM:"O DOOM está em uma experiência de teste separada. Este terminal não executa programas externos.",
-      CREDITOS:"Sentinela Tapajós — monitoramento ambiental. Easter eggs experimentais e não operacionais.",
-      SAIR:"Encerrando terminal."
-    };
-    form.addEventListener("submit",e=>{
-      e.preventDefault();
-      const raw=inp.value.trim().slice(0,32);
-      const cmd=raw.toLocaleUpperCase("pt-BR");inp.value="";
-      if(!cmd)return;
-      if(cmd==="SAIR"){dismiss();return;}
-      if(cmd==="LIMPAR"){clearChildren(consoleBox);return;}
-      add(consoleBox,el("pre",{},"> "+raw+"\n"+(responses[cmd]||"Comando desconhecido. Digite AJUDA.")+"\n"));
-      consoleBox.scrollTop=consoleBox.scrollHeight;
-    });
-    inp.focus();
-  }
-  function timePortal(){
-    const p=shell("tempo","Compare períodos históricos usando as camadas anuais oficiais do MapBiomas. A prévia não inventa mapas nem valores de desmatamento.");
-    const info=el("p",{class:"st-egg-muted"},"Série anual de cobertura e uso da terra do MapBiomas, 1985–2025. Os mapas são abertos no site da fonte e podem exigir a escolha da região.");
-    const line=el("div",{class:"st-egg-time-grid"});
-    const yearControl=(label,year)=>{
-      const group=el("label",{class:"st-egg-year-control"});
-      const title=el("strong",{},label);
-      const value=el("output",{},String(year));
-      const slider=el("input",{type:"range",min:"1985",max:"2025",step:"1",value:String(year),"aria-label":label});
-      slider.addEventListener("input",()=>{value.textContent=slider.value;});
-      add(group,title,value,slider);
-      return {group,slider};
-    };
-    const old=yearControl("Período A",1985), current=yearControl("Período B",2025);
-    add(line,old.group,current.group);
-    const note=el("p",{class:"st-egg-muted"},"Clique nos links abaixo para ver cada período na plataforma oficial. Não são imagens locais armazenadas no aplicativo.");
-    const actions=el("div",{class:"st-egg-actions"});
-    const a=el("a",{href:"https://plataforma.mapbiomas.org/",target:"_blank",rel:"noopener noreferrer"},"Abrir mapa A ↗");
-    const b=el("a",{href:"https://plataforma.mapbiomas.org/",target:"_blank",rel:"noopener noreferrer"},"Abrir mapa B ↗");
-    const update=()=>{
-      for(const [link,year] of [[a,old.slider.value],[b,current.slider.value]]){
-        const u=new URL("https://plataforma.brasil.mapbiomas.org/cobertura");
-        u.searchParams.set("activeModule","coverage");u.searchParams.set("activeYear",year);
-        u.searchParams.set("mapPosition","-4.2637,-55.9916,9");
-        link.href=u.toString();link.textContent="Abrir "+(link===a?"A":"B")+" ("+year+") ↗";
+    youtube.addEventListener("click",()=>{
+      if(playerHolder.querySelector("iframe")){
+        stopYoutube();status.textContent="Vídeo encerrado.";return;
       }
-    };
-    old.slider.addEventListener("input",update);current.slider.addEventListener("input",update);update();
-    add(actions,a,b);
-    add(p,info,line,actions,note,el("p",{class:"st-egg-muted"},"Fonte: MapBiomas Brasil, coleção anual de cobertura e uso da terra. Não corresponde a detecções de incêndio em tempo real."));
+      stopSynth();
+      const frame=el("iframe",{
+        title:"A Floresta Fala — vídeo indicado no YouTube",
+        src:"https://www.youtube-nocookie.com/embed/DNwvIQEXHP4?autoplay=1&rel=0",
+        loading:"eager",
+        allow:"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+        referrerpolicy:"strict-origin-when-cross-origin",
+        allowfullscreen:""
+      });
+      playerHolder.append(frame);
+      youtube.textContent="■ Fechar vídeo";
+      status.textContent="O player oficial do YouTube foi solicitado. Pressione Play no vídeo se a reprodução automática for bloqueada.";
+    });
   }
-  function creator(){
-    const p=shell("criador","Os bastidores e a razão de existir do projeto.");
+    function diary(){
+    const p=shell("diario","Um caderno de referências para conhecer o Tapajós ao longo dos séculos. São notas históricas resumidas e documentadas, não diários originais de exploradores.");
+    const index=el("div",{class:"st-egg-diary-index"});
+    const notes=[
+      {
+        time:"Antes da colonização",
+        title:"O Tapajós já tinha história",
+        body:"A região do Tapajós abrigava sociedades indígenas com redes de troca, produção de cerâmica e conhecimentos sobre seus territórios. Os registros arqueológicos revelam trajetórias muito anteriores às expedições europeias.",
+        source:"Arquivo Nacional · A região do Tapajós",
+        url:"https://exposicoesvirtuais.an.gov.br/index.php/galerias/117-exposicoes/trajet%C3%B3ria-de-uma-cole%C3%A7%C3%A3o-a-arte-da-cer%C3%A2mica-tapaj%C3%B3/saiba-mais/390-a-regi%C3%A3o-do-tapaj%C3%B3s.html"
+      },
+      {
+        time:"1661",
+        title:"A antiga Aldeia dos Tapajós",
+        body:"No século XVII, uma missão jesuítica foi instalada na Aldeia dos Tapajós, região que originou Santarém. A história do lugar inclui a presença e a resistência dos povos indígenas, não apenas a formação da cidade colonial.",
+        source:"Prefeitura de Santarém · História de Santarém",
+        url:"https://turismo.santarem.pa.gov.br/historia-de-santarem"
+      },
+      {
+        time:"1875",
+        title:"Um livro sobre o rio",
+        body:"O naturalista João Barbosa Rodrigues publicou 'Exploração e estudo do valle do Amazonas: Rio Tapajós'. A obra histórica foi digitalizada pela Biblioteca Brasiliana da USP e pode ser consultada em domínio público.",
+        source:"Biblioteca Brasiliana USP · Exploração e estudo do valle do Amazonas",
+        url:"https://digital.bbm.usp.br/handle/bbm/4449"
+      },
+      {
+        time:"1986",
+        title:"Expedição científica ao Tapajós",
+        body:"Uma expedição de novembro a dezembro de 1986 documentou prospecções no Tapajós, incluindo Itaituba, Fordlândia e Rurópolis. O relatório técnico está disponível no acervo da Embrapa.",
+        source:"Embrapa · Expedição aos rios Xingu e Tapajós",
+        url:"https://www.infoteca.cnptia.embrapa.br/bitstream/doc/385792/3/CPATUDoc99.pdf"
+      }
+    ];
+    notes.forEach((note,i)=>{
+      const item=el("details",{class:"st-egg-diary-entry"});
+      if(i===0)item.open=true;
+      const summary=el("summary",{},note.time+" · "+note.title);
+      const desc=el("p",{},note.body);
+      const link=el("a",{href:note.url,target:"_blank",rel:"noopener noreferrer"},note.source+" ↗");
+      add(item,summary,desc,link);index.append(item);
+    });
+    add(p,el("p",{class:"st-egg-muted"},"Páginas selecionadas sobre história, culturas e pesquisa no Tapajós. As referências são abertas em seus portais de origem."),index,
+      el("p",{class:"st-egg-muted"},"O caderno não substitui consultas a fontes primárias nem transforma os registros históricos em dados ambientais atuais."));
+  }
+    function creator(){
+    const p=shell("criador","Registro reservado — Sentinela Tapajós");
     const art=el("div",{class:"st-egg-credits-art","aria-hidden":"true"},"SENTINELA\nTAPAJÓS");
-    const text=el("blockquote",{class:"st-egg-quote"},"“A informação ambiental só protege quando pode ser compreendida, conferida e utilizada.”");
-    add(p,art,text,el("p",{},"O Sentinela Tapajós reúne referências de monitoramento ambiental para facilitar a leitura de acontecimentos na Amazônia e, futuramente, em outras regiões do Brasil."),
-      el("p",{class:"st-egg-muted"},"Uma iniciativa em desenvolvimento. Dados oficiais, estimativas e visualizações devem continuar identificados por origem, validade e limitações."),
-      el("p",{class:"st-egg-muted"},"Agradecimento a quem estuda, protege e cuida das florestas e dos rios. Esta mensagem não integra boletins ou alertas operacionais."));
+    const letter=el("article",{class:"st-egg-creator-letter"});
+    add(letter,el("h3",{},"UMA MENSAGEM DO CRIADOR"),
+      el("p",{class:"st-egg-creator-subtitle"},"Registro reservado — Sentinela Tapajós"),
+      el("p",{},"“Há lugares no mundo que não precisam de mais olhos. Precisam de pessoas que realmente enxerguem."),
+      el("p",{},"A Amazônia respira, muda, sofre e resiste. Cada rio carrega uma história. Cada árvore sustenta uma vida. Cada sinal no horizonte pode revelar algo que merece nossa atenção."),
+      el("p",{},"O Sentinela nasceu de uma ideia simples: não podemos proteger aquilo que não conhecemos, nem cuidar daquilo que escolhemos ignorar."),
+      el("p",{},"Este projeto não foi criado apenas para reunir mapas, satélites e informações. Foi criado para transformar dados em consciência e observação em responsabilidade."),
+      el("p",{},"A tecnologia pode ampliar nossa visão. Mas somente o ser humano pode decidir o que fazer com aquilo que vê."),
+      el("p",{},"Se você encontrou esta mensagem, descobriu algo que não aparece nos mapas:"));
+    add(letter,el("strong",{class:"st-egg-creator-emphasis"},"O verdadeiro Sentinela não é o sistema. É quem está diante dele."));
+    add(letter,el("p",{},"Continue observando."),
+      el("p",{},"A floresta ainda tem muito a nos contar.”"),
+      el("p",{class:"st-egg-creator-signature"},"— O Criador"),
+      el("strong",{class:"st-egg-creator-brand"},"SENTINELA TAPAJÓS"),
+      el("p",{class:"st-egg-creator-motto"},"Vigiar para conhecer. Conhecer para proteger."));
+    add(p,art,letter);
   }
-  const actions={guardiao:guardian,floresta:forest,terminal:terminal,tempo:timePortal,criador:creator};
+  const actions={guardiao:guardian,floresta:forest,diario:diary,criador:creator};
   function open(id){if(VALID.has(id))actions[id]();}
-  // Atalhos são discretos; o endereço /__egg/test permite validar todos.
+    // Atalhos são discretos; o endereço /__egg/test permite validar todos.
   function advance(id, threshold){
     const now=Date.now();
     const previous=counts.get(id)||{n:0,at:0};
@@ -188,32 +230,23 @@
   }
   const isEditable=t=>Boolean(t.closest?.('input,textarea,select,[contenteditable="true"],[role="textbox"]'));
   document.addEventListener("keydown",e=>{
-    if(e.key==="Escape"&&overlay){dismiss();return;}
-    if(overlay||isEditable(e.target)||e.metaKey||e.ctrlKey||e.altKey||e.key.length!==1)return;
-    const now=Date.now(); if(now-keyAt>2600) keyBuffer="";
-    keyBuffer=(keyBuffer+e.key.toUpperCase()).slice(-16);keyAt=now;
-    if(keyBuffer.endsWith("SENTINELA")){keyBuffer="";open("terminal");}
+    if(e.key==="Escape"&&overlay){dismiss();}
   });
-  function logoTarget(t){
-    const candidate=t.closest?.('button,a,strong,b,span,h1,h2,[aria-label],img');
+    function logoTarget(t){
+    if(!t?.closest)return false;
+    // Não depender apenas do texto clicado: SVGs/logotipos aninhados não expõem o texto.
+    if(t.closest('#sentinela-symbol,.brand-mark,[class*="brand-mark"],[aria-label*="Sentinela"],[aria-label*="SENTINELA"]'))return true;
+    const candidate=t.closest('button,a,strong,b,span,h1,h2,[aria-label],img,div');
     if(!candidate)return false;
-    const text=(candidate.getAttribute("aria-label")||candidate.getAttribute("alt")||candidate.textContent||"").replace(/\s+/g," ").toUpperCase().trim();
-    if(text.length>70)return false;
-    return text==="ST"||text==="SENTINELA TAPAJÓS"||text==="SENTINELA"||text.includes("LOGO SENTINELA");
-  }
-  function dateTarget(t){
-    const node=t.closest?.('time,[datetime],small,span');
-    if(!node)return false;
-    const s=(node.textContent||"").trim();
-    return s.length<=45 && (/\b\d{1,2}\s+de\s+[a-zç]+\b/i.test(s)||/\b\d{2}\/\d{2}\/\d{4}\b/.test(s));
+    const label=(candidate.getAttribute("aria-label")||candidate.getAttribute("alt")||candidate.textContent||"").replace(/\s+/g," ").toUpperCase().trim();
+    return label==="ST"||label==="SENTINELA TAPAJÓS"||label==="SENTINELA";
   }
   document.addEventListener("click",e=>{
     if(overlay||e.target.closest?.("#st-eggs-root"))return;
-    if(dateTarget(e.target)){advance("tempo",5);return;}
     if(e.target.closest?.("footer")&&(e.target.textContent||"").length<100){advance("criador",3);return;}
     if(logoTarget(e.target)){advance("guardiao",7);}
   },true);
-  document.addEventListener("pointerdown",e=>{
+    document.addEventListener("pointerdown",e=>{
     if(overlay||!logoTarget(e.target))return;
     const target=e.target;
     heldTimer=window.setTimeout(()=>{if(!overlay)open("floresta");heldTimer=null;},5000);
