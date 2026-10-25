@@ -75,15 +75,46 @@
     const replay=el("button",{class:"st-egg-action",type:"button"},"↻ Repetir animação");
     const status=el("p",{class:"st-egg-muted",role:"status"},"O guardião está despertando.");
     const start=()=>{
-      scene.classList.remove("st-egg-animate");
-      void scene.offsetWidth; // reinicia as animações CSS de forma determinística
-      scene.classList.add("st-egg-animate");
-      status.textContent="A animação foi reiniciada. Observe os olhos e a luz na floresta.";
+      scene.querySelectorAll(".st-egg-moon,.st-egg-eyes,.st-egg-river,.st-egg-beam,.st-egg-guardian-title")
+        .forEach(node=>{
+          node.getAnimations().forEach(animation=>animation.cancel());
+          node.style.setProperty("animation","none","important");
+        });
+      const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      const effects=[
+        [".st-egg-moon",[{opacity:0.15,transform:"translateY(45px) scale(.65)"},{offset:.42,opacity:1,transform:"translateY(0) scale(1)"},{opacity:1,transform:"translateY(0) scale(1)"}]],
+        [".st-egg-eyes",[
+          {offset:0,opacity:0,transform:"translateX(-50%) scaleY(.04)"},
+          {offset:.3,opacity:0,transform:"translateX(-50%) scaleY(.04)"},
+          {offset:.42,opacity:1,transform:"translateX(-50%) scaleY(1)"},
+          {offset:.55,opacity:1,transform:"translateX(-50%) scaleY(1)"},
+          {offset:.57,opacity:1,transform:"translateX(-50%) scaleY(.08)"},
+          {offset:.6,opacity:1,transform:"translateX(-50%) scaleY(1)"},
+          {offset:1,opacity:1,transform:"translateX(-50%) scaleY(1)"}
+        ]],
+        [".st-egg-river",[{opacity:0,backgroundPosition:"0px 0px"},{offset:.4,opacity:.6,backgroundPosition:"50px 0px"},{opacity:.9,backgroundPosition:"120px 0px"}]],
+        [".st-egg-beam",[{opacity:0,transform:"translateX(-50%) scaleX(.1)"},{offset:.28,opacity:0,transform:"translateX(-50%) scaleX(.1)"},{offset:.53,opacity:.9,transform:"translateX(-50%) scaleX(1.6)"},{opacity:.24,transform:"translateX(-50%) scaleX(1)"}]],
+        [".st-egg-guardian-title",[{opacity:0,transform:"translateY(24px)"},{offset:.58,opacity:0,transform:"translateY(24px)"},{offset:.79,opacity:1,transform:"translateY(0)"},{opacity:1,transform:"translateY(0)"}]]
+      ];
+      for(const [selector,frames] of effects){
+        const node=scene.querySelector(selector);
+        if(!node)continue;
+        if(reduced||typeof node.animate!=="function"){
+          const last=frames[frames.length-1];
+          for(const [name,value] of Object.entries(last)){
+            if(name!=="offset")node.style[name]=value;
+          }
+        }else{
+          node.animate(frames,{duration:6500,easing:"ease-in-out",fill:"forwards"});
+        }
+      }
+      status.textContent="Animação iniciada. A lua se eleva, os olhos despertam e o título aparece.";
     };
     replay.addEventListener("click",start);
     add(p,scene,replay,status,
       el("p",{class:"st-egg-quote"},"“Observar para compreender. Compreender para proteger.”"),
       el("p",{class:"st-egg-muted"},"Cena ilustrativa, sem leitura de sensores e sem afetar o mapa ou os alertas."));
+    start();
   }
     function forest(){
     const p=shell("floresta","Uma experiência sonora com duas opções: paisagem sintética local ou reprodução oficial de um vídeo do YouTube indicado para o projeto.");
