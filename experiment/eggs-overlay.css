@@ -189,3 +189,14 @@
  .st-diary-tab-controls{gap:4px}
  .st-diary-tab-controls a,.st-diary-tab-controls button{font-size:10px;padding:7px}
 }
+
+/* A camada de campo legada do site original usa um contexto de sobreposição
+   agressivo. As interfaces da prévia devem permanecer sobre ela. */
+#st-eggs-root,
+#st-eggs-root .st-egg-backdrop,
+.st-diary-tab-panel:not([hidden]){
+  z-index:2147483647!important;
+}
+.st-diary-tab-panel:not([hidden]){
+  pointer-events:auto!important;
+}
