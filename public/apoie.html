@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14382c">
+  <meta name="description" content="Apoie voluntariamente o desenvolvimento do Sentinela Tapajós.">
+  <title>Apoie o Sentinela | Sentinela Tapajós</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/apoie.css">
+</head>
+<body class="support-page">
+  <a class="skip" href="#conteudo">Ir ao conteúdo</a>
+  <header class="support-header">
+    <a class="support-back" href="/#visao" aria-label="Voltar ao painel ambiental">← Voltar ao mapa</a>
+    <div class="support-brand"><span class="support-emblem">ST</span><span>SENTINELA TAPAJÓS</span></div>
+  </header>
+  <main id="conteudo" class="support-main">
+    <div class="support-eyebrow">Projeto independente · contribuição voluntária</div>
+    <h1>Apoie o Sentinela</h1>
+    <p class="support-lead">Nosso propósito é tornar o monitoramento ambiental mais acessível. Contribuições voluntárias podem ajudar a custear hospedagem, fontes de dados e melhorias da plataforma.</p>
+    <div class="support-grid">
+      <section class="panel support-card" aria-labelledby="titulo-pix">
+        <div class="support-section-label">PIX EMPRESARIAL · CNPJ</div>
+        <h2 id="titulo-pix">Contribua, se desejar</h2>
+        <p>O acesso aos mapas, informações e alertas públicos não depende de contribuição. Não são oferecidos recursos extras ou vantagens aos apoiadores.</p>
+        <div class="support-status" role="status" aria-live="polite" id="apoio-status">Verificando disponibilidade da contribuição…</div>
+        <div id="apoio-dados" hidden>
+          <div class="support-detail"><span>Favorecido informado pelo projeto</span><strong id="apoio-beneficiario"></strong></div>
+          <div class="support-detail"><span>Chave Pix CNPJ</span><strong id="apoio-cnpj"></strong></div>
+          <button id="apoio-copiar" class="support-copy" type="button">Copiar chave Pix</button>
+          <p class="support-small">Abra seu aplicativo bancário, cole a chave e defina livremente o valor. Antes de confirmar, verifique se o favorecido exibido pelo banco corresponde ao esperado. O Sentinela não solicita comprovantes nem dados financeiros.</p>
+        </div>
+        <div id="apoio-pendente" class="support-pending">
+          <strong>Pagamentos desativados nesta prévia</strong>
+          <p>A chave CNPJ, o nome empresarial e a habilitação do Pix ainda não foram configurados. Nenhum QR Code ou transferência é gerado.</p>
+        </div>
+      </section>
+      <aside class="panel support-aside">
+        <h2>Como o apoio pode ajudar</h2>
+        <ul>
+          <li>Manutenção da infraestrutura e da coleta de dados.</li>
+          <li>Melhorias da experiência em celulares.</li>
+          <li>Evolução das camadas ambientais e do histórico.</li>
+        </ul>
+        <p>Esta é uma contribuição ao desenvolvimento de um aplicativo independente, não uma campanha de beneficência ou arrecadação oficial. Não há promessa de dedução fiscal.</p>
+        <a href="/#metodo">Conheça as fontes e limitações do projeto</a>
+      </aside>
+    </div>
+    <p class="support-footer">Sentinela Tapajós · O painel principal permanece gratuito e independente desta página.</p>
+  </main>
+  <script type="module" src="/apoie.js"></script>
+</body>
+</html>
