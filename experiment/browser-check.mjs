@@ -92,23 +92,39 @@ try {
       if(id==="criador"){
         const letter=page.locator(".st-egg-creator-letter");
         const value=await letter.innerText();
-        for(const text of [
+        for(const fragment of [
           "UMA MENSAGEM DO CRIADOR",
           "Registro reservado — Sentinela Tapajós",
           "Há lugares no mundo que não precisam de mais olhos. Precisam de pessoas que realmente enxerguem.",
-          "A Amazônia respira, muda, sofre e resiste.",
-          "O Sentinela nasceu de uma ideia simples:",
-          "Este projeto não foi criado apenas para reunir mapas, satélites e informações.",
-          "A tecnologia pode ampliar nossa visão.",
+          "A Amazônia respira, muda, sofre e resiste. Cada rio carrega uma história.",
+          "não podemos proteger aquilo que não conhecemos, nem cuidar daquilo que escolhemos ignorar.",
+          "Foi criado para transformar dados em consciência, conhecimento em responsabilidade e observação em atitudes que façam a diferença.",
+          "A tecnologia pode ampliar nossa visão, revelar o que está distante e nos ajudar a compreender o que antes parecia invisível.",
+          "E, por trás de cada ideia, de cada desafio superado e de cada passo desta jornada, existe algo ainda maior.",
+          "Minha primeira e mais profunda gratidão é a Deus.",
+          "A Ele, Criador dos céus, da terra, dos rios e das florestas, agradeço pela vida, pela sabedoria concedida, pela força nos momentos difíceis",
+          "Ao contemplar a imensidão da Amazônia, é impossível não reconhecer a grandeza de Sua criação.",
+          "Que este projeto seja também uma expressão de gratidão a Deus",
+          "Agradeço igualmente a todos que, de alguma forma, contribuíram para que esta ideia ganhasse vida",
+          "Que todo conhecimento nos torne mais humildes, toda descoberta nos torne mais conscientes e toda capacidade recebida seja utilizada para fazer o bem.",
+          "Do Senhor é a terra e tudo o que nela existe, o mundo e os que nele vivem.",
+          "— Salmos 24:1",
           "Se você encontrou esta mensagem, descobriu algo que não aparece nos mapas:",
           "O verdadeiro Sentinela não é o sistema. É quem está diante dele.",
+          "Porque proteger não é apenas observar o que acontece. É reconhecer o valor daquilo que nos foi confiado.",
           "Continue observando.",
           "A floresta ainda tem muito a nos contar.",
+          "E que, acima de tudo, Deus seja glorificado em cada boa obra realizada.",
           "— O Criador",
           "SENTINELA TAPAJÓS",
           "Vigiar para conhecer. Conhecer para proteger."
-        ])assert.ok(value.includes(text),"faltou trecho da carta: "+text);
-        assert.equal(await letter.locator(".st-egg-creator-emphasis").count(),1);
+        ])assert.ok(value.includes(fragment),"faltou trecho da mensagem: "+fragment);
+        assert.equal(await letter.locator(".st-egg-creator-emphasis").count(),2);
+        assert.equal(await letter.locator(".st-egg-creator-affirmation").count(),1);
+        assert.equal(await letter.locator(".st-egg-creator-scripture em").count(),1);
+        assert.equal(await letter.locator(".st-egg-creator-scripture cite").count(),1);
+        assert.equal(await letter.locator(".st-egg-creator-divider").count(),1);
+        await page.screenshot({path:"artifacts/eggs-preview/mensagem-criador-atualizada.png",fullPage:false});
       }
       await page.locator(".st-egg-close").click();
       assert.equal(await page.locator(".st-egg-dialog").count(),0);
