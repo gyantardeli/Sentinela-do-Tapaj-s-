@@ -84,10 +84,18 @@ try {
         assert.equal(await frame.count(),0);
       }
       if(id==="diario"){
-        assert.equal(await page.locator(".st-egg-diary-entry").count(),4);
-        assert.equal(await page.locator('.st-egg-diary-entry a[href^="https://"]').count(),4);
-        assert.match(await page.locator(".st-egg-diary-index").innerText(),/1875/);
-        await page.locator(".st-egg-diary-entry").nth(2).locator("summary").click();
+        const iframe=page.locator(".st-egg-diary-frame");
+        assert.equal(await iframe.count(),1);
+        assert.match(await iframe.getAttribute("src"),/\/__egg\/diario/);
+        const diary=page.frameLocator(".st-egg-diary-frame");
+        await diary.locator(".tab-page").first().waitFor({timeout:14000});
+        assert.equal(await diary.locator(".tab-page").count(),8);
+        assert.match(await diary.locator("#meta-numero").innerText(),/PÁGINA 1 DE 8/);
+        await diary.locator(".tab-page").nth(7).click();
+        assert.match(await diary.locator("#meta-numero").innerText(),/PÁGINA 8 DE 8/);
+        await diary.locator("#all-sources").click();
+        assert.equal(await diary.locator("#bibliography-content a").count(),24);
+        await diary.locator("#close-bib").click();
       }
       if(id==="criador"){
         const letter=page.locator(".st-egg-creator-letter");
@@ -140,7 +148,9 @@ try {
     await harpy.dispatchEvent("click");
     await page.locator(".st-egg-dialog").waitFor({timeout:6000});
     assert.match(await page.locator("#st-egg-heading").innerText(),/Diário do Explorador/);
-    assert.equal(await page.locator(".st-egg-diary-entry").count(),4);
+    const diary=page.frameLocator(".st-egg-diary-frame");
+    await diary.locator(".tab-page").first().waitFor({timeout:14000});
+    assert.equal(await diary.locator(".tab-page").count(),8);
     await page.screenshot({path:"artifacts/eggs-preview/diario-harpia-sete-toques.png"});
     await page.locator(".st-egg-close").click();
   });
