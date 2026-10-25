@@ -71,3 +71,41 @@
 #st-eggs-root .st-egg-creator-motto{text-align:center;font-style:italic!important;color:#c1e1af!important}
 @media(max-width:600px){#st-eggs-root .st-egg-guardian{height:245px;min-height:245px}#st-eggs-root .st-egg-media-slot{width:100%}}
 @media(prefers-reduced-motion:reduce){#st-eggs-root .st-egg-animate .st-egg-moon,#st-eggs-root .st-egg-animate .st-egg-eyes,#st-eggs-root .st-egg-animate .st-egg-river,#st-eggs-root .st-egg-animate .st-egg-beam,#st-eggs-root .st-egg-animate .st-egg-guardian-title{animation:none!important}#st-eggs-root .st-egg-eyes,#st-eggs-root .st-egg-guardian-title{opacity:1!important}}
+
+/* Mensagem do Criador — gratidão, escritura e assinatura preservadas */
+#st-eggs-root .st-egg-creator-letter .st-egg-creator-affirmation{
+  display:block;
+  color:#e9f6d7;
+  font-size:clamp(16px,2.6vw,19px);
+  line-height:1.7;
+  margin:22px 0;
+  font-weight:760;
+}
+#st-eggs-root .st-egg-creator-scripture{
+  margin:26px auto;
+  padding:18px 22px;
+  background:rgba(8,30,21,.65);
+  border-left:3px solid #aacd88;
+  border-radius:4px 12px 12px 4px;
+  color:#dceccc;
+  font-size:clamp(15px,2.6vw,18px);
+  line-height:1.75;
+}
+#st-eggs-root .st-egg-creator-scripture em{
+  display:block;
+  font-style:italic;
+}
+#st-eggs-root .st-egg-creator-scripture cite{
+  display:block;
+  font-style:normal;
+  text-align:right;
+  color:#b8d3af;
+  margin-top:9px;
+  font-size:13px;
+}
+#st-eggs-root .st-egg-creator-divider{
+  border:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#719c79,transparent);
+  margin:24px 0;
+}
