@@ -37,6 +37,12 @@ try {
     assert.equal(report.environment.scriptInjected,1);
     assert.equal(await page.locator(".st-egg-dialog").count(),0);
     await page.screenshot({path:"artifacts/eggs-preview/painel-v2.png",fullPage:true});
+    const possibleHarpy=await page.evaluate(()=>{
+      const nodes=[...document.querySelectorAll('img,svg,[title],[aria-label],[class*="harp"],[id*="harp"],[class*="brand"],[class*="logo"]')];
+      return nodes.map((e,i)=>({i,tag:e.tagName,id:e.id||null,cls:typeof e.className==="string"?e.className.slice(0,140):"",alt:e.getAttribute("alt"),title:e.getAttribute("title"),aria:e.getAttribute("aria-label"),src:e.getAttribute("src"),text:(e.innerText||e.textContent||"").replace(/\\s+/g," ").slice(0,100)})).filter(x=>/harp|sentinela|logo|brand|ST|ave|guard/i.test(JSON.stringify(x))).slice(0,55);
+    });
+    console.log("POSSIBLE HARPY DOM:",JSON.stringify(possibleHarpy));
+    report.environment.possibleHarpy=possibleHarpy;
   });
   for(const id of IDS){
     await check(id+" abre e fecha no painel espelhado",async()=>{
