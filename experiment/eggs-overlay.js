@@ -74,7 +74,9 @@
       el("div",{class:"st-egg-guardian-title"},"O SENTINELA DESPERTOU"));
     const replay=el("button",{class:"st-egg-action",type:"button"},"↻ Repetir animação");
     const status=el("p",{class:"st-egg-muted",role:"status"},"O guardião está despertando.");
+    let sequence=0;
     const start=()=>{
+      sequence++;
       scene.querySelectorAll(".st-egg-moon,.st-egg-eyes,.st-egg-river,.st-egg-beam,.st-egg-guardian-title")
         .forEach(node=>{
           node.getAnimations().forEach(animation=>animation.cancel());
@@ -108,7 +110,7 @@
           node.animate(frames,{duration:6500,easing:"ease-in-out",fill:"forwards"});
         }
       }
-      status.textContent="Animação iniciada. A lua se eleva, os olhos despertam e o título aparece.";
+      status.textContent=(sequence===1?"Animação iniciada.":"Animação reiniciada.")+" A lua se eleva, os olhos despertam e o título aparece.";
     };
     replay.addEventListener("click",start);
     add(p,scene,replay,status,
