@@ -161,8 +161,15 @@ try {
     await page.locator(".st-diary-tab-return").click();
     assert.equal(await tab.getAttribute("aria-pressed"),"false");
     await tab.click();
+    await page.locator("#st-diary-tab-panel:not([hidden])").waitFor({timeout:12000});
+    // A aba utiliza toda a área abaixo do cabeçalho: retorne ao mapa antes
+    // de selecionar uma aba ambiental, assim como faria o usuário.
+    await page.locator(".st-diary-tab-return").click();
     const nav=page.locator('nav[aria-label="Navegação principal"] button:not(#st-diary-tab-button)').first();
-    if(await nav.count()){await nav.click();assert.equal(await page.locator("#st-diary-tab-panel:not([hidden])").count(),0);}
+    if(await nav.count()){
+      await nav.click();
+      assert.equal(await page.locator("#st-diary-tab-panel:not([hidden])").count(),0);
+    }
   });
     await check("sete toques na harpia abrem Diário, sem abrir Guardião",async()=>{
     await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
