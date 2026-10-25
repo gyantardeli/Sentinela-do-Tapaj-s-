@@ -54,7 +54,7 @@ try {
   await page.waitForTimeout(900);
   await page.screenshot({ path: 'artifacts/doom-layout-mobile.png', fullPage: true });
   await page.locator('#stopDoom').click();
-  if (!(await status.innerText()).includes('Jogo encerrado')) throw Error('Encerramento do emulador falhou');
+  await page.waitForFunction(() => document.querySelector('#gameStatus')?.textContent?.includes('Jogo encerrado'), null, { timeout: 18000 });
   await page.locator('a.back').click();
   await page.waitForURL('http://127.0.0.1:' + port + '/');
   if (!(await page.locator('#sentinela-symbol').count())) throw Error('Painel não foi restaurado');
