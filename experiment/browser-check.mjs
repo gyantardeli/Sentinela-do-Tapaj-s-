@@ -48,6 +48,25 @@ try {
     await check(id+" abre e fecha no painel espelhado",async()=>{
       const r=await page.goto(BASE+"/?egg="+id,{waitUntil:"domcontentloaded",timeout:40000});
       assert.equal(r.status(),200);
+      if(id==="diario"){
+        await page.locator("#st-diary-tab-panel:not([hidden])").waitFor({timeout:15000});
+        assert.equal(await page.locator(".st-egg-dialog").count(),0,"Diário não deve ser modal");
+        const iframe=page.locator(".st-diary-tab-frame");
+        assert.equal(await iframe.count(),1);
+        assert.match(await iframe.getAttribute("src"),/\/__egg\/diario/);
+        const diary=page.frameLocator(".st-diary-tab-frame");
+        await diary.locator(".tab-page").first().waitFor({timeout:15000});
+        assert.equal(await diary.locator(".tab-page").count(),8);
+        await diary.locator(".tab-page").nth(7).click();
+        assert.match(await diary.locator("#meta-numero").innerText(),/PÁGINA 8 DE 8/);
+        await diary.locator("#all-sources").click();
+        assert.equal(await diary.locator("#bibliography-content a").count(),24);
+        await diary.locator("#close-bib").click();
+        await page.screenshot({path:"artifacts/eggs-preview/diario-aba.png",fullPage:false});
+        await page.locator(".st-diary-tab-return").click();
+        assert.equal(await page.locator("#st-diary-tab-panel:not([hidden])").count(),0);
+        return;
+      }
       await page.locator(".st-egg-dialog").waitFor({timeout:15000});
       assert.equal(await page.locator("h1").count()>0,true);
       assert.equal(await page.locator(".st-egg-dialog").count(),1);
@@ -82,22 +101,6 @@ try {
         await page.screenshot({path:"artifacts/eggs-preview/floresta-youtube.png",fullPage:false});
         await video.click();
         assert.equal(await frame.count(),0);
-      }
-      if(id==="diario"){
-        const debug=await page.evaluate(()=>({dialog:document.querySelector(".st-egg-dialog")?.outerHTML.slice(0,1600),scriptText:[...document.scripts].filter(s=>s.src.includes("overlay.js")).map(s=>s.src),modalClass:document.querySelector(".st-egg-dialog")?.className,scriptSources:[...document.scripts].slice(-3).map(s=>s.src),location:location.href}));
-        console.log("DIARIO DIAGNOSTICS",JSON.stringify(debug));
-        const iframe=page.locator(".st-egg-diary-frame");
-        assert.equal(await iframe.count(),1);
-        assert.match(await iframe.getAttribute("src"),/\/__egg\/diario/);
-        const diary=page.frameLocator(".st-egg-diary-frame");
-        await diary.locator(".tab-page").first().waitFor({timeout:14000});
-        assert.equal(await diary.locator(".tab-page").count(),8);
-        assert.match(await diary.locator("#meta-numero").innerText(),/PÁGINA 1 DE 8/);
-        await diary.locator(".tab-page").nth(7).click();
-        assert.match(await diary.locator("#meta-numero").innerText(),/PÁGINA 8 DE 8/);
-        await diary.locator("#all-sources").click();
-        assert.equal(await diary.locator("#bibliography-content a").count(),24);
-        await diary.locator("#close-bib").click();
       }
       if(id==="criador"){
         const letter=page.locator(".st-egg-creator-letter");
@@ -140,7 +143,23 @@ try {
       assert.equal(await page.locator(".st-egg-dialog").count(),0);
     });
   }
-  await check("sete toques na harpia abrem Diário, sem abrir Guardião",async()=>{
+  await check("aba Diário aparece no menu e abre sem segredo",async()=>{
+    await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
+    const tab=page.locator("#st-diary-tab-button");
+    await tab.waitFor({timeout:12000});
+    assert.equal(await tab.count(),1);
+    assert.match(await tab.innerText(),/Diário do Explorador/);
+    await tab.click();
+    await page.locator("#st-diary-tab-panel:not([hidden])").waitFor({timeout:12000});
+    assert.equal(await tab.getAttribute("aria-pressed"),"true");
+    assert.equal(await page.locator('main').count()>0,true);
+    await page.locator(".st-diary-tab-return").click();
+    assert.equal(await tab.getAttribute("aria-pressed"),"false");
+    await tab.click();
+    const nav=page.locator('nav[aria-label="Navegação principal"] button:not(#st-diary-tab-button)').first();
+    if(await nav.count()){await nav.click();assert.equal(await page.locator("#st-diary-tab-panel:not([hidden])").count(),0);}
+  });
+    await check("sete toques na harpia abrem Diário, sem abrir Guardião",async()=>{
     await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
     await page.waitForTimeout(900);
     const harpy=page.locator('a.brand .brand-mark img[src$="/branding/mark.svg"]').first();
@@ -148,13 +167,13 @@ try {
     for(let n=0;n<6;n++)await harpy.dispatchEvent("click");
     assert.equal(await page.locator(".st-egg-dialog").count(),0,"Diário abriu prematuramente");
     await harpy.dispatchEvent("click");
-    await page.locator(".st-egg-dialog").waitFor({timeout:6000});
-    assert.match(await page.locator("#st-egg-heading").innerText(),/Diário do Explorador/);
-    const diary=page.frameLocator(".st-egg-diary-frame");
-    await diary.locator(".tab-page").first().waitFor({timeout:14000});
+    await page.locator("#st-diary-tab-panel:not([hidden])").waitFor({timeout:6000});
+    assert.equal(await page.locator(".st-egg-dialog").count(),0,"O Diário não deve abrir um modal");
+    const diary=page.frameLocator(".st-diary-tab-frame");
+    await diary.locator(".tab-page").first().waitFor({timeout:15000});
     assert.equal(await diary.locator(".tab-page").count(),8);
     await page.screenshot({path:"artifacts/eggs-preview/diario-harpia-sete-toques.png"});
-    await page.locator(".st-egg-close").click();
+    await page.locator(".st-diary-tab-return").click();
   });
   await check("sete toques no nome do projeto preservam Despertar do Sentinela",async()=>{
     await page.goto(BASE+"/",{waitUntil:"domcontentloaded",timeout:40000});
