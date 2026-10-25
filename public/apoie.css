@@ -1,0 +1,24 @@
+.support-page{background:#f5f8f5;color:#213629;min-height:100vh}
+.support-header{background:#163c2f;color:#f4fff6;min-height:70px;padding:15px max(24px,calc((100vw - 1090px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px}
+.support-back{color:#d5eadc;font-size:13px;font-weight:650}.support-back:hover{color:#fff}
+.support-brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:1px;font-size:12px}
+.support-emblem{border:1px solid #89af92;border-radius:9px;display:inline-grid;place-content:center;width:32px;height:32px}
+.support-main{max-width:1100px;margin:0 auto;padding:42px 24px 60px}
+.support-eyebrow{color:#3d7a57;font-size:11px;letter-spacing:1.5px;font-weight:800;text-transform:uppercase}
+.support-main h1{font-size:clamp(29px,4vw,42px);letter-spacing:-.7px;margin:6px 0 9px;color:#173b28}
+.support-lead{font-size:15px;max-width:740px;color:#536c5b;line-height:1.75;margin:0 0 26px}
+.support-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(270px,1fr);gap:20px;align-items:start}
+.support-card,.support-aside{padding:28px}.support-card h2,.support-aside h2{font-size:19px;color:#234d36;margin:7px 0 12px}
+.support-section-label{font-size:10px;font-weight:800;color:#397a54;letter-spacing:1.2px}
+.support-card p,.support-aside p,.support-aside li{font-size:13px;color:#536b5b;line-height:1.7}
+.support-status{border:1px solid #d9e5db;padding:12px 14px;border-radius:10px;background:#f7faf8;font-size:13px;margin:19px 0}
+.support-pending{padding:14px 16px;border-left:3px solid #aebdb0;background:#f7faf7;border-radius:8px}
+.support-pending strong{font-size:13px}.support-pending p{margin:6px 0 0}
+.support-detail{display:flex;flex-direction:column;gap:4px;border-bottom:1px solid #e4ece5;padding:12px 0}
+.support-detail span{font-size:11px;color:#6f8173}.support-detail strong{overflow-wrap:anywhere;font-size:15px}
+.support-copy{margin-top:16px;border:0;border-radius:8px;background:#226442;color:white;padding:12px 16px;font-weight:750;cursor:pointer}
+.support-copy:hover{background:#184f33}.support-copy:focus-visible{outline:3px solid #75b89a;outline-offset:3px}
+.support-small{font-size:11px!important}.support-aside ul{padding-left:19px}.support-aside li{margin-bottom:9px}
+.support-aside a{font-size:12px;font-weight:700}
+.support-footer{border-top:1px solid #dbe8df;margin-top:29px;padding-top:16px;color:#7a8b80;font-size:11px}
+@media(max-width:720px){.support-grid{grid-template-columns:1fr}.support-main{padding:28px 16px 40px}.support-card,.support-aside{padding:20px}.support-brand{font-size:10px}.support-header{padding:12px 16px}}
