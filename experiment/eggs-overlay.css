@@ -109,3 +109,32 @@
   background:linear-gradient(90deg,transparent,#719c79,transparent);
   margin:24px 0;
 }
+
+/* Diário completo: caderno integrado em iframe da própria origem da prévia */
+#st-eggs-root .st-egg-dialog.st-egg-diary-dialog{
+  width:min(98vw,1520px);max-width:none;max-height:98dvh;
+  height:98dvh;display:flex;flex-direction:column;overflow:hidden;
+  padding:14px 15px 12px;border-radius:12px;
+}
+#st-eggs-root .st-egg-diary-dialog .st-egg-head{flex:0 0 auto}
+#st-eggs-root .st-egg-diary-dialog h2{margin:5px 0;font-size:22px}
+#st-eggs-root .st-egg-diary-dialog .st-egg-summary{margin:2px 0 10px;font-size:12px}
+#st-eggs-root .st-egg-diary-frame{
+  flex:1 1 auto;min-height:0;width:100%;background:#281e12;
+  border:1px solid #9d8456;border-radius:8px;display:block;
+}
+#st-eggs-root .st-egg-diary-footer{
+  flex:0 0 auto;display:flex;align-items:center;gap:12px;
+  justify-content:space-between;padding-top:8px;
+}
+#st-eggs-root .st-egg-diary-hint{font-size:11px;color:#d2dfd5}
+#st-eggs-root .st-egg-diary-external{
+  color:#e8f8da;font-size:12px;font-weight:650;text-decoration:underline;
+}
+@media(max-width:600px){
+  #st-eggs-root .st-egg-dialog.st-egg-diary-dialog{height:98dvh;max-height:98dvh;padding:10px 8px}
+  #st-eggs-root .st-egg-diary-dialog h2{font-size:19px}
+  #st-eggs-root .st-egg-diary-dialog .st-egg-summary{font-size:11px;line-height:1.25;margin:2px 0 6px}
+  #st-eggs-root .st-egg-diary-hint{display:none}
+  #st-eggs-root .st-egg-diary-footer{justify-content:flex-end}
+}
