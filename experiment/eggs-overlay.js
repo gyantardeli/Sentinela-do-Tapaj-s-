@@ -21,6 +21,7 @@
   };
   const root=el("div",{id:"st-eggs-root","aria-live":"off"});
   document.body.append(root);
+  const attachRoot=()=>{if(!root.isConnected)document.body.append(root);};
   const names={guardiao:"O Despertar do Sentinela",floresta:"A Floresta Fala",diario:"Diário do Explorador",criador:"Mensagem do Criador"};
   const clearChildren=n=>n.replaceChildren();
   const add=(parent,...children)=>{parent.append(...children);return parent;};
@@ -33,6 +34,7 @@
     return document.querySelector('nav[aria-label="Navegação principal"]');
   }
   function mountDiaryNav(){
+    attachRoot();
     const nav=getDiaryNav();
     if(!nav)return;
     if(!diaryTabButton){
@@ -94,6 +96,7 @@
     return panel;
   }
   function openDiaryTab(){
+    attachRoot();
     dismiss();
     mountDiaryNav();
     const panel=ensureDiaryPanel();
@@ -141,6 +144,7 @@
     lastFocus=null;
   }
   function shell(id, description){
+    attachRoot();
     dismiss();
     lastFocus=document.activeElement;
     const outer=el("div",{class:"st-egg-backdrop"});
