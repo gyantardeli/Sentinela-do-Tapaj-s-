@@ -1,0 +1,31 @@
+name: Testar link DOOM Cloudflare
+on:
+  push:
+    branches: [feature/doom-easter-egg]
+    paths:
+      - 'test-browser/doom-cloudflare-browser.mjs'
+      - '.github/workflows/doom-cloudflare-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Confirmar versão pública da Cloudflare com DOOM jogável
+        run: node test-browser/doom-cloudflare-browser.mjs
+      - name: Salvar capturas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-cloudflare-playtest
+          path: artifacts/playtest/
+          if-no-files-found: ignore
