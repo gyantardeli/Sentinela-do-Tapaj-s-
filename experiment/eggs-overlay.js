@@ -188,50 +188,22 @@
     });
   }
     function diary(){
-    const p=shell("diario","Um caderno de referências para conhecer o Tapajós ao longo dos séculos. São notas históricas resumidas e documentadas, não diários originais de exploradores.");
-    const index=el("div",{class:"st-egg-diary-index"});
-    const notes=[
-      {
-        time:"Antes da colonização",
-        title:"O Tapajós já tinha história",
-        body:"A região do Tapajós abrigava sociedades indígenas com redes de troca, produção de cerâmica e conhecimentos sobre seus territórios. Os registros arqueológicos revelam trajetórias muito anteriores às expedições europeias.",
-        source:"Arquivo Nacional · A região do Tapajós",
-        url:"https://exposicoesvirtuais.an.gov.br/index.php/galerias/117-exposicoes/trajet%C3%B3ria-de-uma-cole%C3%A7%C3%A3o-a-arte-da-cer%C3%A2mica-tapaj%C3%B3/saiba-mais/390-a-regi%C3%A3o-do-tapaj%C3%B3s.html"
-      },
-      {
-        time:"1661",
-        title:"A antiga Aldeia dos Tapajós",
-        body:"No século XVII, uma missão jesuítica foi instalada na Aldeia dos Tapajós, região que originou Santarém. A história do lugar inclui a presença e a resistência dos povos indígenas, não apenas a formação da cidade colonial.",
-        source:"Prefeitura de Santarém · História de Santarém",
-        url:"https://turismo.santarem.pa.gov.br/historia-de-santarem"
-      },
-      {
-        time:"1875",
-        title:"Um livro sobre o rio",
-        body:"O naturalista João Barbosa Rodrigues publicou 'Exploração e estudo do valle do Amazonas: Rio Tapajós'. A obra histórica foi digitalizada pela Biblioteca Brasiliana da USP e pode ser consultada em domínio público.",
-        source:"Biblioteca Brasiliana USP · Exploração e estudo do valle do Amazonas",
-        url:"https://digital.bbm.usp.br/handle/bbm/4449"
-      },
-      {
-        time:"1986",
-        title:"Expedição científica ao Tapajós",
-        body:"Uma expedição de novembro a dezembro de 1986 documentou prospecções no Tapajós, incluindo Itaituba, Fordlândia e Rurópolis. O relatório técnico está disponível no acervo da Embrapa.",
-        source:"Embrapa · Expedição aos rios Xingu e Tapajós",
-        url:"https://www.infoteca.cnptia.embrapa.br/bitstream/doc/385792/3/CPATUDoc99.pdf"
-      }
-    ];
-    notes.forEach((note,i)=>{
-      const item=el("details",{class:"st-egg-diary-entry"});
-      if(i===0)item.open=true;
-      const summary=el("summary",{},note.time+" · "+note.title);
-      const desc=el("p",{},note.body);
-      const link=el("a",{href:note.url,target:"_blank",rel:"noopener noreferrer"},note.source+" ↗");
-      add(item,summary,desc,link);index.append(item);
+    const p=shell("diario","Caderno de expedição interativo: oito capítulos, pesquisa e 24 referências bibliográficas, com mapas e bússolas no fundo.");
+    p.classList.add("st-egg-diary-dialog");
+    const frame=el("iframe",{
+      class:"st-egg-diary-frame",
+      title:"Diário do Explorador — oito páginas interativas do Tapajós",
+      src:"/__egg/diario",
+      loading:"eager",
+      referrerpolicy:"no-referrer"
     });
-    add(p,el("p",{class:"st-egg-muted"},"Páginas selecionadas sobre história, culturas e pesquisa no Tapajós. As referências são abertas em seus portais de origem."),index,
-      el("p",{class:"st-egg-muted"},"O caderno não substitui consultas a fontes primárias nem transforma os registros históricos em dados ambientais atuais."));
+    const footer=el("div",{class:"st-egg-diary-footer"});
+    add(footer,
+      el("span",{class:"st-egg-diary-hint"},"A navegação, a pesquisa e a bibliografia funcionam dentro do caderno."),
+      el("a",{class:"st-egg-diary-external",href:"/__egg/diario",target:"_blank",rel:"noopener noreferrer"},"Abrir em tela inteira ↗"));
+    add(p,frame,footer);
   }
-    function creator(){
+  function creator(){
     const p=shell("criador","Registro reservado — Sentinela Tapajós");
     const art=el("div",{class:"st-egg-credits-art","aria-hidden":"true"},"SENTINELA\nTAPAJÓS");
     const letter=el("article",{class:"st-egg-creator-letter",lang:"pt-BR"});
