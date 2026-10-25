@@ -1,0 +1,39 @@
+/* Estilos restritos ao namespace de easter eggs. */
+.st-eggs-open{overflow:hidden!important}
+#st-eggs-root{position:relative;z-index:2147483600;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px}
+#st-eggs-root .st-egg-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px;background:rgba(4,17,13,.82);z-index:2147483600;backdrop-filter:blur(5px)}
+#st-eggs-root .st-egg-dialog{color:#e4f2e7;background:linear-gradient(160deg,#173627,#0e231d);border:1px solid #547d64;max-width:760px;width:100%;max-height:min(90vh,850px);overflow:auto;box-shadow:0 26px 105px #000a;border-radius:20px;padding:24px;outline:none}
+#st-eggs-root .st-egg-head{display:flex;justify-content:space-between;align-items:center;gap:14px}
+#st-eggs-root .st-egg-kicker{color:#9bcca8;font-size:10px;letter-spacing:1.5px;font-weight:750}
+#st-eggs-root button,#st-eggs-root input{font:inherit}
+#st-eggs-root button{cursor:pointer}
+#st-eggs-root .st-egg-close{border:1px solid #688b6e;border-radius:10px;background:#244b35;color:#fff;font-size:27px;width:44px;height:42px}
+#st-eggs-root :is(button,a,input):focus-visible{outline:3px solid #c1e66f;outline-offset:3px}
+#st-eggs-root h2{color:#f2f7e5;font-size:clamp(25px,4vw,36px);line-height:1.12;margin:10px 0}
+#st-eggs-root .st-egg-summary{color:#c5dccb;font-size:14px;line-height:1.65;margin:6px 0 16px}
+#st-eggs-root p{line-height:1.65}
+#st-eggs-root .st-egg-muted{color:#adc1b3;font-size:12px}
+#st-eggs-root .st-egg-action,#st-eggs-root .st-egg-actions a,#st-eggs-root .st-egg-console-form button{background:#31764e;color:#fff;border:1px solid #70ac80;border-radius:9px;padding:10px 14px;font-weight:700;text-decoration:none;display:inline-block}
+#st-eggs-root .st-egg-actions{display:flex;flex-wrap:wrap;gap:10px;margin:19px 0}
+#st-eggs-root .st-egg-quote{font-size:clamp(17px,3vw,22px);color:#d7eedc;font-style:italic;text-align:center;padding:15px;margin:10px 0}
+#st-eggs-root .st-egg-guardian{height:285px;position:relative;overflow:hidden;border-radius:14px;background:radial-gradient(circle at 53% 24%,#416a51,#0f2825 53%,#050f13);isolation:isolate}
+#st-eggs-root .st-egg-moon{position:absolute;top:26px;left:50%;width:88px;height:88px;background:#cfe1bb;border-radius:50%;box-shadow:0 0 85px 26px #c4ef9180}
+#st-eggs-root .st-egg-canopy{position:absolute;inset:60px -10px -30px;background:radial-gradient(ellipse at 10% 90%,#091c17 30%,transparent 32%),radial-gradient(ellipse at 91% 85%,#091c17 32%,transparent 34%),radial-gradient(ellipse at 48% 92%,#112a1c 45%,transparent 47%)}
+#st-eggs-root .st-egg-eyes{position:absolute;top:128px;left:50%;transform:translateX(-50%);width:140px;height:40px;background:radial-gradient(ellipse at 27% 50%,#d4ee9a 0 13%,transparent 15%),radial-gradient(ellipse at 73% 50%,#d4ee9a 0 13%,transparent 15%);filter:drop-shadow(0 0 13px #8fca52);animation:st-eyes 3.6s ease-in-out infinite}
+#st-eggs-root .st-egg-river{position:absolute;left:35%;right:35%;top:77%;bottom:-100%;transform:perspective(140px) rotateX(57deg);background:linear-gradient(90deg,transparent,#73baba99,transparent);filter:blur(2px)}
+@keyframes st-eyes{50%{opacity:.42;filter:drop-shadow(0 0 3px #8fca52)}}
+#st-eggs-root .st-egg-forest{height:230px;border-radius:12px;position:relative;overflow:hidden;background:linear-gradient(180deg,#152e40,#29553e)}
+#st-eggs-root .st-egg-forest-trees{position:absolute;inset:70px 0 -25px;background:repeating-linear-gradient(105deg,#112b1b 0 18px,#183c25 20px 40px,#0f2517 43px 57px);clip-path:polygon(0 35%,7% 4%,14% 37%,20% 6%,30% 51%,39% 12%,50% 42%,60% 4%,69% 41%,79% 8%,89% 43%,100% 9%,100% 100%,0 100%)}
+#st-eggs-root .st-egg-forest-rain{position:absolute;inset:0;background:repeating-linear-gradient(110deg,transparent 0 21px,#d6efef44 22px 23px,transparent 24px 38px);animation:st-rain .9s linear infinite}
+@keyframes st-rain{to{transform:translateY(31px)}}
+#st-eggs-root .st-egg-console{background:#060f0c;border:1px solid #547b60;border-radius:11px;color:#a7e9ae;height:255px;overflow:auto;padding:15px;margin:12px 0;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+#st-eggs-root .st-egg-console pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 13px;font:inherit}
+#st-eggs-root .st-egg-console-form{display:flex;gap:8px}
+#st-eggs-root .st-egg-console-form input{flex:1;min-width:0;background:#10271b;color:#e5ffdf;border:1px solid #648975;padding:11px;border-radius:8px}
+#st-eggs-root .st-egg-time-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+#st-eggs-root .st-egg-year-control{padding:15px;background:#244434;border-radius:12px;display:flex;gap:8px;flex-direction:column}
+#st-eggs-root .st-egg-year-control output{color:#c6e999;font-weight:800;font-size:30px}
+#st-eggs-root .st-egg-year-control input{width:100%;accent-color:#b5d986}
+#st-eggs-root .st-egg-credits-art{min-height:172px;display:grid;place-content:center;text-align:center;white-space:pre-line;letter-spacing:5px;font-size:clamp(30px,7vw,60px);line-height:1.1;font-weight:900;border-radius:14px;background:radial-gradient(ellipse at center,#366f48,#0e221a 72%)}
+@media(max-width:600px){#st-eggs-root .st-egg-backdrop{padding:8px}#st-eggs-root .st-egg-dialog{max-height:94vh;padding:16px;border-radius:14px}#st-eggs-root .st-egg-time-grid{grid-template-columns:1fr}#st-eggs-root .st-egg-guardian{height:205px}#st-eggs-root .st-egg-forest{height:180px}}
+@media(prefers-reduced-motion:reduce){#st-eggs-root .st-egg-eyes,#st-eggs-root .st-egg-forest-rain{animation:none}}
