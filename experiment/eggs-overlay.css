@@ -27,7 +27,8 @@
 #st-eggs-root .st-egg-forest-rain{position:absolute;inset:0;background:repeating-linear-gradient(110deg,transparent 0 21px,#d6efef44 22px 23px,transparent 24px 38px);animation:st-rain .9s linear infinite}
 @keyframes st-rain{to{transform:translateY(31px)}}
 #st-eggs-root .st-egg-credits-art{min-height:172px;display:grid;place-content:center;text-align:center;white-space:pre-line;letter-spacing:5px;font-size:clamp(30px,7vw,60px);line-height:1.1;font-weight:900;border-radius:14px;background:radial-gradient(ellipse at center,#366f48,#0e221a 72%)}
-@media(max-width:600px){#st-eggs-root .st-egg-backdrop{padding:8px}#st-eggs-root .st-egg-dialog{max-height:94vh;padding:16px;border-radius:14px}@media(prefers-reduced-motion:reduce){#st-eggs-root .st-egg-eyes,#st-eggs-root .st-egg-forest-rain{animation:none}}
+@media(max-width:600px){#st-eggs-root .st-egg-backdrop{padding:8px}#st-eggs-root .st-egg-dialog{max-height:94vh;padding:16px;border-radius:14px}}
+@media(prefers-reduced-motion:reduce){#st-eggs-root .st-egg-eyes,#st-eggs-root .st-egg-forest-rain{animation:none}}
 
 /* V2: despertar claro, animado e com repetição manual */
 #st-eggs-root .st-egg-guardian{height:min(340px,48vw);min-height:218px;background:radial-gradient(circle at 51% 22%,#647c60,#1b3939 44%,#081b20 88%);overflow:hidden}
