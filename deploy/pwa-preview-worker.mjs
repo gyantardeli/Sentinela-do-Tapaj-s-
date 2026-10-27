@@ -15,7 +15,7 @@ async function getPwaStatus(env,city){
     env.DB.prepare("SELECT kind,valid_at,collected_at,value FROM environment_observations WHERE place_id=? AND kind IN ('air','weather') ORDER BY valid_at DESC LIMIT 100").bind(place).all(),
     env.DB.prepare("SELECT day_utc,collected_at,value FROM fire_archive_days ORDER BY day_utc DESC LIMIT 4").all(),
     env.DB.prepare("SELECT started_at,completed_at,checked,available,accepted,status FROM radar_runs ORDER BY started_at DESC LIMIT 1").first(),
-    env.DB.prepare("SELECT checked_at,value FROM watchdog_checks ORDER BY checked_at DESC LIMIT 1").first()
+    env.DB.prepare("SELECT checked_at,value FROM watchdog_checks WHERE mode='independent' ORDER BY checked_at DESC LIMIT 1").first()
   ]);
   const envMap={};
   const now=Math.floor(Date.now()/1000);
