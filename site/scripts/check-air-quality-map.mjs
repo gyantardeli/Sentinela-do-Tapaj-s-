@@ -95,8 +95,9 @@ await check('Read-only API, online maps, Portuguese controls and original Purple
   const Panel=load('./components/purpleair-panel').default;
   const html=renderToStaticMarkup(React.createElement(Panel,{place:PLACES[0]}));
   assert(html.includes('Mapa PurpleAir')&&html.includes('<iframe'));
-  assert(html.includes('Mapa CAMS · estimativas e previsão'));
-  assert(!html.includes('tile.openstreetmap.org'),'CAMS does not mount while collapsed');
+  assert(html.includes('Mapa IQAir · qualidade do ar'));
+  assert(!html.includes('Mapa CAMS · estimativas e previsão'), 'CAMS is absent from the air-quality panel');
+  assert(!html.includes('tile.openstreetmap.org'),'Legacy CAMS map is not mounted by the panel');
   const Map=load('./components/air-quality-map').default;
   const mapHtml=renderToStaticMarkup(React.createElement(Map,{place:PLACES[0]}));
   for(const label of ['Qualidade do ar · mapa integrado','Horário da previsão de qualidade do ar','Estimativa nas referências municipais','0/154']) assert(mapHtml.includes(label),label);

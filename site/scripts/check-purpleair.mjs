@@ -36,11 +36,11 @@ const render = (place = PLACES[0]) => renderToStaticMarkup(React.createElement(P
 const full = render();
 assert(full.includes('<iframe') && full.includes(api.PURPLEAIR_REGION_URL), 'normal view retains the supplied map settings');
 assert.equal((full.match(/<iframe/g)||[]).length,1,'PurpleAir is the only initially loaded map');
-assert(!/<input|air-map-canvas|<details[^>]*\bopen(?:=|\s|>)/.test(full),'manual interpreter removed and CAMS initially collapsed');
-assert(full.indexOf('Mapa PurpleAir')<full.indexOf('<details'),'PurpleAir appears before the collapsed CAMS section');
-assert(full.includes('Mapa CAMS · estimativas e previsão'));
+assert(!/<input|air-map-canvas|<details[^>]*\bopen(?:=|\s|>)/.test(full),'manual interpreter removed and IQAir initially collapsed');
+assert(full.indexOf('Mapa PurpleAir')<full.indexOf('<details'),'PurpleAir appears before the collapsed IQAir section');
+assert(full.includes('Mapa IQAir · qualidade do ar'));
 for(const band of api.PURPLEAIR_AQI_BANDS) assert(full.includes(band.range)&&full.includes(band.label),'all AQI legend bands remain visible');
 assert(full.includes('não é uma concentração de PM2,5'), 'AQI and concentration must remain distinct');
 for(const url of ['https://www.airnow.gov/aqi/aqi-basics/','https://community.purpleair.com/t/purpleair-map-guide/90']) assert(full.includes(url),'official references retained');
 for (const place of PLACES) assert(render(place).includes('Ver ' + place.name));
-console.log(JSON.stringify({ passed: true, checks: ['all six AQI boundaries and zero', 'missing and invalid input remain unclassified', 'PurpleAir prominent with supplied map URL', 'CAMS collapsed without initial render', 'Portuguese legend and official references visible', 'all eight municipality labels'] }));
+console.log(JSON.stringify({ passed: true, checks: ['all six AQI boundaries and zero', 'missing and invalid input remain unclassified', 'PurpleAir prominent with supplied map URL', 'IQAir collapsed without initial render', 'Portuguese legend and official references visible', 'all eight municipality labels'] }));
