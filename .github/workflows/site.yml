@@ -46,5 +46,7 @@ jobs:
         run: pnpm run typecheck
       - name: Executar regressões locais
         run: pnpm run check:ci
+      - name: Consultar políticas de iframe do RadarClima (diagnóstico)
+        run: node scripts/check-radarclima-iframe.mjs --live
       - name: Compilar site
         run: pnpm run build
