@@ -5,6 +5,7 @@ const checks = [
   "check-collector-v23",
   "check-apoie-integration",
   "check-unified-map",
+  "check-radarclima-iframe",
   "check-priority1",
   "verify-monitoring",
   "verify-operations",
