@@ -1,0 +1,59 @@
+import fs from "node:fs";
+import path from "node:path";
+import vm from "node:vm";
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+import { DatabaseSync } from "node:sqlite";
+import ts from "typescript";
+const nativeRequire=createRequire(import.meta.url), sqlite=new DatabaseSync(":memory:");
+for (const file of fs.readdirSync("drizzle").filter(f=>f.endsWith(".sql")).sort()) sqlite.exec(fs.readFileSync(path.join("drizzle",file),"utf8"));
+const DB={prepare(sql){let args=[];const statement={bind(...values){assert(values.length<=100,"D1 binding limit");args=values;return statement;},async all(){return {results:sqlite.prepare(sql).all(...args)};},async first(){return sqlite.prepare(sql).get(...args) ?? null;},async run(){const result=sqlite.prepare(sql).run(...args);return {...result,meta:{changes:Number(result.changes)}};}};return statement;},async batch(statements){sqlite.exec("BEGIN");try{const result=[];for(const s of statements)result.push(await s.run());sqlite.exec("COMMIT");return result;}catch(error){sqlite.exec("ROLLBACK");throw error;}}};
+const memory=new Map();
+const localStorage={getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)};
+const modules=new Map();
+function load(name){
+ if(modules.has(name))return modules.get(name).exports;
+ if(name === "cloudflare:workers")return {env:{DB}};
+ if(!name.startsWith("."))return nativeRequire(name);
+ const base=path.resolve(name), filename=[base+".ts",base+".tsx"].find(p=>fs.existsSync(p));
+ if(!filename)throw new Error("Missing module "+name);
+ const mod={exports:{}};modules.set(name,mod);
+ const code=ts.transpileModule(fs.readFileSync(filename,"utf8"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
+ const wrapper=filename.endsWith("bulletin-pdf.ts") ? vm.runInThisContext(`(function(require,module,exports){${code}\n})`) : vm.runInNewContext(`(function(require,module,exports){${code}\n})`,{URL,Date,console,crypto,localStorage,fetch,AbortSignal,Response,setTimeout,clearTimeout,setInterval,clearInterval,TextEncoder});
+ wrapper(id=>load(id.startsWith(".") ? "./"+path.relative(process.cwd(),path.resolve(path.dirname(filename),id)) : id),mod,mod.exports);
+ return mod.exports;
+}
+const geo=load("./lib/areas"),areas=load("./lib/area-store"),monitor=load("./lib/watchdog"),watchdog=load("./lib/watchdog-store"),environment=load("./lib/environment"),envStore=load("./lib/environment-store"),history=load("./lib/monitoring-store"),catalog=load("./lib/monitoring").SOURCE_CATALOG;
+const now=Math.floor(Date.now()/1000),circle=geo.validateArea({id:"test-circle",name:"Área de teste",kind:"circle",points:[{lat:-4,lon:-56}],radiusKm:25},now);
+assert(geo.containsPoint(circle,{lat:-4,lon:-56}));assert(!geo.containsPoint(circle,{lat:-5,lon:-56}));
+const polygon=geo.validateArea({id:"test-polygon",name:"Polígono",kind:"polygon",points:[{lat:-4.5,lon:-56.5},{lat:-4.5,lon:-55.5},{lat:-3.5,lon:-55.5},{lat:-3.5,lon:-56.5}],radiusKm:0},now);
+assert(geo.containsPoint(polygon,{lat:-4,lon:-56}));assert(geo.containsPoint(polygon,{lat:-4.5,lon:-56.5}),"polygon boundary included");assert(!geo.containsPoint(polygon,{lat:-4,lon:-55}));assert(geo.containsPoint({...polygon,points:[...polygon.points].reverse()},{lat:-4,lon:-56}),"winding independent");
+const corridor=geo.validateArea({id:"test-route",name:"Corredor",kind:"corridor",points:[{lat:0,lon:-57},{lat:0,lon:-56}],radiusKm:10},now);
+assert(geo.containsPoint(corridor,{lat:.08,lon:-56.5}));assert(!geo.containsPoint(corridor,{lat:.11,lon:-56.5}));assert(geo.containsPoint(corridor,{lat:0,lon:-57.08}),"rounded end cap");assert(!geo.containsPoint(corridor,{lat:0,lon:-57.11}));assert(geo.distanceToSegment({lat:0,lon:-56.5},corridor.points[0],corridor.points[1])<.001);
+for(const bad of [{...circle,points:[{lat:10,lon:-56}]},{...circle,radiusKm:300},{...polygon,points:[{lat:-4,lon:-56},{lat:-3,lon:-55},{lat:-4,lon:-55},{lat:-3,lon:-56}]},{...polygon,points:[{lat:-4,lon:-56},{lat:-4,lon:-55},{lat:-4,lon:-54}]},{...corridor,points:[corridor.points[0],corridor.points[0]]}])assert.throws(()=>geo.validateArea(bad,now));
+for(const area of [circle,polygon,corridor]){const imported=geo.importAreas(geo.areaFeature(area),now)[0];assert.equal(imported.kind,area.kind);assert.equal(imported.radiusKm,area.radiusKm);assert.deepEqual(JSON.parse(JSON.stringify(imported.points)),JSON.parse(JSON.stringify(area.points)));}
+assert.throws(()=>geo.importAreas({type:"Feature",properties:{},geometry:{type:"Polygon",coordinates:[[],[]]}}));
+assert.equal(geo.filterAreaFires([{lat:-4,lon:-56,time:now-100},{lat:-4,lon:-56,time:now-90000},{lat:-5,lon:-56,time:now-100}],circle,24,now).length,1);
+let saved=await areas.writeAreas("initial",[circle,polygon,corridor],now);assert.equal((await areas.readAreas()).areas.length,3);await assert.rejects(()=>areas.writeAreas("initial",[],now),/outra aba/);await assert.rejects(()=>areas.writeAreas(saved.version,[circle,circle],now),/repetidos/);await areas.writeAreas(saved.version,[],now);
+assert.equal(monitor.collectionIssues([{id:"a",name:"A",lastAt:now-5400,failure:null}],now).length,0);assert.equal(monitor.collectionIssues([{id:"a",name:"A",lastAt:now-5401,failure:null}],now).length,1);
+const allChecks=at=>catalog.filter(s=>s.automatic).map(s=>({sourceId:s.id,checkedAt:at,status:s.id.startsWith("radar:")?"empty":"partial",detail:"Consulta concluída",dataTime:at,method:"fixture",accepted:0}));
+async function seed(at){await DB.batch(history.healthStatements(allChecks(at)));await envStore.saveEnvironment({revision:"environment-v1",collectedAt:at,air:environment.PLACES.map(p=>({placeId:p.id,points:[{time:at,pm25:0,pm10:0,aqi:0}]})),weather:environment.PLACES.map(p=>({placeId:p.id,value:{time:at,temperature:0,humidity:0,speed:0,direction:0,rain:0}})),failures:{}});await DB.prepare("INSERT INTO radar_runs (id,started_at,completed_at,checked,available,accepted,status) VALUES (?,?,?,?,?,?,?)").bind(crypto.randomUUID(),at,at,20,20,0,"complete").run();}
+await seed(now);assert((await watchdog.readWatchdog(now)).overdue);
+let check=await watchdog.runWatchdog("manual",now);assert.equal(check.status,"ok","empty and partial sources do not imply interrupted collection");assert((await watchdog.readWatchdog(now)).overdue,"manual probe does not hide a missing independent probe");
+await watchdog.runWatchdog("independent",now+1);assert(!(await watchdog.readWatchdog(now+1)).overdue);
+check=await watchdog.runWatchdog("manual",now+5700);assert.equal(check.status,"attention");assert.equal(check.issues.length,24);assert((await watchdog.readWatchdog(now+5700)).overdue);
+await watchdog.runWatchdog("manual",now+5800);let events=(await DB.prepare("SELECT value FROM alert_events WHERE rule_id=?").bind("system-watchdog").all()).results;assert.equal(events.length,1,"an ongoing outage must not repeat warnings");
+await seed(now+5900);await watchdog.runWatchdog("independent",now+5901);events=(await DB.prepare("SELECT value FROM alert_events WHERE rule_id=?").bind("system-watchdog").all()).results;assert.equal(events.length,2);assert(events.some(r=>JSON.parse(r.value).title.includes("recuperada")));
+await watchdog.runWatchdog("manual",now+10);assert.equal((await watchdog.readWatchdog(now+5902)).latest.checkedAt,now+5901,"older check cannot overwrite newer state");assert.equal((await DB.prepare("SELECT value FROM radar_settings WHERE key=?").bind("watchdog:condition").first()).value,JSON.stringify({condition:"",at:now+5901}));
+await watchdog.saveWatchdogSchedule({id:"test-only",enabled:true,cadence:"Por hora",timezone:"America/Bahia"});assert((await watchdog.readWatchdog(now+5902)).schedule.enabled);
+const expired={id:"expired-event",ruleId:"system-watchdog",createdAt:now-31*86400,kind:"collection",title:"Expired",detail:"Retention test",dataTime:null,readAt:null};await DB.prepare("INSERT INTO alert_events (id,rule_id,created_at,value,read_at) VALUES (?,?,?,?,NULL)").bind(expired.id,expired.ruleId,expired.createdAt,JSON.stringify(expired)).run();assert(!(await load("./lib/alerts-store").readAlerts()).events.some(e=>e.id===expired.id),"expired events stay hidden before cleanup even with alert rules disabled");await watchdog.runWatchdog("manual",now+5902);assert.equal(await DB.prepare("SELECT id FROM alert_events WHERE id=?").bind(expired.id).first(),null,"watchdog prunes expired events without enabled user rules");
+const manifest=JSON.parse(fs.readFileSync("public/manifest.webmanifest","utf8"));assert.equal(manifest.display,"standalone");assert.equal(manifest.id,"/");for(const icon of manifest.icons){const bytes=fs.readFileSync("public"+new URL(icon.src,"https://fixture.test").pathname),size=Number(icon.sizes.split("x")[0]);assert.equal(bytes.subarray(1,4).toString(),"PNG");assert.equal(bytes.readUInt32BE(16),size);assert.equal(bytes.readUInt32BE(20),size);}
+// O site permanece instalavel, mas nao intercepta navegacoes nem guarda dados offline.
+const sw = fs.readFileSync("public/sw.js", "utf8");
+assert(!/addEventListener\(["']fetch["']/.test(sw));
+assert(!sw.includes("caches.open("));
+console.log(JSON.stringify({passed:true,checks:["geometrias e GeoJSON", "areas e configuracoes", "monitoramento e alertas", "manifesto e icones", "navegacao somente online"]}));
+
+if(process.argv[2]){const b=JSON.parse(fs.readFileSync(process.argv[2],"utf8")),model=load("./lib/bulletin"),html=load("./lib/bulletin-html"),pdf=load("./lib/bulletin-pdf"),fonts={regular:fs.readFileSync("public/fonts/DejaVuSans.ttf"),bold:fs.readFileSync("public/fonts/DejaVuSans-Bold.ttf")};fs.mkdirSync("work/pdf-qa-areas",{recursive:true});for(const [name,area] of [["poligono",polygon],["corredor",{...corridor,points:[{lat:-4.4,lon:-56.1},{lat:-4.1,lon:-55.7}],radiusKm:15}]]){const packet={...b,scope:"local",area};assert(model.validBulletin(packet));const view=model.bulletinView(packet);assert(view.fires.every(f=>geo.containsPoint(area,f)));const geometry=model.bulletinGeometry(packet);assert(geometry.area.projected.length===area.points.length);const page=html.bulletinHtml(packet);assert(page.includes(area.name));fs.writeFileSync("work/pdf-qa-areas/boletim-"+name+".html",page);fs.writeFileSync("work/pdf-qa-areas/boletim-"+name+".pdf",await pdf.createBulletinPdf(packet,fonts));}console.log(JSON.stringify({pdfAreaReports:2,verified:true}));}
+
+const React=nativeRequire("react"),{renderToStaticMarkup}=nativeRequire("react-dom/server"),RegionalMapTest=load("./components/regional-map").default;const markup=renderToStaticMarkup(React.createElement(RegionalMapTest,{place:environment.PLACES[0],radius:100,fires:[{id:"test",lat:-4.1,lon:-56,time:now,satellite:"NPP-375",frp:0,source:"INPE"}],sensors:[],weather:null,area:polygon}));assert(!markup.includes("NaN"));assert(markup.includes("<svg"));console.log(JSON.stringify({mapSSR:true}));

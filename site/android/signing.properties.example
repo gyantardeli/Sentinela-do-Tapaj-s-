@@ -1,0 +1,5 @@
+# Copie como signing.properties e use uma chave sob sua guarda.
+storeFile=/caminho/privado/sentinela-tapajos.p12
+storePassword=SENHA_DO_ARQUIVO
+keyAlias=sentinela-tapajos
+keyPassword=SENHA_DA_CHAVE

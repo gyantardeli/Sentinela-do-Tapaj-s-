@@ -1,0 +1,23 @@
+M	app/page.tsx
+M	scripts/check-online-interface.mjs
+app/apoie/page.tsx
+app/apoie/style.module.css
+app/experiences.css
+app/forest-theme.css
+components/apoie-pix-copy.tsx
+components/explorer-diary.tsx
+components/sentinela-experiences.tsx
+docs/integration-20261025/integration-results.json
+docs/integration-20261025/regression-results.json
+lib/apoie-pix.ts
+lib/experiences-runtime.js
+preview/integration-entry.tsx
+public/branding/forest-homolog.webp
+public/diario/app.js
+public/diario/assets/mapa-explorador.webp
+public/diario/data.js
+public/diario/index.html
+public/diario/style.css
+scripts/build-integration-preview.mjs
+scripts/check-apoie-integration.mjs
+scripts/check-consolidated-integration.mjs

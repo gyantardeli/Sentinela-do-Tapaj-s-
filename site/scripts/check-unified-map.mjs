@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { createRequire } from 'node:module';
+import ts from 'typescript';
+const nativeRequire = createRequire(import.meta.url), modules = new Map();
+function load(name) {
+  if (!name.startsWith('.')) return nativeRequire(name);
+  const file = ['.ts', '.tsx'].map(ext => path.resolve(name + ext)).find(fs.existsSync);
+  if (!file) throw new Error('Module not found: ' + name);
+  if (modules.has(file)) return modules.get(file).exports;
+  const mod = { exports: {} }; modules.set(file, mod);
+  const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
+  vm.runInNewContext('(function(require,module,exports){' + code + '\n})', { console, setTimeout, clearTimeout, setInterval, clearInterval, fetch, Request, Response, URL, URLSearchParams, AbortSignal, TextEncoder, TextDecoder })(id => load(id.startsWith('.') ? './' + path.relative(process.cwd(), path.resolve(path.dirname(file), id)) : id), mod, mod.exports);
+  return mod.exports;
+}
+
+const core=load('./lib/unified-map'), air=load('./lib/air-quality-map');
+const {PLACES}=load('./lib/environment');
+const now=1792764000, times=air.airTimes(now), cell={...air.AIR_GRID[0],collectedAt:now,pm25:times.map(()=>0),aqiPm25:times.map(()=>0)};
+const data={revision:air.AIR_MAP_REVISION,now,times,cells:[cell],model:{state:'partial',checkedAt:now,detail:'partial'}};
+const cells=core.airCells(data,times[0],now);
+assert.equal(cells.length,154);
+assert.equal(cells[0].value,0,'Valid zero concentration must be retained');
+assert.equal(cells[1].value,null,'Missing cells must not become zero');
+assert.equal(core.airCells(data,times[0],now+21601)[0].value,null,'Stale air must be excluded');
+const polygon=core.cellGeoJSON(cells).features[0].geometry.coordinates[0];
+assert.equal(polygon.length,5);assert.deepEqual(polygon[0],polygon[4]);
+assert(polygon[0][0]<polygon[1][0]&&polygon[1][1]<polygon[2][1]);
+const row={placeId:'itaituba',state:'ok',attemptedAt:now,detail:'',capture:{collectedAt:now,pageTime:now,current:{time:now,temperature:0,rainProbability:null,wind:0},hourly:[{time:now+3600,temperature:31,rainProbability:40,wind:12}],daily:[{day:'2026-10-24',min:22,max:34,rainProbability:60}]}};
+assert.equal(core.forecastValue(row,{horizon:'current',time:null,day:null,now},'temperature'),0);
+assert.equal(core.forecastValue(row,{horizon:'current',time:null,day:null,now},'rainProbability'),null);
+assert.equal(core.forecastValue(row,{horizon:'hourly',time:null,day:null,now},'temperature'),null);
+assert.equal(core.forecastValue(row,{horizon:'hourly',time:now+1800,day:null,now},'temperature'),null,'Never substitute nearby hours');
+assert.equal(core.forecastValue(row,{horizon:'hourly',time:now+3600,day:null,now},'temperature'),31);
+assert.equal(core.forecastValue(row,{horizon:'daily',time:null,day:'2026-10-24',now},'temperature'),34);
+assert.equal(core.forecastValue(row,{horizon:'daily',time:null,day:'2026-10-24',now},'wind'),null);
+assert.equal(core.forecastValue(row,{horizon:'current',time:null,day:null,now:now+7201},'temperature'),null);
+const pins=core.forecastMarkers({locations:[row]}, {horizon:'current',time:null,day:null,now}, 'temperature');
+assert.equal(pins.length,8);assert.equal(pins[1].color,'#74837b');assert(pins[0].label.includes('0'));
+assert.deepEqual(JSON.parse(JSON.stringify(core.routeFromHash('#campo'))),{tab:'map',view:'detections'});
+assert.deepEqual(JSON.parse(JSON.stringify(core.routeFromHash('#qualidade-do-ar'))),{tab:'map',view:'air'});
+assert.deepEqual(JSON.parse(JSON.stringify(core.routeFromHash('#previsao'))),{tab:'map',view:'forecast'});
+assert.deepEqual(JSON.parse(JSON.stringify(core.routeFromHash('#coleta'))),{tab:'collection',view:'detections'});
+console.log(JSON.stringify({passed:true,coverage:['zeros vs missing','stale air and weather','grid coordinates','exact forecast hour','daily metric','all municipal markers','legacy navigation']}));

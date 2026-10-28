@@ -1,0 +1,37 @@
+[
+  {
+    "check": "node_modules/typescript/bin/tsc",
+    "passed": true,
+    "seconds": 9.61,
+    "output": "",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-online-interface.mjs",
+    "passed": true,
+    "seconds": 0.36,
+    "output": "{\"passed\":true,\"checks\":[\"no offline UI or orphan imports\",\"manual storage key retained\",\"mobile serializer retained without local storage\",\"GeoJSON/CSV use independent download helper\",\"legacy worker has no intercept\",\"independent tabs reuse unchanged environmental components and online data modules\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-online-runtime.mjs",
+    "passed": true,
+    "seconds": 0.8,
+    "output": "{\"passed\":true,\"groups\":5,\"checks\":[\"retirement worker preserves other caches and unregisters after cleanup failure\",\"startup cleanup selects only same-origin /sw.js and tolerates one rejected unregister\",\"snapshot failures, HTTP errors, reconnect and late responses clear or refresh remote values\",\"Home ignores environmental device cache, preserves manual readings, and revalidates online\",\"watchdog never reports healthy collection when its status is unknown or unavailable\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-consolidated-integration.mjs",
+    "passed": true,
+    "seconds": 0.54,
+    "output": "{\"passed\":true,\"protectedFiles\":63,\"chapters\":8,\"chapterReferences\":24,\"navigation\":\"independent panels, canonical and legacy links checked\",\"payment\":\"locked-off\",\"experiences\":\"client-only, cleanup installed\",\"productionWrites\":0}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-apoie-integration.mjs",
+    "passed": true,
+    "seconds": 0.08,
+    "output": "✔ página mantém liberdade de contribuição e tom de cafezinho (3.060144ms)\n✔ sem dados Pix, botão de copiar está protegido por condicional (0.606453ms)\n✔ camada de Pix tem guardas de autorização e verificação (0.520697ms)\n✔ CSS usa classes locais, sem modificar global CSS (1.149632ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 10.310964",
+    "error": ""
+  }
+]

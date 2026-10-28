@@ -1,0 +1,46 @@
+{
+  "versionName": "1.5.0",
+  "versionCode": 7,
+  "package": "br.com.sentinelatapajos.app",
+  "minSdk": 23,
+  "targetSdk": 36,
+  "permissions": [],
+  "sizeBytes": 312100,
+  "sha256": "fb4051dbe48080b670fe06dfdd728f39aced600b4b19fc383edc737edc134816",
+  "signerCertificateSha256": "c157aa3320d5492319dfb6b54f2632a9913348118573b358ba6eed9afbd9a8c3",
+  "sameSignerAs1_4_0_beta_1": true,
+  "signatureSchemes": [
+    "v1",
+    "v2",
+    "v3"
+  ],
+  "zipalignVerified": true,
+  "debuggable": false,
+  "compiledOn": "2026-10-25",
+  "mode": "online_browser_custom_tab",
+  "panelUrl": "https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/?campo=0",
+  "nativeOfflineFeatures": false,
+  "browserCacheControlledByApk": false,
+  "sitePublicationChanged": false,
+  "publishedSiteVersionAtBuild": 30,
+  "unpublishedSiteVersionAtBuild": 32,
+  "physicalAndroidTest": "NOT_EXECUTED_NO_CONNECTED_DEVICE",
+  "previousBetaDeviceTest": "User reported validation of 1.4.0-beta.1; not validation of this 1.5.0 build.",
+  "tests": [
+    "Java and resources compiled against Android 36",
+    "DEX generated for minimum API 23",
+    "v1/v2/v3 signature verified",
+    "Signer identical to previous APK",
+    "Package ID retained and versionCode increased",
+    "zipalign verified",
+    "Manifest no debug or permissions",
+    "Old offline activities/classes/assets absent",
+    "No signing material packaged",
+    "Both guardian images byte-equal to approved source assets"
+  ],
+  "limits": [
+    "Requires an Android browser and internet for current environmental data",
+    "Opens currently published website; does not activate unpublished web revisions",
+    "Physical installation and device UI not verified in this environment"
+  ]
+}

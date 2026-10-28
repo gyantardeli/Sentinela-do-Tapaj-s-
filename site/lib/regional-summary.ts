@@ -1,0 +1,2 @@
+import type { AirPoint, Weather } from "./environment";
+export type RegionalSummary = { now: number; airCollectedAt: number | null; weatherCollectedAt: number | null; newsCollectedAt: number | null; places: { id: string; air: AirPoint | null; weather: Weather | null; airCollectedAt?:number|null;weatherCollectedAt?:number|null;airStale?:boolean;weatherStale?:boolean;news: { title: string; url: string; sourceId: string; publishedAt: number; context: boolean; score: number; label: string } | null }[]; error?: string };

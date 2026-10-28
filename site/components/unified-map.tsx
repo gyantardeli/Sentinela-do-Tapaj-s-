@@ -1,0 +1,85 @@
+"use client";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { ArrowUpRight, CloudFog, CloudSun, Flame, Layers, Plus, RefreshCw, Wind } from "lucide-react";
+import { PLACES, aqBand, display, stamp, type Fire, type Place, type Sensor, type SourceState } from "../lib/environment";
+import { buildFireReplay } from "../lib/fire-replay";
+import { type AirMapData } from "../lib/air-quality-map";
+import { FORECAST_PROVIDER_NAMES, forecastStale, type ForecastMapData, type ForecastProvider } from "../lib/weather-capture";
+import { weatherLinks } from "../lib/weather-providers";
+import { airCells, forecastMarkers, forecastValue, sensorMarkers, FORECAST_UNITS, type ForecastFrame, type ForecastMetric, type MapView } from "../lib/unified-map";
+import { useSnapshot } from "./use-snapshot";
+const TerrainMap = lazy(() => import("./fire-terrain-map"));
+const views = [
+  { id: "detections", title: "Detecções e leituras", caption: "INPE · registros locais", icon: Flame },
+  { id: "windy", title: "Vento e poluentes", caption: "Windy", icon: Wind },
+  { id: "air", title: "Qualidade do ar", caption: "CAMS · mapa integrado", icon: CloudFog },
+  { id: "forecast", title: "Previsão regional", caption: "Clima & Radar · AccuWeather", icon: CloudSun },
+] as const;
+type Props = { place: Place; radius: number; hours: number; now: number; fires: Fire[]; sensors: Sensor[]; source?: SourceState; loading: boolean; view: MapView; onView: (v: MapView) => void; onReading: () => void; refreshKey: number; active: boolean };
+export default function UnifiedMap(p: Props) {
+  const [windLayer, setWindLayer] = useState("wind"), [windError, setWindError] = useState(false);
+  const [provider, setProvider] = useState<ForecastProvider>("climaeradar"), [weatherView, setWeatherView] = useState("forecast");
+  const [metric, setMetric] = useState<ForecastMetric>("temperature"), [horizon, setHorizon] = useState<ForecastFrame["horizon"]>("current");
+  const [forecastTime, setForecastTime] = useState<number | null>(null), [forecastDay, setForecastDay] = useState<string | null>(null);
+  const [airIndex, setAirIndex] = useState(0), [fireOffset, setFireOffset] = useState(0);
+  const [showFires, setShowFires] = useState(true), [showSensors, setShowSensors] = useState(true);
+  const [selectedFire, setSelectedFire] = useState<string | null>(null);
+  const [focus, setFocus] = useState<{ lat: number; lon: number; key: string } | null>(null);
+  const [frameError, setFrameError] = useState(false);
+  const air = useSnapshot<AirMapData>("/api/air-map", p.refreshKey, p.active && p.view === "air");
+  const accu = useSnapshot<ForecastMapData>("/api/weather-map?provider=accuweather", p.refreshKey, p.active && p.view === "forecast");
+  const clima = useSnapshot<ForecastMapData>("/api/weather-map?provider=climaeradar", p.refreshKey, p.active && p.view === "forecast");
+  const weather = provider === "accuweather" ? accu : clima;
+  const links = weatherLinks(p.place);
+  const times = air.data?.times ?? [], airTime = times[Math.min(airIndex, Math.max(0, times.length-1))] ?? null;
+  const availableTimes = [...new Set(weather.data?.locations.flatMap(r => r.capture?.hourly.filter(h => h.time >= p.now && h.time <= p.now + 86400).map(h => h.time) ?? []) ?? [])].sort((a,b)=>a-b);
+  const days = [...new Set(weather.data?.locations.flatMap(r => r.capture?.daily.map(d=>d.day) ?? []) ?? [])].sort();
+  const time = availableTimes.includes(forecastTime!) ? forecastTime : availableTimes[0] ?? null;
+  const day = days.includes(forecastDay!) ? forecastDay : days[0] ?? null;
+  const frame = useMemo<ForecastFrame>(() => ({ horizon, time, day, now: p.now }), [horizon, time, day, p.now]);
+  const replay = useMemo(() => buildFireReplay(p.fires, p.now-p.hours*3600, p.now), [p.fires,p.now,p.hours]);
+  const cursor = p.now - (p.view === "detections" ? Math.min(fireOffset,p.hours)*3600 : 0);
+  const detections = useMemo(() => showFires && (p.view === "detections" || p.view === "air") ? replay.detections.filter(f=>f.time<=cursor) : [], [replay,showFires,p.view,cursor]);
+  const cells = useMemo(() => p.view === "air" ? airCells(air.data, airTime, p.now) : [], [p.view,air.data,airTime,p.now]);
+  const localSensors = useMemo(() => showSensors && (p.view === "detections" || p.view === "air") ? sensorMarkers(p.sensors,p.now) : [], [p.sensors,p.now,p.view,showSensors]);
+  const markers = useMemo(() => p.view === "forecast" ? forecastMarkers(weather.data,frame,metric) : [...PLACES.map(c=>({...c,kind:"city" as const,label:c.name,detail:"Sede municipal de referência",color:"#244f42"})),...localSensors], [p.view,weather.data,frame,metric,localSensors]);
+  const selected = detections.find(f=>f.detectionId===selectedFire);
+  const windUrl = `https://www.windy.com/-${windLayer === "pm2p5" ? "PM2.5-pm2p5" : windLayer === "rain" ? "Rain-rain" : windLayer === "fires" ? "Fire-intensity-fires" : "Wind-wind"}?${windLayer},${p.place.lat},${p.place.lon},8`;
+  const windEmbed = "https://embed.windy.com/embed.html?"+new URLSearchParams({lat:String(p.place.lat),lon:String(p.place.lon),zoom:"7",level:"surface",overlay:windLayer,product:["pm2p5","fires"].includes(windLayer)?"cams":"ecmwf",type:"map",location:"coordinates",metricWind:"km/h",metricTemp:"°C",metricRain:"mm",marker:"true",message:"true"});
+  const radarRow = accu.data?.locations.find(r=>r.placeId===p.place.id);
+  const radarImage = !forecastStale(radarRow,p.now) ? radarRow?.capture?.radarImage : null;
+  const external = p.view === "windy" || p.view === "forecast" && weatherView !== "forecast";
+  useEffect(()=>setWindError(false),[windEmbed]);
+  useEffect(()=>setFrameError(false),[weatherView,p.place.id]);
+  useEffect(()=>{setSelectedFire(null);setFocus(null);},[p.place.id,p.hours]);
+  useEffect(()=>setAirIndex(0),[times[0]]);
+  function chooseFire(id:string) { const f=replay.detections.find(f=>f.detectionId===id); setSelectedFire(id); if(f)setFocus({lat:f.lat,lon:f.lon,key:id}); }
+  const available = p.source?.status !== "unavailable" && !!p.source;
+  return <section className="unified-map" aria-label="Mapa único de monitoramento">
+    <div className="map-layer-selector" role="group" aria-label="Selecionar camada do mapa">{views.map(v=><button key={v.id} aria-pressed={p.view===v.id} onClick={()=>p.onView(v.id)}><v.icon size={20}/><span><strong>{v.title}</strong><small>{v.caption}</small></span></button>)}</div>
+    <div className="map-layer-controls">
+      {p.view === "detections" && <><strong>Detecções e leituras locais</strong><label><input type="checkbox" checked={showFires} onChange={e=>setShowFires(e.target.checked)}/>Focos INPE</label><label><input type="checkbox" checked={showSensors} onChange={e=>setShowSensors(e.target.checked)}/>Leituras locais</label><button className="text-button" onClick={p.onReading}><Plus size={15}/>Registrar leitura</button></>}
+      {p.view === "windy" && <><strong>Vento e poluentes · Windy</strong><div className="compact-switch" role="group" aria-label="Camada do Windy">{[["wind","Vento"],["pm2p5","PM2,5"],["rain","Chuva"],["fires","Intensidade do fogo"]].map(([v,l])=><button key={v} aria-pressed={windLayer===v} onClick={()=>setWindLayer(v)}>{l}</button>)}</div><a className="text-button" href={windUrl} target="_blank" rel="noreferrer">Abrir Windy<ArrowUpRight size={14}/></a></>}
+      {p.view === "air" && <><strong>Qualidade do ar · mapa integrado</strong><label><input type="checkbox" checked={showFires} onChange={e=>setShowFires(e.target.checked)}/>Sobrepor focos INPE</label><label><input type="checkbox" checked={showSensors} onChange={e=>setShowSensors(e.target.checked)}/>Leituras locais</label><a className="text-button" href={`https://map.purpleair.com/air-quality-standards-us-epa-aqi?opt=%2F1%2Flp%2Fa10#7/${p.place.lat}/${p.place.lon}`} target="_blank" rel="noreferrer">Sensores PurpleAir<ArrowUpRight size={14}/></a></>}
+      {p.view === "forecast" && <><strong>Mapa de previsão regional</strong><label className="inline-select">Visualização<select aria-label="Visualização da previsão" value={weatherView} onChange={e=>setWeatherView(e.target.value)}><option value="forecast">Previsão no mapa</option><option value="clima">RadarClima oficial</option><option value="accu">Radar AccuWeather</option></select></label>{weatherView==="forecast"&&<div className="compact-switch" role="group" aria-label="Fonte da previsão">{(["climaeradar","accuweather"] as const).map(v=><button key={v} aria-pressed={provider===v} onClick={()=>setProvider(v)}>{FORECAST_PROVIDER_NAMES[v]}</button>)}</div>}</>}
+    </div>
+    {p.view === "forecast" && weatherView === "forecast" && <div className="map-time-controls"><label>Indicador<select aria-label="Indicador meteorológico" value={metric} onChange={e=>{setMetric(e.target.value as ForecastMetric);if(e.target.value==="wind"&&horizon==="daily")setHorizon("current");}}><option value="temperature">Temperatura</option><option value="rainProbability">Chance de chuva</option><option value="wind">Vento</option></select></label><label>Período<select aria-label="Período da previsão" value={horizon} onChange={e=>{setHorizon(e.target.value as ForecastFrame["horizon"]);if(e.target.value==="daily"&&metric==="wind")setMetric("temperature");}}><option value="current">Atual</option><option value="hourly">Próximas 24 h</option><option value="daily">Próximos 7 dias</option></select></label>{horizon==="hourly"&&<label>Horário<select value={time??""} onChange={e=>setForecastTime(Number(e.target.value))} disabled={!availableTimes.length}>{!availableTimes.length&&<option value="">Sem horários disponíveis</option>}{availableTimes.map(t=><option key={t} value={t}>{stamp(t,true)} · UTC−3</option>)}</select></label>}{horizon==="daily"&&<label>Dia<select value={day??""} onChange={e=>setForecastDay(e.target.value)} disabled={!days.length}>{!days.length&&<option value="">Sem dias disponíveis</option>}{days.map(d=><option key={d} value={d}>{d.slice(8,10)}/{d.slice(5,7)}</option>)}</select></label>}<button className="text-button" disabled={weather.loading} onClick={()=>void weather.load()}><RefreshCw size={14} className={weather.loading?"spin":""}/>Atualizar fonte</button></div>}
+    <div className="unified-stage">
+      <div hidden={external}><Suspense fallback={<div className="map-placeholder">Preparando mapa ambiental…</div>}><TerrainMap place={p.place} radius={p.radius} fires={detections} cursor={cursor} selected={selectedFire} onSelect={chooseFire} focus={focus} showEvents={false} markers={markers} cells={cells} sensors={showSensors?p.sensors:[]} unified regional={p.view==="air"||p.view==="forecast"} visible={!external&&p.active}/></Suspense></div>
+      {p.view==="windy" && <div className="unified-external">{windError?<div className="map-placeholder">O Windy não carregou. <a href={windUrl} target="_blank" rel="noreferrer">Consultar diretamente na fonte ↗</a></div>:<iframe src={windEmbed} title={`Windy · ${windLayer} · ${p.place.name}`} referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onError={()=>setWindError(true)}/>}</div>}
+      {p.view==="forecast" && weatherView==="clima" && <div className="unified-external">{frameError?<div className="map-placeholder">RadarClima indisponível nesta consulta.<a href={links.climaRadar} target="_blank" rel="noreferrer">Abrir na fonte ↗</a></div>:<iframe src={links.climaRadarEmbed} title={`Clima & Radar · ${p.place.name}`} referrerPolicy="strict-origin-when-cross-origin" allowFullScreen onError={()=>setFrameError(true)}/>}</div>}
+      {p.view==="forecast" && weatherView==="accu" && <div className="unified-external accu-image">{radarImage&&!frameError?<a href={links.accuRadar} target="_blank" rel="noreferrer"><img src={radarImage} alt={`Radar AccuWeather de ${p.place.name}`} onError={()=>setFrameError(true)}/></a>:<div className="map-placeholder"><CloudSun size={32}/><strong>{accu.loading?"Consultando imagem do AccuWeather…":"Imagem de radar indisponível nesta captura."}</strong><p>Isso não indica ausência de chuva.</p><a className="button primary" href={links.accuRadar} target="_blank" rel="noreferrer">Abrir radar AccuWeather<ArrowUpRight size={15}/></a></div>}</div>}
+    </div>
+    <div className="unified-map-status" role="status">
+      {p.view==="detections"&&<><span className={`dot ${available&&p.source?.status==="ok"?"green":"amber"}`}/><strong>{p.loading&&!p.source?"Consultando INPE…":!available?"Detecções indisponíveis":`${detections.length} detecções visíveis${p.source?.status==="partial"?" · cobertura parcial":""}`}</strong><span>{localSensors.length} leituras locais · referência INPE {stamp(p.source?.dataTime,true)}</span></>}
+      {p.view==="air"&&<><Layers size={15}/><strong>{cells.filter(c=>c.value!==null).length}/{cells.length} células com estimativa</strong><span>{air.loading?"Consultando CAMS…":air.error||air.data?.model.detail}</span></>}
+      {p.view==="windy"&&<span>Mapa oficial com horário próprio. Se a camada selecionada não aparecer, confira no Windy. Intensidade do fogo CAMS e detecções INPE são produtos diferentes.</span>}
+      {p.view==="forecast"&&<span>{weatherView==="forecast"?`${FORECAST_PROVIDER_NAMES[provider]} · ${weather.loading?"Consultando…":weather.error||`${markers.filter(m=>!m.detail.startsWith("Sem dado")).length}/8 sedes com valor válido`}. Valores ausentes ficam cinza.`:"Mapa oficial com horários e controles próprios."} {weatherView!=="forecast"&&<a href={weatherView==="clima"?links.climaRadar:links.accuRadar} target="_blank" rel="noreferrer">Abrir na fonte ↗</a>}</span>}
+    </div>
+    {p.view==="detections"&&<div className="unified-timeline"><label htmlFor="fire-time"><strong>Evolução das detecções</strong><span>{stamp(cursor,true)} · UTC−3</span></label><input id="fire-time" type="range" min="0" max={p.hours} step="0.5" value={p.hours-Math.min(fireOffset,p.hours)} onChange={e=>setFireOffset(p.hours-Number(e.target.value))}/><div><span>Há {p.hours} horas</span><span>Agora</span></div><small>Detecções acumuladas até o horário selecionado; não representam perímetro ou propagação do fogo.</small></div>}
+    {p.view==="air"&&<div className="unified-timeline"><label htmlFor="air-time"><strong>Previsão de partículas · até 72 h</strong><span>{stamp(airTime,true)} · UTC−3</span></label><input id="air-time" type="range" min="0" max={Math.max(0,times.length-1)} value={Math.min(airIndex,Math.max(0,times.length-1))} disabled={!times.length} onChange={e=>setAirIndex(Number(e.target.value))}/><div><span>Referência CAMS</span><span>+72 h</span></div><small>Grade de aproximadamente 45 km. As células são estimativas, não medições locais. Focos e leituras sobrepostos conservam seus horários de observação.</small><div className="unified-legend">{[...[0,51,101,151,201,301].map(n=>[aqBand(n).color,aqBand(n).label]),["#87968d","Sem estimativa"]].map(([color,label])=><span key={label}><i style={{background:color}}/>{label}</span>)}<span className="legend-label">AQI EUA · PM2,5</span></div></div>}
+    {selected&&p.view==="detections"&&<div className="map-selected"><Flame size={18}/><span><strong>Detecção selecionada · {selected.satellite}</strong><br/>{stamp(selected.time,true)} · {selected.lat.toFixed(4)}, {selected.lon.toFixed(4)} · FRP {display(selected.frp)} MW</span><button className="text-button" onClick={()=>setSelectedFire(null)}>Fechar</button></div>}
+    {p.view==="detections"&&<details className="unified-details"><summary>Consultar detecções e leituras em tabela</summary><div className="table-scroll"><table><thead><tr><th>Tipo</th><th>Referência</th><th>Horário · UTC−3</th><th>Coordenadas</th></tr></thead><tbody>{detections.slice(-100).reverse().map(f=><tr key={f.detectionId}><td>INPE</td><td><button className="text-button" onClick={()=>chooseFire(f.detectionId)}>{f.satellite}</button></td><td>{stamp(f.time,true)}</td><td>{f.lat.toFixed(4)}, {f.lon.toFixed(4)}</td></tr>)}{p.sensors.map(s=><tr key={s.id}><td>Leitura local</td><td>{s.name} · {display(s.pm25)} µg/m³</td><td>{stamp(s.time,true)}</td><td>{s.lat.toFixed(4)}, {s.lon.toFixed(4)}</td></tr>)}</tbody></table></div>{detections.length>100&&<p>Mostrando as 100 observações mais recentes; o mapa inclui todas as detecções filtradas.</p>}</details>}
+    {p.view==="forecast"&&weatherView==="forecast"&&<details className="unified-details"><summary>Comparar Clima & Radar e AccuWeather nas 8 sedes</summary><p>{metric==="temperature"&&horizon==="daily"?"Temperatura máxima prevista":"Indicador selecionado"} · {FORECAST_UNITS[metric]}. Cada fonte mantém o horário de sua captura.</p><div className="table-scroll"><table><thead><tr><th>Município</th><th>Clima & Radar</th><th>AccuWeather</th></tr></thead><tbody>{PLACES.map(c=><tr key={c.id}><td>{c.name}</td>{[clima,accu].map((s,i)=>{const row=s.data?.locations.find(r=>r.placeId===c.id);return <td key={i}>{display(forecastValue(row,frame,metric))} {FORECAST_UNITS[metric]}<small className="table-subline">Captura: {stamp(row?.capture?.collectedAt,true)}{row?.state!=="ok"?` · ${row?.detail??"Sem captura"}`:""}</small></td>;})}</tr>)}</tbody></table></div></details>}
+  </section>;
+}

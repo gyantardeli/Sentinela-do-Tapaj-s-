@@ -1,0 +1,90 @@
+[
+  {
+    "name": "check-online-interface",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.31,
+    "output": "{\"passed\":true,\"checks\":[\"no offline UI or orphan imports\",\"manual storage key retained\",\"mobile serializer retained without local storage\",\"GeoJSON/CSV use independent download helper\",\"legacy worker has no intercept\",\"independent tabs reuse unchanged environmental components and online data modules\"]}",
+    "stderr": ""
+  },
+  {
+    "name": "check-online-runtime",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.53,
+    "output": "{\"passed\":true,\"groups\":4,\"checks\":[\"retirement worker preserves other caches and unregisters after cleanup failure\",\"startup cleanup selects only same-origin /sw.js and tolerates one rejected unregister\",\"snapshot failures, HTTP errors, reconnect and late responses clear or refresh remote values\",\"Home ignores environmental device cache, preserves manual readings, and revalidates online\"]}",
+    "stderr": ""
+  },
+  {
+    "name": "check-consolidated-integration",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.49,
+    "output": "{\"passed\":true,\"protectedFiles\":63,\"chapters\":8,\"chapterReferences\":24,\"navigation\":\"independent panels, canonical and legacy links checked\",\"payment\":\"locked-off\",\"experiences\":\"client-only, cleanup installed\",\"productionWrites\":0}",
+    "stderr": ""
+  },
+  {
+    "name": "verify-operations",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.77,
+    "output": "{\"passed\":true,\"checks\":[\"alerts off by default and config validation\",\"optimistic config version\",\"archive baseline, corrections, missing file and cooldown\",\"model zero, threshold crossing and stale rejection\",\"empty/index/partial distinguished from collection failure\",\"alert history idempotence and acknowledgement\",\"self-contained HTML and injection escaping\",\"service worker desativado sem interceptacao\",\"operations UI SSR\"]}",
+    "stderr": ""
+  },
+  {
+    "name": "verify-geo-monitor",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.93,
+    "output": "{\"passed\":true,\"checks\":[\"geometrias e GeoJSON\",\"areas e configuracoes\",\"monitoramento e alertas\",\"manifesto e icones\",\"navegacao somente online\"]}\n{\"mapSSR\":true}",
+    "stderr": ""
+  },
+  {
+    "name": "check-fire-replay",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.42,
+    "output": "{\"verified\":true,\"checks\":[\"deduplication\",\"time and distance association\",\"no future leakage\",\"deterministic event labels\",\"satellite provenance\",\"frame export\",\"spatial filtering\",\"query boundaries\",\"10000 observations\"],\"denseMilliseconds\":41}",
+    "stderr": ""
+  },
+  {
+    "name": "check-fire-kml",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.57,
+    "output": "{\"verified\":true,\"checks\":[\"XML parsing and unique IDs\",\"longitude/latitude and terrain\",\"original attributes and escaping\",\"observation timestamps\",\"no future leakage\",\"satellite/event/recent filters\",\"empty source\",\"circle/polygon/corridor geometry\",\"no private callbacks\"]}",
+    "stderr": ""
+  },
+  {
+    "name": "check-air-quality-map",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.69,
+    "output": "{\"passed\":true,\"groups\":6,\"checks\":[\"154 unique cells cover all eight municipal seats and 72 hours\",\"Concentration zero survives; missing data, wrong units, coordinates and composite AQI are rejected\",\"Only CAMS is queried; partial failures preserve other cells\",\"Shared cache avoids repeat calls and preserves original timestamps after a provider failure\",\"Request uses CAMS Global, PM2.5-specific AQI and explicit UTC horizon\",\"Read-only API, online maps, Portuguese controls and original PurpleAir remain intact\"]}",
+    "stderr": ""
+  },
+  {
+    "name": "check-purpleair",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.7,
+    "output": "{\"passed\":true,\"checks\":[\"all six AQI boundaries and zero\",\"missing and invalid input remain unclassified\",\"online map loads without field-mode dependency\",\"supplied map URL preserved\",\"empty manual interpreter with accessible controls\",\"Portuguese guide and honest language scope\",\"all eight municipality labels\"]}",
+    "stderr": ""
+  },
+  {
+    "name": "check-weather-capture",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.59,
+    "output": "{\"passed\":true,\"checks\":[\"public HTML parsing and geographic identity\",\"Celsius/Fahrenheit and true zeros\",\"UTC−3 clock, hourly epochs and daily dates\",\"missing versus zero and no interpolation\",\"old/future pages and changed formats rejected\",\"fixed-host public radar images and no app credential reuse\",\"request coalescing, cache, failure preservation and stale removal\",\"eight-place forecast SVG and official radar SSR\",\"invalid API provider and no database writes\"],\"livePagesValidated\":0,\"productionWrites\":0}",
+    "stderr": ""
+  },
+  {
+    "name": "check-apoie-integration",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.07,
+    "output": "✔ página mantém liberdade de contribuição e tom de cafezinho (2.72878ms)\n✔ sem dados Pix, botão de copiar está protegido por condicional (0.621134ms)\n✔ camada de Pix tem guardas de autorização e verificação (0.410501ms)\n✔ CSS usa classes locais, sem modificar global CSS (1.013958ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 9.097385",
+    "stderr": ""
+  }
+]

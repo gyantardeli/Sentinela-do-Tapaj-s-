@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Diário do Explorador: oito páginas selecionáveis sobre história, cultura e natureza do Tapajós, com fontes verificáveis.">
+  <meta name="theme-color" content="#302b1d">
+  <title>Diário do Explorador | Sentinela Tapajós</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" class="svg-defs" xmlns="http://www.w3.org/2000/svg">
+ <symbol id="ico-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="15.2,8.8 13.1,13.1 8.8,15.2 10.9,10.9"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2"/></symbol>
+ <symbol id="ico-people" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M2.5 20v-2.4a6.5 6.5 0 0 1 13 0V20zM17 5a3 3 0 0 1 0 6m1.5 3a5 5 0 0 1 3 4.6V20h-4"/></symbol>
+ <symbol id="ico-village" viewBox="0 0 24 24"><path d="M2 11 12 3l10 8M5 10v11h14V10M9 21v-7h6v7"/></symbol>
+ <symbol id="ico-book" viewBox="0 0 24 24"><path d="M12 6c-2.7-2-6-2.2-9-1v14c3-1.2 6.3-1 9 1 2.7-2 6-2.2 9-1V5c-3-1.2-6.3-1-9 1zM12 6v14"/></symbol>
+ <symbol id="ico-rubber" viewBox="0 0 24 24"><path d="M12 22V8m0 6C5 14 3 10 4 5c5-.2 8 2.5 8 7m0 4c7 0 9-4 8-9-5 0-8 2.5-8 7M8 22h8"/></symbol>
+ <symbol id="ico-factory" viewBox="0 0 24 24"><path d="M3 21V11l7 4v-4l7 4V5h4v16zM3 21h18M7 18h1m4 0h1m4 0h1"/></symbol>
+ <symbol id="ico-river" viewBox="0 0 24 24"><path d="M3 7c4-4 7 4 11 0s7-2 7-2M3 13c4-4 7 4 11 0s7-2 7-2M3 19c4-4 7 4 11 0s7-2 7-2"/></symbol>
+ <symbol id="ico-leaf" viewBox="0 0 24 24"><path d="M21 3C9 3 3 8 3 16a5 5 0 0 0 5 5C16 21 21 15 21 3zM4 20c4-7 9-10 14-13"/></symbol>
+ <symbol id="ico-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v12h14V9M10 14h4"/></symbol>
+ <symbol id="ico-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+ <symbol id="ico-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+ <symbol id="ico-external" viewBox="0 0 24 24"><path d="M13 5h6v6M10 14l9-9M19 14v5H5V5h5"/></symbol>
+ <symbol id="ico-fact" viewBox="0 0 24 24"><path d="M9 19h6m-5 3h4M9 15c-2-1.4-3-3.4-3-5.5a6 6 0 1 1 12 0c0 2.1-1 4.1-3 5.5v2H9z"/></symbol>
+ <symbol id="ico-close" viewBox="0 0 24 24"><path d="m5 5 14 14M19 5 5 19"/></symbol>
+</svg>
+<main class="site" id="diario-tapajos-root">
+ <header class="masthead">
+  <div class="masthead-sigil" aria-hidden="true"><svg class="ico"><use href="#ico-compass"></use></svg></div>
+  <div class="masthead-titles">
+   <span class="eyebrow">SENTINELA TAPAJÓS · ARQUIVO DO EXPLORADOR</span>
+   <h1>Diário do Explorador</h1>
+   <p>Oito páginas entre memória, território e natureza amazônica</p>
+  </div>
+  <div class="masthead-stamp" aria-hidden="true"><span>EXPEDIÇÃO</span><b>TAPAJÓS</b><span>REGISTROS & FONTES</span></div>
+ </header>
+ <div class="diary-layout">
+  <aside class="sidebar" id="indice-diario" aria-label="Índice do diário">
+   <div class="sidebar-upper">
+    <div class="side-label"><svg class="ico"><use href="#ico-compass"></use></svg> CADERNO DE CAMPO</div>
+    <h2>Índice das descobertas</h2>
+    <p>Escolha uma página para viajar pelos registros do Tapajós.</p>
+    <label class="search-wrap" for="busca-paginas"><svg class="ico"><use href="#ico-search"></use></svg><input id="busca-paginas" type="search" placeholder="Buscar no diário..." autocomplete="off"><span class="sr-only">Buscar uma página do diário</span></label>
+   </div>
+   <div id="page-tabs" class="page-tabs" role="tablist" aria-label="Oito capítulos do Diário do Explorador"></div>
+   <div class="sidebar-lower"><div class="stamp-mini">DOCUMENTAÇÃO CONSULTÁVEL</div><p><span id="source-count">24</span> referências organizadas, com links para as fontes.</p><button id="all-sources" class="subtle-link" type="button">Ver bibliografia completa <span aria-hidden="true">↗</span></button></div>
+  </aside>
+  <section class="journal" id="journal" aria-live="off">
+   <div class="paper-head">
+    <div class="page-kicker"><span id="meta-numero">PÁGINA 1 DE 8</span><span class="ink-dot">◆</span><span id="meta-epoca">ANTES DA COLONIZAÇÃO • PRESENTE</span></div>
+    <div class="paper-icon" aria-hidden="true"><svg class="ico" id="current-page-icon"><use href="#ico-people"></use></svg></div>
+    <h2 id="chapter-title">Povos Originários</h2>
+    <p id="chapter-subtitle" class="chapter-subtitle">Histórias que antecedem os mapas coloniais</p>
+    <div class="ornament" aria-hidden="true"><span>❧</span></div>
+   </div>
+   <div class="paper-body" role="tabpanel" tabindex="0" id="chapter-panel" aria-label="Conteúdo do capítulo selecionado">
+    <div class="paper-text">
+     <p id="chapter-lead" class="lead"></p>
+     <div id="chapter-paragraphs" class="prose"></div>
+    </div>
+    <figure class="journal-inset" aria-label="Gravura decorativa de rio e floresta amazônica, não documental">
+     <div class="inset-art"><span class="inset-year" id="chapter-epoch-chip">MEMÓRIA</span><svg viewBox="0 0 230 140" aria-hidden="true"><path d="M0 110Q28 80 45 100T93 99T135 104T183 88T230 101V140H0Z" fill="#5e6740" opacity=".85"/><path d="M0 130C60 80 113 160 230 105V140H0Z" fill="#9bb0a1"/><path d="M10 104l8-44 13 44m3 1 12-65 18 65m80 0 14-55 16 55m22-4 9-66 17 67" stroke="#3d4a2e" stroke-width="5" fill="none" stroke-linejoin="round"/><path d="M44 55h20m109 4h15M22 74h28m129 1h37" stroke="#3d4a2e" stroke-width="5" opacity=".7"/></svg></div>
+     <figcaption>Gravura simbólica · não é fotografia de acervo</figcaption>
+    </figure>
+   </div>
+   <div class="paper-notes">
+    <h3><svg class="ico"><use href="#ico-fact"></use></svg> Notas de observação</h3>
+    <ul id="chapter-observations"></ul>
+   </div>
+   <section class="sources" aria-labelledby="source-heading"><div class="section-header"><h3 id="source-heading"><svg class="ico"><use href="#ico-archive"></use></svg> Fontes e referências</h3><span id="source-numeration" class="reference-count">3 registros</span></div><div id="source-cards" class="source-cards"></div><p class="source-disclaimer">Os links abrem documentos externos em nova aba. Alguns portais podem alterar endereços ou exigir conexão com a internet.</p></section>
+   <nav class="page-bottom" aria-label="Navegação entre páginas"><button id="prev-page" class="page-arrow" type="button">← Página anterior</button><span id="page-progress" aria-label="Progresso no diário">01 / 08</span><button id="next-page" class="page-arrow" type="button">Próxima página →</button></nav>
+  </section>
+ </div>
+ <footer class="page-footer"><span>DIÁRIO DO EXPLORADOR · HISTÓRIA, CULTURA E NATUREZA</span><span>Vigiar para conhecer. Conhecer para proteger.</span><span>Arte inspirada em mapas de expedição · não é cartografia para navegação</span></footer>
+</main>
+<dialog id="bibliography-dialog" aria-labelledby="bib-title"><div class="bibliography-sheet"><button id="close-bib" class="close-bib" type="button" aria-label="Fechar bibliografia"><svg class="ico"><use href="#ico-close"></use></svg></button><span class="eyebrow">ÍNDICE DOCUMENTAL</span><h2 id="bib-title">Bibliografia do explorador</h2><p>Referências agrupadas por capítulo. Selecione uma fonte para consultar seu conteúdo original.</p><div id="bibliography-content"></div></div></dialog>
+<noscript><div class="no-js">Este diário interativo precisa de JavaScript para trocar de página. O conteúdo e as fontes estão também descritos no arquivo README do pacote.</div></noscript>
+</body>
+</html>

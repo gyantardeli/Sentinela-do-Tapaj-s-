@@ -1,0 +1,10 @@
+{
+  "name": "sentinela-tapajos-beta",
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "d1_databases": [{ "binding": "DB", "database_name": "sentinela-tapajos-staging", "database_id": "9367d435-5b35-49fa-86dd-943ceadd40c3" }],
+  "triggers": { "crons": ["41 * * * *"] },
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

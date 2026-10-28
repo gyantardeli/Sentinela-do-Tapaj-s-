@@ -1,0 +1,100 @@
+[
+  {
+    "check": "node_modules/typescript/bin/tsc",
+    "passed": true,
+    "seconds": 3.8,
+    "output": "",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-online-interface.mjs",
+    "passed": true,
+    "seconds": 0.36,
+    "output": "{\"passed\":true,\"checks\":[\"no offline UI or orphan imports\",\"manual storage key retained\",\"mobile serializer retained without local storage\",\"GeoJSON/CSV use independent download helper\",\"legacy worker has no intercept\",\"independent tabs reuse unchanged environmental components and online data modules\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-online-runtime.mjs",
+    "passed": true,
+    "seconds": 0.63,
+    "output": "{\"passed\":true,\"groups\":4,\"checks\":[\"retirement worker preserves other caches and unregisters after cleanup failure\",\"startup cleanup selects only same-origin /sw.js and tolerates one rejected unregister\",\"snapshot failures, HTTP errors, reconnect and late responses clear or refresh remote values\",\"Home ignores environmental device cache, preserves manual readings, and revalidates online\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-consolidated-integration.mjs",
+    "passed": true,
+    "seconds": 0.8,
+    "output": "{\"passed\":true,\"protectedFiles\":63,\"chapters\":8,\"chapterReferences\":24,\"navigation\":\"independent panels, canonical and legacy links checked\",\"payment\":\"locked-off\",\"experiences\":\"client-only, cleanup installed\",\"productionWrites\":0}",
+    "error": ""
+  },
+  {
+    "check": "scripts/verify-operations.mjs",
+    "passed": true,
+    "seconds": 0.78,
+    "output": "{\"passed\":true,\"checks\":[\"alerts off by default and config validation\",\"optimistic config version\",\"archive baseline, corrections, missing file and cooldown\",\"model zero, threshold crossing and stale rejection\",\"empty/index/partial distinguished from collection failure\",\"alert history idempotence and acknowledgement\",\"self-contained HTML and injection escaping\",\"service worker desativado sem interceptacao\",\"operations UI SSR\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/verify-geo-monitor.mjs",
+    "passed": true,
+    "seconds": 0.92,
+    "output": "{\"passed\":true,\"checks\":[\"geometrias e GeoJSON\",\"areas e configuracoes\",\"monitoramento e alertas\",\"manifesto e icones\",\"navegacao somente online\"]}\n{\"mapSSR\":true}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-fire-replay.mjs",
+    "passed": true,
+    "seconds": 0.72,
+    "output": "{\"verified\":true,\"checks\":[\"deduplication\",\"time and distance association\",\"no future leakage\",\"deterministic event labels\",\"satellite provenance\",\"frame export\",\"spatial filtering\",\"query boundaries\",\"10000 observations\"],\"denseMilliseconds\":131}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-fire-kml.mjs",
+    "passed": true,
+    "seconds": 0.73,
+    "output": "{\"verified\":true,\"checks\":[\"XML parsing and unique IDs\",\"longitude/latitude and terrain\",\"original attributes and escaping\",\"observation timestamps\",\"no future leakage\",\"satellite/event/recent filters\",\"empty source\",\"circle/polygon/corridor geometry\",\"no private callbacks\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-air-quality-map.mjs",
+    "passed": true,
+    "seconds": 0.86,
+    "output": "{\"passed\":true,\"groups\":6,\"checks\":[\"154 unique cells cover all eight municipal seats and 72 hours\",\"Concentration zero survives; missing data, wrong units, coordinates and composite AQI are rejected\",\"Only CAMS is queried; partial failures preserve other cells\",\"Shared cache avoids repeat calls and preserves original timestamps after a provider failure\",\"Request uses CAMS Global, PM2.5-specific AQI and explicit UTC horizon\",\"Read-only API, online maps, Portuguese controls and original PurpleAir remain intact\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-purpleair.mjs",
+    "passed": true,
+    "seconds": 0.91,
+    "output": "{\"passed\":true,\"checks\":[\"all six AQI boundaries and zero\",\"missing and invalid input remain unclassified\",\"online map loads without field-mode dependency\",\"supplied map URL preserved\",\"empty manual interpreter with accessible controls\",\"Portuguese guide and honest language scope\",\"all eight municipality labels\"]}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-weather-capture.mjs",
+    "passed": true,
+    "seconds": 0.68,
+    "output": "{\"passed\":true,\"checks\":[\"public HTML parsing and geographic identity\",\"Celsius/Fahrenheit and true zeros\",\"UTC−3 clock, hourly epochs and daily dates\",\"missing versus zero and no interpolation\",\"old/future pages and changed formats rejected\",\"fixed-host public radar images and no app credential reuse\",\"request coalescing, cache, failure preservation and stale removal\",\"eight-place forecast SVG and official radar SSR\",\"invalid API provider and no database writes\"],\"livePagesValidated\":0,\"productionWrites\":0}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-apoie-integration.mjs",
+    "passed": true,
+    "seconds": 0.07,
+    "output": "✔ página mantém liberdade de contribuição e tom de cafezinho (3.310884ms)\n✔ sem dados Pix, botão de copiar está protegido por condicional (0.555977ms)\n✔ camada de Pix tem guardas de autorização e verificação (0.626914ms)\n✔ CSS usa classes locais, sem modificar global CSS (1.163111ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 10.71553",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-public-access.mjs",
+    "passed": true,
+    "seconds": 0.34,
+    "output": "{\"passed\":true,\"checks\":[\"all API write methods reject anonymous and viewer requests\",\"same-origin is not authorization\",\"owner identity and service token allowed\",\"missing secrets fail closed\",\"public read methods preserved\",\"updated scheduled collector protocol and checksum\",\"service credentials absent from client code\"],\"productionWrites\":0}",
+    "error": ""
+  },
+  {
+    "check": "scripts/check-mobile.mjs",
+    "passed": true,
+    "seconds": 1.46,
+    "output": "{\"component\":\"mobile-history\",\"checkedAt\":1793005316,\"status\":\"ok\",\"written\":[\"2026-10-26\",\"2026-10-25\",\"2026-10-24\"],\"totalDays\":3,\"failures\":[]}\n{\"component\":\"mobile-history\",\"checkedAt\":1793005317,\"status\":\"partial\",\"written\":[\"2026-10-25\",\"2026-10-23\"],\"totalDays\":4,\"failures\":[{\"day\":\"2026-10-26\",\"reason\":\"HTTP 503\"}]}\n{\"passed\":true,\"checks\":[\"eight cities and bounded forecast\",\"read-only API and invalid filters\",\"secrets excluded\",\"missing versus zero\",\"archive write/readback and failed-source preservation\",\"stale model rejection\",\"HEAD semantics\"],\"fixtures\":\"../mobile-test-fixtures\"}",
+    "error": ""
+  }
+]

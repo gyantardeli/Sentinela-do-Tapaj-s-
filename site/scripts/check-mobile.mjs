@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {harness} from './priority1-harness.mjs';
+const h=harness(),now=Math.floor(Date.now()/1000),load=h.loader(undefined,()=>now*1000);
+const core=load('./lib/environment'),envStore=load('./lib/environment-store'),mobile=load('./mobile/worker'),worker=mobile.default;
+await envStore.saveEnvironment({revision:'environment-v1',collectedAt:now,air:core.PLACES.map(p=>({placeId:p.id,points:Array.from({length:97},(_,i)=>({time:now+(i-24)*3600,pm25:12,pm10:20,aqi:45}))})),weather:core.PLACES.map(p=>({placeId:p.id,value:{time:now,temperature:30,humidity:80,speed:8,direction:90,rain:0}})),failures:{}});
+h.sql.prepare('INSERT INTO radar_settings(key,value,updated_at) VALUES (?,?,?)').run('private:test','must-not-leak',now);
+const get=path=>worker.fetch(new Request('https://example.invalid'+path));
+for(const p of core.PLACES){const r=await get('/v1/snapshot?place='+p.id);assert.equal(r.status,200);const s=await r.json();assert.equal(s.packet.place.id,p.id);assert.equal(s.schema,'sentinela-mobile-v1');assert.equal(s.forecast.length,73);assert.equal(s.history.length,7);assert.equal(s.packet.air.pm25,12);assert(!JSON.stringify(s).includes('must-not-leak'));assert(s.history.every(d=>d.fireCount===null&&d.fireCoverage==='missing'));}
+assert.equal((await get('/v1/snapshot?place=unknown')).status,400);
+assert.equal((await get('/v1/snapshot?place=itaituba&url=https://attacker.invalid')).status,400);
+for(const method of ['POST','PUT','DELETE','PATCH'])assert.equal((await worker.fetch(new Request('https://example.invalid/v1/snapshot',{method}))).status,405);
+assert.equal((await get('/not-an-api')).status,404);
+const head=await worker.fetch(new Request('https://example.invalid/v1/places',{method:'HEAD'}));assert.equal(head.status,200);assert.equal(await head.text(),'');
+const rowsBefore=h.sql.prepare('SELECT COUNT(*) AS n FROM radar_settings').get().n;
+await get('/v1/snapshot');assert.equal(h.sql.prepare('SELECT COUNT(*) AS n FROM radar_settings').get().n,rowsBefore,'GET must not write');
+const day=load('./lib/monitoring').utcDay(now);
+const csv=target=>'data_hora_gmt,satelite,latitude,longitude,frp,municipio\n'+target+(target===day?' 00:00:00':' 04:00:00')+',NPP-375,-4.2761,-55.9836,3,ITAITUBA\n';
+const fetcher=async url=>{const match=String(url).match(/(\d{4})(\d{2})(\d{2})\.csv$/);const target=match.slice(1).join('-');return new Response(csv(target));};
+const result=await mobile.refreshFireArchives(now,fetcher,3);assert.equal(result.written.length,3);assert.equal(result.failures.length,0);
+const next=await mobile.refreshFireArchives(now+1,async url=>String(url).includes(day.replaceAll('-',''))?new Response('unavailable',{status:503}):fetcher(url),3);
+assert.equal(next.status,'partial');assert.equal(h.sql.prepare('SELECT COUNT(*) AS n FROM fire_archive_days').get().n,4,'failed archive must preserve previous day');
+const updated=await (await get('/v1/snapshot')).json();assert(updated.history.some(d=>d.fireCoverage==='full'));
+const later=now+3*3600,stale=await h.loader(undefined,()=>later*1000)('./mobile/worker').mobileSnapshot('itaituba',later);assert.equal(stale.packet.air,null);assert.equal(stale.packet.weather,null);assert.equal(stale.forecast.length,0);assert(stale.sourceHealth.filter(s=>s.id!=='inpe').every(s=>s.stale));
+fs.mkdirSync('../mobile-test-fixtures',{recursive:true});fs.writeFileSync('../mobile-test-fixtures/snapshot.json',JSON.stringify(updated));
+const packet=structuredClone(updated.packet);packet.fires=[{id:'test',lat:-4.2761,lon:-55.9836,time:now-100,satellite:'NPP-375',frp:2,source:'INPE'}];fs.writeFileSync('../mobile-test-fixtures/field.json',JSON.stringify(packet));
+h.sql.close();console.log(JSON.stringify({passed:true,checks:['eight cities and bounded forecast','read-only API and invalid filters','secrets excluded','missing versus zero','archive write/readback and failed-source preservation','stale model rejection','HEAD semantics'],fixtures:'../mobile-test-fixtures'}));

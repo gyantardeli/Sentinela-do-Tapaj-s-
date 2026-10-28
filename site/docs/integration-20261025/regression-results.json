@@ -1,0 +1,92 @@
+[
+  {
+    "name": "check-online-interface",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.43
+  },
+  {
+    "name": "check-online-runtime",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.61
+  },
+  {
+    "name": "check-unified-map",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.49
+  },
+  {
+    "name": "check-air-quality-map",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.67
+  },
+  {
+    "name": "check-purpleair",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.72
+  },
+  {
+    "name": "check-collector-v23",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 1.11
+  },
+  {
+    "name": "check-priority1",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 1.36
+  },
+  {
+    "name": "verify-monitoring",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.81
+  },
+  {
+    "name": "verify-operations",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.64
+  },
+  {
+    "name": "verify-geo-monitor",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.63
+  },
+  {
+    "name": "check-fire-replay",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.44
+  },
+  {
+    "name": "check-fire-kml",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.56
+  },
+  {
+    "name": "check-weather-capture",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.7
+  },
+  {
+    "name": "check-public-access",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.35
+  },
+  {
+    "name": "check-mobile",
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 1.22
+  }
+]

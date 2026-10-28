@@ -1,3 +1,13 @@
+# Sentinela Tapajós — site publicado V41
+
+O código completo da versão 41 está em [site/](site/). Origem: commit `ddd8c6970fa6b448d77bf1c183e3ad7211db63a9`, publicado em 27/10/2026 no [Sentinela Tapajós](https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/).
+
+Inclui as abas independentes, mapa 3D, histórico, coleta, alertas, áreas de interesse, Diário do Explorador e fonte Android. Na aba Qualidade do ar, PurpleAir permanece em destaque e o painel recolhido IQAir substitui o mapa CAMS. Os modelos CAMS utilizados em outros indicadores e na coleta permanecem presentes.
+
+O diretório raiz conserva a implementação independente V2.2 e seus testes. Para trabalhar no site em produção, entre em `site/`; consulte [SITE_V41.md](SITE_V41.md). Não existe implantação automática deste GitHub no ChatGPT Sites. Banco de dados, credenciais e tarefas agendadas são configurados na plataforma e não fazem parte desta cópia.
+
+## Documentação da implementação anterior (V2.2)
+
 # Sentinela Tapajós — Projeto integrado V2.2
 
 Versão web instalável, com acesso **somente online**, que **integra** o coletor resiliente V2.1 com um painel funcional de visualização e diagnóstico. O frontend é uma implementação nova baseada na estrutura funcional documentada do projeto. **Não modifica o site antigo automaticamente.**
@@ -7,7 +17,7 @@ Versão web instalável, com acesso **somente online**, que **integra** o coleto
 - **Site original:** [Sentinela Tapajós — Queimadas e qualidade do ar](https://sentinela-tapajos-ar.gyantardeli.chatgpt.site/)
 - **Repositório de desenvolvimento:** [gyantardeli/Sentinela-do-Tapaj-s-](https://github.com/gyantardeli/Sentinela-do-Tapaj-s-)
 - **Situação:** associação documentada; **não existe sincronização automática ou implantação deste GitHub no Site original**.
-- **Código neste repositório:** implementação independente V2.2. Não equivale ao código completo da publicação original (faltam Mapa 3D, áreas de interesse e alertas).
+- **Código na raiz:** implementação independente V2.2. O código completo da publicação V41 está em `site/`.
 - **Próxima integração:** abrir o Site existente no ChatGPT Sites/Work, referenciar este repositório e integrar seletivamente coletor e APIs; revisar prévia e banco antes de publicar na mesma URL. Não substituir o frontend original pela V2.2 inteira sem auditoria.
 
 Para passos operacionais, consulte [VINCULAR_CHATGPT_SITES.md](VINCULAR_CHATGPT_SITES.md).
@@ -75,7 +85,7 @@ O "Modo Campo" não integra o frontend desta implementação V2.2; deve ser reti
 
 `npm run check` executa os testes do coletor, das regras de consistência e de integração HTTP. Os testes unitários usam provedores simulados e os testes HTTP usam servidor com coleta desabilitada. **Não há validação de conectividade real das 20 fontes nesta entrega.** A automação de screenshot/browser foi impedida pelas restrições de acesso local do navegador de testes; layout deve ser inspecionado no ambiente de implantação.
 
-O projeto não possui o código-fonte do Site publicado. A versão hospedada em `sentinela-tapajos-ar.gyantardeli.chatgpt.site` continua intacta e não deve ser anunciada como atualizada. Faltam os módulos antigos não reproduzidos na nova Visão geral (por exemplo Mapa 3D e Áreas de Interesse); para preservá-los, integra-se o coletor no código original assim que o acesso for disponibilizado.
+Na V2.2 original, o projeto não possuía o código-fonte do Site publicado; agora ele está em `site/`. A versão hospedada em `sentinela-tapajos-ar.gyantardeli.chatgpt.site` continua intacta e não deve ser anunciada como atualizada. Faltam os módulos antigos não reproduzidos na nova Visão geral (por exemplo Mapa 3D e Áreas de Interesse); para preservá-los, integra-se o coletor no código original assim que o acesso for disponibilizado.
 
 ## Arquivos
 

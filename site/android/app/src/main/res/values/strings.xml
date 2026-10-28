@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sentinela Tapajós</string>
+    <string name="tagline">MONITORAMENTO AMBIENTAL</string>
+    <string name="intro">Acompanhe focos de calor, qualidade do ar, previsão do tempo e histórico da região do Tapajós.</string>
+    <string name="guardian_description">Harpia guardiã sobre o rio e a floresta amazônica.</string>
+    <string name="open_panel">Abrir painel online</string>
+    <string name="network_body">É necessário estar conectado à internet. O painel abre em uma aba segura do navegador. Confira a fonte e o horário de atualização de cada informação.</string>
+    <string name="opened_status">Painel aberto. Use uma conexão com a internet para consultar os dados. Volte a esta tela para abrir novamente ou compartilhar o site.</string>
+    <string name="browser_missing">Não foi possível abrir o navegador. Instale ou atualize um navegador Android compatível e tente novamente.</string>
+    <string name="share_title">Compartilhar site</string>
+    <string name="share_text">Sentinela Tapajós — monitoramento ambiental da região.</string>
+    <string name="share_unavailable">Não há aplicativo disponível para compartilhar o link neste aparelho.</string>
+    <string name="version">VERSÃO 1.5.0 · ONLINE · 25 OUT 2026</string>
+</resources>

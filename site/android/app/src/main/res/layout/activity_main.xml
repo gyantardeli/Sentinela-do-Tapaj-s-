@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#F4F7F0" android:fillViewport="true">
+    <LinearLayout android:id="@+id/root" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+        <ImageView android:layout_width="match_parent" android:layout_height="200dp"
+            android:layout_marginBottom="24dp" android:src="@drawable/guardian_background"
+            android:scaleType="centerCrop" android:contentDescription="@string/guardian_description"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/tagline" android:textSize="12sp" android:letterSpacing="0.08"
+            android:textColor="#425E45"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/app_name" android:textSize="30sp"
+            android:fontFamily="sans-serif-medium" android:textColor="#173F2E"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" android:layout_marginBottom="24dp"
+            android:text="@string/intro" android:textSize="17sp" android:lineSpacingExtra="4dp"
+            android:textColor="#39543E"/>
+        <Button android:id="@+id/open_panel" style="@style/PanelButton" android:text="@string/open_panel"/>
+        <Button android:id="@+id/share_site" style="@style/PanelButton" android:text="@string/share_title"
+            android:backgroundTint="#DBE8D9" android:textColor="#173F2E"/>
+        <TextView android:id="@+id/status" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="16dp"
+            android:background="@drawable/status_background" android:accessibilityLiveRegion="polite"
+            android:text="@string/network_body" android:textSize="15sp" android:lineSpacingExtra="4dp"
+            android:textColor="#29482F"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" android:layout_marginBottom="12dp" android:text="@string/version"
+            android:textSize="12sp" android:textColor="#516C55"/>
+    </LinearLayout>
+</ScrollView>

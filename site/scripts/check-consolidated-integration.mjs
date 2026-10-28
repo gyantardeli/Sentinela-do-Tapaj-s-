@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {execFileSync} from 'node:child_process';
+import ts from 'typescript';
+const base='53e43fa4fc046978005ea97bb6dc28e1d629d797';
+const read=p=>fs.readFileSync(p,'utf8');
+const tracked=execFileSync('git',['ls-tree','-r','--name-only',base],{encoding:'utf8'}).trim().split('\n');
+const protectedFiles=tracked.filter(p=>/^(app\/api\/|android\/|db\/|drizzle\/|mobile\/)/.test(p)||p==='.openai/hosting.json'||p==='middleware.ts');
+for(const file of protectedFiles) assert.equal(Buffer.compare(fs.readFileSync(file),execFileSync('git',['show',base+':'+file])),0,'Preserve '+file);
+const context={window:{}};vm.runInNewContext(read('public/diario/data.js'),context);
+const chapters=context.window.DIARIO_TAPAJOS;
+assert.equal(chapters.length,8);assert.equal(chapters.reduce((sum,c)=>sum+c.fontes.length,0),24);
+assert.equal(new Set(chapters.map(c=>c.id)).size,8);
+const compiled=ts.transpileModule(read('lib/apoie-pix.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const mod={exports:{}};vm.runInNewContext(compiled,{module:mod,exports:mod.exports});
+const cfg=mod.exports.getApoiePixConfig;
+for(const env of [{},{SENTINELA_PIX_ENABLED:'true'},{SENTINELA_PIX_ENABLED:'true',SENTINELA_PIX_VERIFIED:'true'}]) {
+  const result=cfg(env);assert.equal(result.enabled,false);assert.equal(result.cnpjKey,null);assert.equal(result.businessName,null);
+}
+assert(read('app/apoie/page.tsx').includes('getApoiePixConfig({})'),'Review candidate must lock payments off');
+const runtime=read('lib/experiences-runtime.js');
+assert(!/fetch\(|localStorage|sessionStorage|serviceWorker|document\.cookie/.test(runtime));
+assert(runtime.includes('listeners.abort()'));assert(runtime.includes('root.remove()'));
+assert(runtime.includes('youtube-nocookie.com'));assert(runtime.includes('Minha primeira e mais profunda gratidão é a Deus.'));
+assert(runtime.includes('Salmos 24:1'));
+assert(!/const actions=\{[^}]*\b(doom|terminal|portal)\b/.test(runtime));
+const page=read('app/page.tsx');
+assert(page.includes('PANELS.map'));assert(page.includes('diary: BookOpen'));
+const navigation={exports:{}};
+vm.runInNewContext(ts.transpileModule(read('lib/panel-navigation.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:navigation,exports:navigation.exports,URLSearchParams});
+const {PANELS,panelFromLocation,panelHash}=navigation.exports;
+assert.equal(new Set(PANELS.map(p=>p.hash)).size,PANELS.length);
+for(const panel of PANELS) assert.equal(panelFromLocation(panelHash(panel.id)),panel.id);
+for(const [hash,expected] of [['','overview'],['#mapa','fire3d'],['#mapa-3d','fire3d'],['#windy','maps'],['#qualidade-do-ar','purpleair'],['#previsao','weather'],['#historico','history'],['#saude-das-fontes','health'],['#coleta','collection'],['#fontes','sources'],['#diario','diary'],['#campo','overview'],['#unknown','overview']]) assert.equal(panelFromLocation(hash),expected);
+assert.equal(panelFromLocation('','?tab=diario'),'diary');
+assert.equal(panelFromLocation('#previsao','?tab=diario'),'weather');
+console.log(JSON.stringify({passed:true,protectedFiles:protectedFiles.length,chapters:8,chapterReferences:24,navigation:'independent panels, canonical and legacy links checked',payment:'locked-off',experiences:'client-only, cleanup installed',productionWrites:0}));

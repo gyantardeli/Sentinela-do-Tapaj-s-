@@ -1,0 +1,77 @@
+[
+  {
+    "check": "check-online-interface",
+    "passed": true,
+    "seconds": 0.39
+  },
+  {
+    "check": "check-online-runtime",
+    "passed": true,
+    "seconds": 0.55
+  },
+  {
+    "check": "check-unified-map",
+    "passed": true,
+    "seconds": 0.68
+  },
+  {
+    "check": "check-air-quality-map",
+    "passed": true,
+    "seconds": 0.9
+  },
+  {
+    "check": "check-purpleair",
+    "passed": true,
+    "seconds": 0.98
+  },
+  {
+    "check": "check-collector-v23",
+    "passed": true,
+    "seconds": 1.27
+  },
+  {
+    "check": "check-priority1",
+    "passed": true,
+    "seconds": 1.24
+  },
+  {
+    "check": "verify-monitoring",
+    "passed": true,
+    "seconds": 0.78
+  },
+  {
+    "check": "verify-operations",
+    "passed": true,
+    "seconds": 0.62
+  },
+  {
+    "check": "verify-geo-monitor",
+    "passed": true,
+    "seconds": 0.69
+  },
+  {
+    "check": "check-fire-replay",
+    "passed": true,
+    "seconds": 0.49
+  },
+  {
+    "check": "check-fire-kml",
+    "passed": true,
+    "seconds": 0.6
+  },
+  {
+    "check": "check-weather-capture",
+    "passed": true,
+    "seconds": 0.57
+  },
+  {
+    "check": "check-public-access",
+    "passed": true,
+    "seconds": 0.32
+  },
+  {
+    "check": "check-mobile",
+    "passed": true,
+    "seconds": 1.18
+  }
+]

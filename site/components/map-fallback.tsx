@@ -1,0 +1,26 @@
+"use client";
+import { useMemo, useRef, useState } from "react";
+import { Crosshair, Minus, Plus } from "lucide-react";
+import { AIR_GRID_STEP } from "../lib/air-quality-map";
+import { historyProject } from "../lib/history-timeline";
+import { stamp } from "../lib/environment";
+import type { ReplayDetection } from "../lib/fire-replay";
+import { SATELLITE_TILES, type Basemap } from "../lib/satellite-basemap";
+import type { MapCell, MapMarker } from "../lib/unified-map";
+
+export default function MapFallback({cells,markers,fires,basemap}:{cells:MapCell[];markers:MapMarker[];fires:ReplayDetection[];basemap:Basemap}) {
+  const [detail,setDetail]=useState(""),[zoomDelta,setZoomDelta]=useState(0),[offset,setOffset]=useState({x:0,y:0}),[baseError,setBaseError]=useState(false);
+  const drag=useRef<{x:number;y:number;ox:number;oy:number}|null>(null),moved=useRef(false);
+  const width=1000,height=650,zoom=7+zoomDelta,z=Math.floor(zoom),tileSize=256*2**(zoom-z),center=historyProject(-5,-56,zoom),left=center.x-width/2-offset.x,top=center.y-height/2-offset.y;
+  const point=(lat:number,lon:number)=>{const p=historyProject(lat,lon,zoom);return {x:p.x-left,y:p.y-top};};
+  const tiles=useMemo(()=>{const rows=[];for(let x=Math.floor(left/tileSize);x<=Math.floor((left+width)/tileSize);x++)for(let y=Math.floor(top/tileSize);y<=Math.floor((top+height)/tileSize);y++)rows.push({x,y,url:basemap==="satellite"?SATELLITE_TILES.replace("{z}",String(z)).replace("{x}",String(x)).replace("{y}",String(y)):`https://tile.openstreetmap.org/${z}/${x}/${y}.png`});return rows;},[left,top,tileSize,z,basemap]);
+  function changeZoom(delta:number){const next=Math.max(-1,Math.min(3,zoomDelta+delta)),factor=2**(next-zoomDelta);setOffset(o=>({x:o.x*factor,y:o.y*factor}));setZoomDelta(next);}
+  function select(text:string){if(!moved.current)setDetail(text);}
+  return <div className="unified-2d-map"><svg className="unified-fallback-svg" viewBox="0 0 1000 650" role="group" aria-label="Mapa 2D das estimativas e referências municipais" onPointerDown={e=>{moved.current=false;drag.current={x:e.clientX,y:e.clientY,ox:offset.x,oy:offset.y};}} onPointerMove={e=>{if(!drag.current)return;const d=drag.current;if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<5)return;moved.current=true;e.currentTarget.setPointerCapture(e.pointerId);const scale=width/e.currentTarget.getBoundingClientRect().width;setOffset({x:d.ox+(e.clientX-d.x)*scale,y:d.oy+(e.clientY-d.y)*scale});}} onPointerUp={e=>{drag.current=null;if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}} onPointerCancel={()=>{drag.current=null;}}>
+    <defs><pattern id="fallback-grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#cbd9cc"/></pattern></defs><rect width="1000" height="650" fill="#e7eee3"/><rect width="1000" height="650" fill="url(#fallback-grid)"/>
+    {tiles.map(t=><image key={`${basemap}-${z}-${t.x}-${t.y}`} href={t.url} x={t.x*tileSize-left} y={t.y*tileSize-top} width={tileSize+.5} height={tileSize+.5} onError={()=>setBaseError(true)}/>)}
+    {cells.map(c=>{const a=point(c.lat+AIR_GRID_STEP/2,c.lon-AIR_GRID_STEP/2),b=point(c.lat-AIR_GRID_STEP/2,c.lon+AIR_GRID_STEP/2);return <rect key={c.id} x={a.x} y={a.y} width={b.x-a.x} height={b.y-a.y} fill={c.color} fillOpacity=".42" stroke="#6d8975" strokeWidth=".6" role="button" tabIndex={0} aria-label={c.detail} onClick={()=>select(c.detail)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setDetail(c.detail);}}}><title>{c.detail}</title></rect>;})}
+    {fires.map(f=>{const p=point(f.lat,f.lon),text=`INPE · ${f.satellite} · ${stamp(f.time,true)} · ${f.lat.toFixed(4)}, ${f.lon.toFixed(4)}`;return <circle key={f.detectionId} cx={p.x} cy={p.y} r="3.5" fill="#e4773b" stroke="#fff" strokeWidth=".8" onClick={()=>select(text)}><title>{text}</title></circle>;})}
+    {markers.map((m,i)=>{const p=point(m.lat,m.lon);return <g key={m.kind+m.id} role="button" tabIndex={0} aria-label={`${m.label}. ${m.detail}`} onClick={()=>select(m.label+" · "+m.detail)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setDetail(m.label+" · "+m.detail);}}}><circle cx={p.x} cy={p.y} r={m.kind==="weather"?10:5} fill={m.color} stroke="#fff" strokeWidth="2"/><text x={p.x+10} y={p.y+(i%2?-12:20)} fontSize="13" fill="#153c2a" stroke="#fff" strokeWidth="3" paintOrder="stroke">{m.label}</text><title>{m.detail}</title></g>;})}
+  </svg><div className="map-tools"><button aria-label="Aproximar mapa regional" onClick={()=>changeZoom(.5)} disabled={zoomDelta>=3}><Plus size={17}/></button><button aria-label="Afastar mapa regional" onClick={()=>changeZoom(-.5)} disabled={zoomDelta<=-1}><Minus size={17}/></button><button aria-label="Centralizar região" onClick={()=>{setZoomDelta(0);setOffset({x:0,y:0});}}><Crosshair size={17}/></button></div><div className="fallback-attribution">{basemap==="satellite"?<a href="https://s2maps.eu" target="_blank" rel="noreferrer">Sentinel-2 cloudless © EOX · Copernicus 2024 · CC BY-NC-SA 4.0</a>:<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a>}</div>{(detail||baseError)&&<p className="unified-map-status" role="status">{detail||"Há falhas nas imagens de fundo; as coordenadas e os valores permanecem disponíveis."}</p>}</div>;
+}

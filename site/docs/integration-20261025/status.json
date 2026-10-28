@@ -1,0 +1,16 @@
+{
+  "period": [
+    "2026-10-24",
+    "2026-10-25"
+  ],
+  "timezone": "America/Fortaleza",
+  "project_id": "appgprj_6ad394eb7be48191a994993ead538987",
+  "published_version": 30,
+  "v33_commit": "0206e4a21c434b7ece422abd1c2faa333f78de61",
+  "source_base": "53e43fa4fc046978005ea97bb6dc28e1d629d797",
+  "publication_requested": false,
+  "browser_qa": "unverified: managed preview route refused connection",
+  "production_database_writes": 0,
+  "pix_enabled": false,
+  "apk_recompiled_in_this_integration": false
+}

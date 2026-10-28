@@ -1,0 +1,124 @@
+.fire3d-module { color:#304c3b; }
+.fire3d-intro,.fire3d-stage-head,.fire3d-launch { display:flex;align-items:center;justify-content:space-between;gap:20px; }
+.fire3d-intro { margin:25px 0 20px; }
+.fire3d-intro h2 { font-size:28px;line-height:1.3;letter-spacing:-.6px;margin:11px 0; }
+.fire3d-intro p,.fire3d-launch p { font-size:13px;line-height:1.8;color:#657b6a; }
+.fire3d-export-actions { display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px;flex-shrink:0;max-width:390px; }
+.fire3d-export-actions .button { font-size:12px;min-height:43px; }
+.fire3d-earth-help { font-size:12px;line-height:1.9;margin:-3px 0 20px;color:#526f59; }
+.fire3d-earth-help summary { cursor:pointer;font-weight:600;padding:7px 0; }
+.fire3d-earth-help p { margin:9px 0;max-width:850px; }
+.fire3d-earth-help a { text-decoration:underline;text-underline-offset:3px; }
+.fire3d-launch { padding:23px 26px;border:1px solid #cbdccf;background:#eaf2e8;border-radius:16px;margin:0 0 28px; }
+.fire3d-launch h2 { font-size:21px;margin:8px 0; }
+.fire3d-launch .button { flex-shrink:0; }
+.fire3d-coverage { display:flex;align-items:flex-start;gap:11px;padding:16px 19px;background:#edf5ef;border:1px solid #d3e1d4;border-radius:12px;margin-bottom:20px; }
+.fire3d-coverage.partial { background:#fff6e8;border-color:#ecd9b5; }
+.fire3d-coverage svg { flex-shrink:0;margin-top:3px; }
+.fire3d-coverage strong,.fire3d-coverage span { display:block; }
+.fire3d-coverage strong { font-size:13px; }
+.fire3d-coverage span { font-size:12px;line-height:1.8;color:#687867;margin-top:4px; }
+.fire3d-stage { overflow:hidden;margin-bottom:20px; }
+.fire3d-stage-head { padding:20px 24px;background:#f8faf6;flex-wrap:wrap; }
+.fire3d-stage-head strong { display:block;font-size:21px;margin-top:7px; }
+.fire3d-stage-head strong small { font-size:12px;font-weight:500;color:#6e806e; }
+.fire3d-observed-label { font-size:10px;letter-spacing:1.8px;color:#627a66; }
+.fire3d-toggle { display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer; }
+.fire3d-toggle input { width:17px;height:17px;accent-color:#2e7152; }
+.fire3d-map-wrap { position:relative;background:#e4ece3; }
+.fire3d-map-surface { position:relative; }
+.fire3d-basemap-bar { display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 20px;padding:12px 18px;background:#f5f8ef;border-top:1px solid #e2e8da;border-bottom:1px solid #dbe4d4; }
+.fire3d-basemap-bar>span { font-size:11px;line-height:1.7;color:#657959; }
+.fire3d-basemap-switch { display:flex;padding:3px;background:#e5eddf;border-radius:8px;gap:3px; }
+.fire3d-basemap-switch button { min-height:38px;min-width:90px;padding:8px 15px;font-size:12px;border-radius:6px; }
+.fire3d-basemap-switch button[aria-pressed=true] { background:#2c6549;color:white;box-shadow:0 2px 4px #244b2920; }
+.fire3d-fallback-imagery-error { position:absolute;left:12px;right:12px;bottom:50px;padding:9px 12px;background:#fff4e4;color:#805d2b;font-size:11px;border-radius:6px; }
+.fire3d-map-fallback .map-attribution { max-width:80%;font-size:9px;line-height:1.6; }
+.fire3d-canvas { height:580px;width:100%; }
+.fire3d-loading { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;background:#edf3e9;font-size:14px;pointer-events:none; }
+.fire3d-map-controls { position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;max-width:calc(100% - 70px); }
+.fire3d-map-controls button,.fire3d-map-controls label { background:#fffef8f2;border:1px solid #d6dfd0;border-radius:7px;min-height:37px;display:flex;align-items:center;gap:7px;padding:8px 10px;font-size:11px;color:#355b40;box-shadow:0 2px 5px #18332112; }
+.fire3d-map-controls label { padding:3px 8px;gap:5px; }
+.fire3d-map-controls select { background:transparent;border:0;max-width:127px;font-size:11px;min-height:29px;color:#355b40; }
+.fire3d-map-controls button:disabled,.fire3d-map-controls select:disabled { opacity:.55; }
+.fire3d-tile-notice { position:absolute;left:12px;right:55px;top:105px;background:#fff5e5ef;padding:10px 13px;border-radius:7px;font-size:12px;color:#806232; }
+.fire3d-map-fallback .notice { margin:0;border-radius:0;display:flex;flex-wrap:wrap; }
+.fire3d-map-wrap .maplibregl-ctrl-attrib { font-size:10px;max-width:290px; }
+.fire3d-map-wrap .maplibregl-ctrl-attrib a { color:#294f3c; }
+.fire3d-map-wrap .maplibregl-ctrl-group button { background-color:white;border-radius:0; }
+.fire3d-legend { display:flex;flex-wrap:wrap;gap:11px 20px;padding:13px 20px;border-top:1px solid #dae3d7;background:#fbfcf8;font-size:11px;color:#526c56; }
+.fire3d-legend>span { display:flex;align-items:center;gap:7px; }
+.fire3d-dot { display:inline-block;border-radius:50%;width:9px;height:9px; }
+.fire3d-dot.recent { background:#f05e30; }
+.fire3d-dot.previous { background:#a08263; }
+.fire3d-dot.event { border:1.5px solid #8054ab;background:#8054ab25;width:14px;height:14px; }
+.fire3d-timeline { padding:20px 24px;background:white; }
+.fire3d-playback { display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:19px; }
+.fire3d-playback button { min-height:36px;min-width:36px;display:flex;align-items:center;justify-content:center;border:1px solid #d3dfd0;border-radius:7px;padding:8px;color:#3d5d43; }
+.fire3d-playback button:disabled { opacity:.45;cursor:default; }
+.fire3d-playback button.fire3d-play { background:#2c6549;color:white;border-color:#2c6549;min-width:42px; }
+.fire3d-playback label { display:flex;align-items:center;gap:8px;font-size:11px;margin-left:9px; }
+.fire3d-playback select { border:1px solid #d3dfd0;background:#f7faf4;border-radius:6px;padding:7px;font-size:12px;color:#355b40; }
+.fire3d-playback button.fire3d-latest { margin-left:auto;font-size:11px;padding:8px 13px; }
+.fire3d-slider-label { display:block;font-size:11px;color:#61745f; }
+.fire3d-slider-label input { display:block;width:100%;accent-color:#327653;margin:13px 0 6px;min-height:25px; }
+.fire3d-range { display:flex;justify-content:space-between;font-size:11px;font-variant-numeric:tabular-nums;color:#526e58; }
+.fire3d-timeline>p { font-size:12px;color:#72816a;line-height:1.8;margin-top:13px; }
+.fire3d-stats { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:22px; }
+.fire3d-stats article { background:white;border:1px solid #dce5d7;border-radius:13px;padding:22px; }
+.fire3d-stats small { font-size:10px;letter-spacing:.7px;line-height:1.7;color:#667e62;display:block; }
+.fire3d-stats strong { display:block;font-size:34px;font-weight:600;margin:12px 0 6px; }
+.fire3d-stats article>span { font-size:12px;color:#73836c;line-height:1.7; }
+.fire3d-inspection { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;margin-bottom:22px;align-items:start; }
+.fire3d-inspection .panel-head,.fire3d-table .panel-head { padding:23px; }
+.fire3d-inspection h3,.fire3d-table h3 { font-size:18px; }
+.fire3d-inspection .panel-head p,.fire3d-table .panel-head p { font-size:12px;line-height:1.8; }
+.fire3d-event-select { display:flex;flex-direction:column;gap:10px;padding:0 23px;font-size:12px; }
+.fire3d-event-select select { width:100%;min-width:0;border:1px solid #d3dfd0;border-radius:7px;padding:12px;background:#f9fbf6;color:#3a6246;font-size:12px; }
+.fire3d-event-detail,.fire3d-focus-data { padding:20px 23px; }
+.fire3d-event-detail>strong,.fire3d-focus-data>strong { display:block;font-size:12px;word-break:break-all; }
+.fire3d-event-detail>span { display:block;font-size:12px;line-height:1.9;color:#658066;margin-top:7px; }
+.fire3d-event-detail>button { margin-top:14px; }
+.fire3d-help { font-size:12px;color:#708268;line-height:1.85;margin:18px 23px; }
+.fire3d-method { padding:20px 23px;border-top:1px solid #e3ebdc;font-size:12px;color:#5c7758; }
+.fire3d-method summary { cursor:pointer;font-weight:600;line-height:1.8; }
+.fire3d-method p { margin-top:13px;line-height:1.9; }
+.fire3d-empty-detail { display:flex;flex-direction:column;align-items:center;padding:38px 25px;text-align:center;gap:17px;color:#83947a;min-height:245px; }
+.fire3d-empty-detail p { font-size:13px;line-height:1.9;max-width:360px; }
+.fire3d-focus-data { padding-top:0; }
+.fire3d-focus-data dl { margin-top:16px; }
+.fire3d-focus-data dl>div { padding:10px 0;border-bottom:1px solid #eaf0e5;display:flex;justify-content:space-between;gap:18px;align-items:flex-start;font-size:12px; }
+.fire3d-focus-data dt { color:#718267;flex:1; }
+.fire3d-focus-data dd { color:#32583e;text-align:right;word-break:break-word;max-width:65%; }
+.fire3d-focus-data>.text-button { margin-top:17px; }
+.fire3d-focus-data .fire3d-help { margin:16px 0 0; }
+.fire3d-search { display:flex;flex-direction:column;gap:10px;font-size:12px;margin:0 23px 20px;color:#647b5f; }
+.fire3d-search input { border:1px solid #d6dfd1;border-radius:7px;padding:13px;font-size:13px;width:100%;color:#3b5a40;background:white; }
+.fire3d-table table { width:100%;border-collapse:collapse;font-size:12px; }
+.fire3d-table th { background:#f6f9f1;padding:15px 20px;text-align:left;font-size:10px;font-weight:500;color:#67805e;white-space:nowrap; }
+.fire3d-table td { padding:15px 20px;border-top:1px solid #e4ebde;vertical-align:middle;white-space:nowrap;color:#4b694c; }
+.fire3d-table td small { display:block;font-size:10px;color:#87977c;margin-top:5px; }
+.fire3d-table tr.selected td { background:#eaf4ed; }
+.fire3d-pages { display:flex;align-items:center;justify-content:center;gap:20px;padding:18px;font-size:12px;border-top:1px solid #e4ebde; }
+.fire3d-pages button { border:1px solid #d7e2cf;padding:9px 13px;border-radius:6px; }
+.fire3d-pages button:disabled { opacity:.45; }
+.fire3d-provenance { border-left:3px solid #9ab28b;padding:3px 0 3px 20px;margin:25px 0;color:#6d8064; }
+.fire3d-provenance>strong { font-size:13px; }
+.fire3d-provenance p { font-size:12px;line-height:1.9;margin-top:9px; }
+.fire3d-provenance a { text-decoration:underline;text-underline-offset:3px; }
+.fire3d-module button:focus-visible,.fire3d-module select:focus-visible,.fire3d-module input:focus-visible { outline:3px solid #5b9c78;outline-offset:3px; }
+@media(max-width:1000px) { .fire3d-inspection{grid-template-columns:1fr}.fire3d-stats article{padding:18px}.fire3d-canvas{height:510px}.fire3d-intro h2{font-size:25px} }
+@media(max-width:650px) {
+  .fire3d-intro,.fire3d-launch{align-items:flex-start;flex-direction:column;gap:14px}.fire3d-intro h2{font-size:25px}.fire3d-intro p{font-size:13px}
+  .fire3d-export-actions{width:100%;max-width:none;justify-content:flex-start}.fire3d-export-actions .button{flex:1;justify-content:center;font-size:11px;white-space:nowrap;padding:11px 8px;gap:6px}
+  .fire3d-basemap-bar{padding:12px 14px;gap:8px}.fire3d-basemap-bar>span{font-size:10px;width:100%}.fire3d-basemap-switch button{min-width:100px;min-height:42px}
+  .fire3d-launch{padding:21px;margin-bottom:22px}.fire3d-launch h2{font-size:22px}.fire3d-launch .button{width:100%;justify-content:center}
+  .fire3d-canvas{height:450px}.fire3d-stage-head{padding:18px;gap:15px}.fire3d-stage-head strong{font-size:20px}.fire3d-stage-head .fire3d-toggle{font-size:12px}
+  .fire3d-map-controls{top:9px;left:9px;gap:5px}.fire3d-map-controls button{font-size:11px;padding:8px;gap:5px}.fire3d-map-controls label{font-size:10px}
+  .fire3d-tile-notice{top:110px;left:9px;font-size:11px}.fire3d-legend{padding:13px 16px;gap:12px;font-size:11px}.fire3d-timeline{padding:18px 16px}
+  .fire3d-playback{gap:6px}.fire3d-playback label{margin-left:3px;gap:4px}.fire3d-playback button.fire3d-latest{margin-left:0}.fire3d-playback select{padding:7px 3px}
+  .fire3d-stats{grid-template-columns:1fr;gap:10px}.fire3d-stats article{padding:17px 20px;position:relative}.fire3d-stats strong{font-size:30px;margin:6px 0}.fire3d-stats small{font-size:10px}
+  .fire3d-inspection .panel-head,.fire3d-table .panel-head{padding:21px 18px;gap:12px;flex-wrap:wrap}.fire3d-event-select{padding:0 18px}.fire3d-method{padding:18px}.fire3d-event-detail,.fire3d-focus-data{padding:18px}.fire3d-focus-data{padding-top:0}
+  .fire3d-help{margin:18px}.fire3d-focus-data dl>div{font-size:12px;gap:12px}.fire3d-search{margin:0 18px 18px}.fire3d-table td{padding:14px 16px}.fire3d-provenance{padding-left:15px}
+}
+@media(prefers-reduced-motion:reduce) { .fire3d-module *{scroll-behavior:auto!important} }
