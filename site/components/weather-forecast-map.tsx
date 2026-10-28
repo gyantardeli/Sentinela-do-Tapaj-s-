@@ -72,6 +72,8 @@ export default function WeatherForecastMap({ place }: { place: Place }) {
   function changeHorizon(next:Horizon){setHorizon(next);if(next==="daily"&&metric==="wind")setMetric("temperature");}
   const frameTitle=horizon==="current"?"Condição atual":horizon==="daily"?`${activeDay?labelDay(activeDay):"—"} · previsão diária`:`${activeTime?stamp(activeTime,true):"—"} · UTC−3`;
   return <div className="forecast-map-module">
+    <ProviderRainMap place={place} accuweather={accu.data?.locations.find(r=>r.placeId===place.id)} now={now} />
+    <details className="forecast-regional-details"><summary>Comparar previsões regionais · 8 municípios</summary>
     <section className="panel forecast-map-panel" aria-labelledby={`${id}-title`}>
       <div className="panel-head"><div><span className="eyebrow"><MapIcon size={14}/>TEMPO NA REGIÃO</span><h2 id={`${id}-title`}>Mapa de previsão regional</h2><p>Dados capturados nas páginas públicas das duas fontes · oito sedes do Tapajós.</p></div><div className="forecast-map-actions"><button className="button secondary" disabled={!data} onClick={()=>data&&downloadCsv(data,frame,metric)}><ArrowDownToLine size={14}/>CSV</button><button className="button secondary" disabled={accu.loading||clima.loading} onClick={()=>{void accu.load();void clima.load();}}><RefreshCw size={14} className={accu.loading||clima.loading?"spin":""}/>Atualizar leitura</button></div></div>
       <div className="forecast-map-toolbar"><div className="forecast-switch" role="group" aria-label="Fonte do mapa de previsão">{(["accuweather","climaeradar"] as const).map(p=><button key={p} aria-pressed={provider===p} onClick={()=>setProvider(p)}>{FORECAST_PROVIDER_NAMES[p]}</button>)}</div><div className="forecast-switch" role="group" aria-label="Indicador meteorológico"><button aria-pressed={metric==="temperature"} onClick={()=>changeMetric("temperature")}><Thermometer size={14}/>Temperatura</button><button aria-pressed={metric==="rainProbability"} onClick={()=>changeMetric("rainProbability")}><CloudRain size={14}/>Chance de chuva</button><button aria-pressed={metric==="wind"} onClick={()=>changeMetric("wind")}><Wind size={14}/>Vento</button></div><label>Horizonte<select value={horizon} onChange={e=>changeHorizon(e.target.value as Horizon)}><option value="current">Atual</option><option value="hourly">Por hora · até 24 h</option><option value="daily">Por dia · até 7 dias</option></select></label></div>
@@ -101,7 +103,7 @@ export default function WeatherForecastMap({ place }: { place: Place }) {
       <p className="forecast-map-note">Cada círculo representa a previsão para uma sede, sem interpolação entre municípios. Chance de chuva não é volume de chuva nem leitura de radar. As duas fontes mantêm suas próprias previsões; os dados do Open-Meteo permanecem identificados separadamente. A leitura é automática enquanto esta aba estiver aberta, e capturas válidas são reutilizadas por 15 minutos. Bloqueios da fonte e alterações de formato são identificados.</p>
       <ForecastComparison data={sources} frame={frame} metric={metric} focusId={focused.id} onFocus={setFocusId}/>
     </section>
-    <ProviderRainMap place={focused} accuweather={accu.data?.locations.find(r=>r.placeId===focused.id)} now={now} />
+    </details>
   </div>;
 }
 
