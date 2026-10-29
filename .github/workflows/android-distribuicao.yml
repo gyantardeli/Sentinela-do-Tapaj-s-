@@ -2,7 +2,7 @@ name: Compilar APK Sentinela Tapajós - teste
 
 on:
   push:
-    branches: [release/android-20261029, feat/android-mapa-nativo-20261029]
+    branches: [main, feat/android-fontes-integradas-20261029]
     paths: ['site/android/**', '.github/workflows/android-distribuicao.yml']
   workflow_dispatch:
 
@@ -65,13 +65,13 @@ jobs:
             exit 1
           fi
           mkdir -p dist
-          cp "$APK" dist/Sentinela_Tapajos_v1.7.0_Mapa_Nativo_Beta1.apk
+          cp "$APK" dist/Sentinela_Tapajos_v1.8.0_Fontes_Integradas_Beta1.apk
           sha256sum dist/*.apk | tee dist/SHA256SUMS.txt
           cat > dist/LEIA-ME.txt <<'EOF'
-          Sentinela Tapajos Android - versao 1.7.0-beta.1 (mapa MapLibre Native)
-          Fonte: branch feat/android-mapa-nativo-20261029.
+          Sentinela Tapajos Android - versao 1.8.0-beta.1 (mapa MapLibre Native)
+          Fonte: branch feat/android-fontes-integradas-20261029.
           Pacote: br.com.sentinelatapajos.app.preview
-          15 telas Android nativas, 14 abas + Apoie. Requer internet.\n          Mapa vetorial MapLibre com INPE e grade PM2,5 CAMS.\n          Sem 3D de terreno, Windy integrado, modo offline ou escrita administrativa.
+          15 telas Android nativas, 14 abas + Apoie. Requer internet.\n          Mapa nativo MapLibre com INPE/CAMS.\n          Painel Windy oficial embutido + navegadores internos de PurpleAir, IQAir, RadarClima e AccuWeather.\n          Conteudo dos terceiros e web, NAO SDK nativo. Sem 3D real, offline nem escrita administrativa.
           APK de teste, assinado com chave debug do GitHub Actions.
           Instalavel paralelamente ao aplicativo principal.
           NAO e a versao de producao, nem adequada a Play Store.
@@ -81,7 +81,7 @@ jobs:
       - name: Disponibilizar ZIP com APK e comprovantes
         uses: actions/upload-artifact@v4
         with:
-          name: Sentinela-Tapajos-Mapa-Nativo-Beta1
+          name: Sentinela-Tapajos-Fontes-Integradas-Beta1
           path: dist/
           if-no-files-found: error
           retention-days: 30
