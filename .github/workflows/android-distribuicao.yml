@@ -1,0 +1,76 @@
+name: Compilar APK Sentinela Tapajós - teste
+
+on:
+  push:
+    branches: [release/android-20261029]
+    paths: ['site/android/**', '.github/workflows/android-distribuicao.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Gerar e validar APK Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Instalar Android API 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Isolar pacote de teste do aplicativo principal
+        run: |
+          cat > /tmp/sentinela-preview.init.gradle <<'EOF'
+          gradle.beforeProject { project ->
+            if (project.path == ':app') {
+              project.plugins.withId('com.android.application') {
+                project.android.buildTypes.debug.applicationIdSuffix = '.preview'
+                project.android.buildTypes.debug.versionNameSuffix = '-teste'
+              }
+            }
+          }
+          EOF
+      - name: Compilar APK assinado para testes
+        working-directory: site/android
+        run: |
+          chmod +x gradlew
+          ./gradlew -I /tmp/sentinela-preview.init.gradle --no-daemon --stacktrace assembleDebug
+      - name: Verificar identificação, assinatura e arquivo
+        run: |
+          set -eu
+          APK=site/android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          "${ANDROID_HOME}/build-tools/36.0.0/aapt" dump badging "$APK" | head -n 4
+          "${ANDROID_HOME}/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
+          if ! "${ANDROID_HOME}/build-tools/36.0.0/aapt" dump badging "$APK" | grep -q "name='br.com.sentinelatapajos.app.preview'"; then
+            echo "ERRO: pacote de testes não isolado" >&2
+            exit 1
+          fi
+          mkdir -p dist
+          cp "$APK" dist/Sentinela_Tapajos_v1.5.0_Teste_20261029.apk
+          sha256sum dist/*.apk | tee dist/SHA256SUMS.txt
+          cat > dist/LEIA-ME.txt <<'EOF'
+          Sentinela Tapajos Android - versao 1.5.0 (teste)
+          Fonte: branch release/android-20261029.
+          Pacote: br.com.sentinelatapajos.app.preview
+          Abre o Site publicado no navegador. Internet obrigatoria.
+          APK de teste, assinado com chave debug do GitHub Actions.
+          Instalavel paralelamente ao aplicativo principal.
+          NAO e a versao de producao, nem adequada a Play Store.
+          A versao publica definitiva precisa ser assinada com
+          o keystore original do Sentinela.
+          EOF
+      - name: Disponibilizar ZIP com APK e comprovantes
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sentinela-Tapajos-APK-Teste-20261029
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
