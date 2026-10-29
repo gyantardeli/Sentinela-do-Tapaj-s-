@@ -8,8 +8,8 @@ android {
         applicationId 'br.com.sentinelatapajos.app'
         minSdk 23
         targetSdk 36
-        versionCode 7
-        versionName '1.5.0'
+        versionCode 9
+        versionName '1.7.0-beta.1'
     }
     def signingFile = rootProject.file('signing.properties')
     if (signingFile.exists()) {
@@ -35,4 +35,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 }
-// Uses Android framework APIs; no runtime dependencies.
+dependencies {
+    implementation 'org.maplibre.gl:android-sdk-opengl:13.7.1'
+}
+// MapLibre Native with OpenGL ES for wider Android compatibility.
