@@ -1,28 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fundo ambiental sem download externo, degradê suave que substitui o branco chapado. -->
+<!-- Arte de fundo local: harpia, floresta, rio Tapajos, nevoa e linhas de relevo.
+     Sobreposicao clara garante legibilidade dos cartoes. Nenhum download para a imagem. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
+        <bitmap android:src="@drawable/sentinela_forest_wallpaper" android:gravity="fill"/>
+    </item>
+    <item>
         <shape android:shape="rectangle">
-            <gradient android:angle="270" android:startColor="#DAEBD9"
-                android:centerColor="#EDF4E6" android:endColor="#BCD5C1" />
-        </shape>
-    </item>
-    <item android:gravity="top|right" android:right="-125dp" android:top="5dp">
-        <shape android:shape="oval">
-            <size android:width="340dp" android:height="340dp"/>
-            <solid android:color="#1A24543C"/>
-        </shape>
-    </item>
-    <item android:gravity="bottom|left" android:left="-100dp" android:bottom="25dp">
-        <shape android:shape="oval">
-            <size android:width="320dp" android:height="420dp"/>
-            <solid android:color="#17437448"/>
-        </shape>
-    </item>
-    <item android:gravity="bottom|right" android:right="-110dp" android:bottom="-110dp">
-        <shape android:shape="oval">
-            <size android:width="440dp" android:height="360dp"/>
-            <solid android:color="#1C1F4F3F"/>
+            <solid android:color="#B8EFF6EB"/>
         </shape>
     </item>
 </layer-list>
