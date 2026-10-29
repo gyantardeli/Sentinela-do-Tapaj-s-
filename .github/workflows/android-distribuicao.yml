@@ -21,8 +21,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Confirmar Android SDK pré-instalado
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          command -v sdkmanager
+          sdkmanager --version
       - name: Instalar Android API 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Isolar pacote de teste do aplicativo principal
