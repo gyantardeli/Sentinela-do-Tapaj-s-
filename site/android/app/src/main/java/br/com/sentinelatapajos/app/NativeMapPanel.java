@@ -148,6 +148,8 @@ public final class NativeMapPanel extends LinearLayout {
         tiltButton.setText(tilted ? "Vista 2D" : "Inclinar");
     }
 
+    public void showAirLayer() { selectMode(1); }
+
     private void selectMode(int nextMode) {
         if(closed) return;
         mode=nextMode;
