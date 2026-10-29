@@ -464,7 +464,7 @@ public final class NativeDashboardActivity extends Activity {
         showLink("Consultar apoio no site oficial",ORIGIN+"/apoie");
         page.addView(button("Compartilhar o projeto",()->{
             Intent i=new Intent(Intent.ACTION_SEND);
-            i.setType("text/plain");i.putExtra(Intent.EXTRA_TEXT","Sentinela Tapajós — "+ORIGIN);
+            i.setType("text/plain");i.putExtra(Intent.EXTRA_TEXT,"Sentinela Tapajós — "+ORIGIN);
             startActivity(Intent.createChooser(i,"Compartilhar Sentinela"));
         }));
     }
