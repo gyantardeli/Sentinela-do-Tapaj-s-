@@ -33,8 +33,9 @@ import java.util.concurrent.Executors;
 
 /**
  * Interfaces Android nativas: TextView, Canvas, controles e listas.
- * Sem WebView, Custom Tabs ou armazenamento de dados ambientais no aparelho.
- * Mapas proprietários, 3D real e operações administrativas não são reproduzidos.
+ * MapLibre, controles e dados próprios são nativos. Terceiros são exibidos em WebView
+ * isolada na tela Android; NÃO são SDK nativo ou dados controlados pelo Sentinela.
+ * Sem downloads ambientais ou pacotes offline. 3D real não implementado.
  */
 public final class NativeDashboardActivity extends Activity {
     private static final String ORIGIN="https://sentinela-tapajos-ar.gyantardeli.chatgpt.site";
@@ -59,6 +60,7 @@ public final class NativeDashboardActivity extends Activity {
     private boolean suppressCityEvents=false;
     private JSONObject current;
     private NativeMapPanel activeMap;
+    private NativeProviderPanel activeProvider;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -92,7 +94,12 @@ public final class NativeDashboardActivity extends Activity {
     }
     private void card(String title,String body) {
         LinearLayout wrap=vertical();wrap.setPadding(dp(14),dp(10),dp(14),dp(10));
-        wrap.setBackgroundColor(Color.WHITE);
+        android.graphics.drawable.GradientDrawable panelBackground=
+            new android.graphics.drawable.GradientDrawable();
+        panelBackground.setColor(Color.argb(239,250,255,248));
+        panelBackground.setCornerRadius(dp(12));
+        panelBackground.setStroke(dp(1),Color.argb(55,64,120,78));
+        wrap.setBackground(panelBackground);
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
         lp.bottomMargin=dp(9);page.addView(wrap,lp);
         wrap.addView(text(title,16,true,GREEN));wrap.addView(text(body,14,false,MUTED));
@@ -110,7 +117,9 @@ public final class NativeDashboardActivity extends Activity {
         }catch(Exception error) { status.setText("Não foi possível abrir o endereço externo."); }
     }
     private void buildShell() {
-        LinearLayout root=vertical();root.setBackgroundColor(BG);root.setFitsSystemWindows(true);setContentView(root);
+        LinearLayout root=vertical();
+        root.setBackgroundResource(R.drawable.sentinela_forest_background);
+        root.setFitsSystemWindows(true);setContentView(root);
         LinearLayout header=horizontal();header.setPadding(dp(13),dp(8),dp(12),dp(6));header.setBackgroundColor(GREEN);
         ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.guardian);
         header.addView(logo,new LinearLayout.LayoutParams(dp(48),dp(48)));
@@ -144,6 +153,7 @@ public final class NativeDashboardActivity extends Activity {
     private int filterIndex(){return radius==25?0:radius==50?1:radius==100?2:3;}
     private void select(int index) {
         disposeMap();
+        disposeProvider();
         tab=index;sequence++;
         nav.removeAllViews();
         for(int i=0;i<LABELS.length;i++) {
@@ -179,7 +189,16 @@ public final class NativeDashboardActivity extends Activity {
                     card("Dados indisponíveis","Não foi possível consultar o servidor: "+
                          (e.getMessage()==null?"Falha de rede.":e.getMessage())+
                          "\nA ausência de dados não significa ausência de focos ou poluentes.");
-                    status.setText("Erro de consulta. Requer internet e acesso público à API.");
+                    status.setText("Servidor ambiental indisponível; fontes externas mantidas em painel próprio.");
+                    if(tab==2) addProvider(NativeProviderPanel.Provider.WINDY,
+                        NativeProviderPanel.Provider.WINDY, NativeProviderPanel.Provider.RADARCLIMA,
+                        NativeProviderPanel.Provider.PURPLEAIR, NativeProviderPanel.Provider.IQAIR,
+                        NativeProviderPanel.Provider.ACCUWEATHER);
+                    else if(tab==3) addProvider(NativeProviderPanel.Provider.PURPLEAIR,
+                        NativeProviderPanel.Provider.PURPLEAIR, NativeProviderPanel.Provider.IQAIR);
+                    else if(tab==4) addProvider(NativeProviderPanel.Provider.RADARCLIMA,
+                        NativeProviderPanel.Provider.RADARCLIMA, NativeProviderPanel.Provider.ACCUWEATHER,
+                        NativeProviderPanel.Provider.WINDY);
                 });
             }
         });
@@ -274,6 +293,15 @@ public final class NativeDashboardActivity extends Activity {
     private void disposeMap(){
         if(activeMap!=null){activeMap.close();activeMap=null;}
     }
+    private void addProvider(NativeProviderPanel.Provider first, NativeProviderPanel.Provider... choices){
+        disposeProvider();
+        activeProvider=new NativeProviderPanel(this,LATS[city],LONS[city],first,choices);
+        page.addView(activeProvider,new LinearLayout.LayoutParams(-1,-2));
+        activeProvider.onHostResume();
+    }
+    private void disposeProvider(){
+        if(activeProvider!=null){activeProvider.close();activeProvider=null;}
+    }
     private void render(JSONObject data){
         switch(tab) {
             case 0:renderOverview(data);break;
@@ -282,11 +310,16 @@ public final class NativeDashboardActivity extends Activity {
                      "A base cartográfica vetorial é renderizada pelo MapLibre Android. Gestos, inclinação, focos e camadas ambientais funcionam nativamente; terreno 3D real e linha do tempo animada ainda não foram portados.");
                 addNativeMap(data);fireList(data,10);break;
             case 2:
-                card("Comparação nativa","Focos INPE e grade estimada PM2,5 sobre a mesma base vetorial MapLibre. Windy e imagens de satélite proprietárias não são incorporados.");
+                card("Mapa unificado · camadas nativas",
+                    "MapLibre representa focos INPE e PM2,5 modelado. Abaixo, o widget interativo Windy é carregado do próprio provedor em painel web integrado ao APK.");
                 addNativeMap(data);
                 JSONObject met=data.optJSONObject("weather");
-                card("Vento","Velocidade: "+value(met,"speed"," km/h")+"\nDireção: "+value(met,"direction","°"));
-                showLink("Windy • abrir provedor externo","https://www.windy.com/");break;
+                card("Vento · modelo verificado","Velocidade: "+value(met,"speed"," km/h")+"\nDireção: "+value(met,"direction","°"));
+                addProvider(NativeProviderPanel.Provider.WINDY,
+                    NativeProviderPanel.Provider.WINDY,NativeProviderPanel.Provider.RADARCLIMA,
+                    NativeProviderPanel.Provider.PURPLEAIR,NativeProviderPanel.Provider.IQAIR,
+                    NativeProviderPanel.Provider.ACCUWEATHER);
+                break;
             case 3:renderAir(data);break;
             case 4:renderWeather(data);break;
             case 5:
@@ -314,17 +347,19 @@ public final class NativeDashboardActivity extends Activity {
         card("Modelo regional, não sensor físico","PM2,5: "+value(air,"pm25"," µg/m³")+"\nPM10: "+value(air,"pm10"," µg/m³")+"\nÍndice AQI: "+value(air,"aqi","")+"\nReferência: "+clock(air==null?0:air.optLong("time")));
         addNativeMap(data);
         activeMap.showAirLayer();
-        card("Sensores PurpleAir e IQAir","Os mapas interativos de terceiros não foram recriados como SDK nativo. Não atribua a este valor modelado a condição de leitura local de sensor.");
-        showLink("PurpleAir • mapa oficial","https://map.purpleair.com/");
-        showLink("IQAir • mapa oficial","https://www.iqair.com/br/air-quality-map");
+        card("Sensores PurpleAir e IQAir",
+            "O mapa acima exibe PM2,5 MODELADO, não leitura física. Use abaixo os mapas originais para consultar sensores e fontes separadamente; indisponibilidade do provedor não equivale a ar limpo.");
+        addProvider(NativeProviderPanel.Provider.PURPLEAIR,
+            NativeProviderPanel.Provider.PURPLEAIR,NativeProviderPanel.Provider.IQAIR);
     }
     private void renderWeather(JSONObject data){
         JSONObject m=data.optJSONObject("weather");
         card("Condições numéricas · modelo","Temperatura: "+value(m,"temperature"," °C")+"\nUmidade: "+value(m,"humidity"," %")+"\nVento: "+value(m,"speed"," km/h")+"\nDireção: "+value(m,"direction","°")+"\nChuva: "+value(m,"rain"," mm")+"\nHora do dado: "+clock(m==null?0:m.optLong("time")));
-        card("Previsões externas","RadarClima, AccuWeather e Windy têm suas próprias referências de horário. As camadas animadas proprietárias não estão reproduzidas nativamente.");
-        showLink("Clima & Radar","https://www.climaeradar.com.br/radarclima");
-        showLink("AccuWeather","https://www.accuweather.com/");
-        showLink("Windy","https://www.windy.com/");
+        card("Mapas de previsão integrados",
+            "RadarClima, AccuWeather e Windy são carregados em painéis próprios do aplicativo. Mantêm autoria, data de atualização e restrições da fonte original. Sem scraping de dados.");
+        addProvider(NativeProviderPanel.Provider.RADARCLIMA,
+            NativeProviderPanel.Provider.RADARCLIMA,
+            NativeProviderPanel.Provider.ACCUWEATHER,NativeProviderPanel.Provider.WINDY);
     }
     private void fireList(JSONObject data,int limit){
         JSONArray a=filteredFires(data);
@@ -482,12 +517,16 @@ public final class NativeDashboardActivity extends Activity {
         }));
     }
     @Override public void onBackPressed() {
-        if(tab!=0) select(0); else super.onBackPressed();
+        if(activeProvider!=null&&activeProvider.canGoBack())activeProvider.goBack();
+        else if(tab!=0) select(0);
+        else super.onBackPressed();
     }
     @Override protected void onStart(){super.onStart();if(activeMap!=null)activeMap.onHostStart();}
-    @Override protected void onResume(){super.onResume();if(activeMap!=null)activeMap.onHostResume();}
-    @Override protected void onPause(){if(activeMap!=null)activeMap.onHostPause();super.onPause();}
+    @Override protected void onResume(){super.onResume();if(activeMap!=null)activeMap.onHostResume();
+        if(activeProvider!=null)activeProvider.onHostResume();}
+    @Override protected void onPause(){if(activeMap!=null)activeMap.onHostPause();
+        if(activeProvider!=null)activeProvider.onHostPause();super.onPause();}
     @Override protected void onStop(){if(activeMap!=null)activeMap.onHostStop();super.onStop();}
     @Override public void onLowMemory(){if(activeMap!=null)activeMap.onHostLowMemory();super.onLowMemory();}
-    @Override protected void onDestroy(){disposeMap();sequence++;executor.shutdownNow();super.onDestroy();}
+    @Override protected void onDestroy(){disposeProvider();disposeMap();sequence++;executor.shutdownNow();super.onDestroy();}
 }

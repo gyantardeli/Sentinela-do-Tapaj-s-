@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Arte de fundo local: harpia, floresta, rio Tapajos, nevoa e linhas de relevo.
+     Sobreposicao clara garante legibilidade dos cartoes. Nenhum download para a imagem. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap android:src="@drawable/sentinela_forest_wallpaper" android:gravity="fill"/>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#B8EFF6EB"/>
+        </shape>
+    </item>
+</layer-list>
