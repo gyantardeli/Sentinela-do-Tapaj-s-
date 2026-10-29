@@ -38,7 +38,7 @@ public final class NativeProviderPanel extends LinearLayout {
     private final HorizontalScrollView menu;
     private WebView web;
     private Provider selected;
-    private boolean closed=false, resumed=false;
+    private boolean closed=false, resumed=false, pageFailed=false;
 
     public NativeProviderPanel(Activity activity, double lat, double lon,
                                Provider selected, Provider... available){
@@ -131,7 +131,7 @@ public final class NativeProviderPanel extends LinearLayout {
                     "https://map.purpleair.com/air-quality-standards-us-epa-aqi#7/%.4f/%.4f",lat,lon);
             case IQAIR:return "https://www.iqair.com/br/air-quality-map";
             case RADARCLIMA:return "https://www.climaeradar.com.br/radarclima";
-            case ACCUWEATHER:return "https://www.accuweather.com/pt/br/brazil-weather";
+            case ACCUWEATHER:return "https://www.accuweather.com/pt/br/national/weather-radar";
             default:throw new IllegalArgumentException("Provedor desconhecido");
         }
     }
@@ -161,12 +161,14 @@ public final class NativeProviderPanel extends LinearLayout {
         viewer.removeView(w);
         w.clearHistory();w.clearCache(true);w.clearFormData();
         w.destroy();
+        resumed=false;
     }
 
     public void load(Provider p){
         if(closed)return;
         selected=p;
         releaseBrowser();
+        pageFailed=false;
         header.setText(label(p)+" · painel integrado");
         String restriction;
         switch(p) {
@@ -215,13 +217,23 @@ public final class NativeProviderPanel extends LinearLayout {
                     return true;
                 }
                 @Override public void onPageFinished(WebView view,String url){
-                    if(web==view && !closed)
+                    if(web==view && !closed && !pageFailed)
                         info.setText(label(p)+" · fonte externa exibida. "+restriction+
                             " Sem dados locais verificados adicionalmente.");
                 }
+                @Override public void onReceivedHttpError(WebView view, WebResourceRequest request,
+                        android.webkit.WebResourceResponse response){
+                    if(request.isForMainFrame()&&web==view&&response.getStatusCode()>=400){
+                        pageFailed=true;
+                        info.setText(label(p)+" retornou HTTP "+response.getStatusCode()+
+                            ". Use “Abrir fonte oficial”.");
+                    }
+                }
                 @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){
-                    if(request.isForMainFrame()&&web==view && !closed)
+                    if(request.isForMainFrame()&&web==view && !closed){
+                        pageFailed=true;
                         info.setText(label(p)+" não pôde ser exibido internamente. Use “Abrir fonte oficial”.");
+                    }
                 }
             });
             // Evita que o scroll vertical da pagina intercepte gestos dos mapas.
