@@ -61,13 +61,13 @@ jobs:
             exit 1
           fi
           mkdir -p dist
-          cp "$APK" dist/Sentinela_Tapajos_v1.5.0_Teste_20261029.apk
+          cp "$APK" dist/Sentinela_Tapajos_v1.6.0_Nativo_Beta1.apk
           sha256sum dist/*.apk | tee dist/SHA256SUMS.txt
           cat > dist/LEIA-ME.txt <<'EOF'
-          Sentinela Tapajos Android - versao 1.5.0 (teste)
+          Sentinela Tapajos Android - versao 1.6.0-beta.1 (telas nativas)
           Fonte: branch release/android-20261029.
           Pacote: br.com.sentinelatapajos.app.preview
-          Abre o Site publicado no navegador. Internet obrigatoria.
+          15 telas Android nativas, 14 abas + Apoie. Requer internet.\n          Mapas proprietarios, terreno 3D e configuracoes de escrita ainda nao portados.
           APK de teste, assinado com chave debug do GitHub Actions.
           Instalavel paralelamente ao aplicativo principal.
           NAO e a versao de producao, nem adequada a Play Store.
@@ -77,7 +77,7 @@ jobs:
       - name: Disponibilizar ZIP com APK e comprovantes
         uses: actions/upload-artifact@v4
         with:
-          name: Sentinela-Tapajos-APK-Teste-20261029
+          name: Sentinela-Tapajos-Android-Nativo-Beta1
           path: dist/
           if-no-files-found: error
           retention-days: 30
