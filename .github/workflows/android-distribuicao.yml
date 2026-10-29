@@ -2,7 +2,7 @@ name: Compilar APK Sentinela Tapajós - teste
 
 on:
   push:
-    branches: [release/android-20261029]
+    branches: [release/android-20261029, feat/android-mapa-nativo-20261029]
     paths: ['site/android/**', '.github/workflows/android-distribuicao.yml']
   workflow_dispatch:
 
@@ -60,14 +60,18 @@ jobs:
             echo "ERRO: pacote de testes não isolado" >&2
             exit 1
           fi
+          if "${ANDROID_HOME}/build-tools/36.0.0/aapt" dump permissions "$APK" | grep -E 'android.permission.ACCESS_(FINE|COARSE)_LOCATION'; then
+            echo "ERRO: permissão de localização desnecessária" >&2
+            exit 1
+          fi
           mkdir -p dist
-          cp "$APK" dist/Sentinela_Tapajos_v1.6.0_Nativo_Beta1.apk
+          cp "$APK" dist/Sentinela_Tapajos_v1.7.0_Mapa_Nativo_Beta1.apk
           sha256sum dist/*.apk | tee dist/SHA256SUMS.txt
           cat > dist/LEIA-ME.txt <<'EOF'
-          Sentinela Tapajos Android - versao 1.6.0-beta.1 (telas nativas)
-          Fonte: branch release/android-20261029.
+          Sentinela Tapajos Android - versao 1.7.0-beta.1 (mapa MapLibre Native)
+          Fonte: branch feat/android-mapa-nativo-20261029.
           Pacote: br.com.sentinelatapajos.app.preview
-          15 telas Android nativas, 14 abas + Apoie. Requer internet.\n          Mapas proprietarios, terreno 3D e configuracoes de escrita ainda nao portados.
+          15 telas Android nativas, 14 abas + Apoie. Requer internet.\n          Mapa vetorial MapLibre com INPE e grade PM2,5 CAMS.\n          Sem 3D de terreno, Windy integrado, modo offline ou escrita administrativa.
           APK de teste, assinado com chave debug do GitHub Actions.
           Instalavel paralelamente ao aplicativo principal.
           NAO e a versao de producao, nem adequada a Play Store.
@@ -77,7 +81,7 @@ jobs:
       - name: Disponibilizar ZIP com APK e comprovantes
         uses: actions/upload-artifact@v4
         with:
-          name: Sentinela-Tapajos-Android-Nativo-Beta1
+          name: Sentinela-Tapajos-Mapa-Nativo-Beta1
           path: dist/
           if-no-files-found: error
           retention-days: 30
