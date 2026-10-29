@@ -58,9 +58,14 @@ public final class NativeDashboardActivity extends Activity {
     private TextView status;
     private boolean suppressCityEvents=false;
     private JSONObject current;
+    private NativeMapPanel activeMap;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        // Zero ambient tile cache: the Sentinela does not provide offline maps.
+        org.maplibre.android.MapLibre.getInstance(this);
+        org.maplibre.android.offline.OfflineManager.getInstance(this)
+            .setMaximumAmbientCacheSize(0L, null);
         getWindow().setStatusBarColor(GREEN);
         getWindow().setNavigationBarColor(GREEN);
         buildShell();
@@ -138,6 +143,7 @@ public final class NativeDashboardActivity extends Activity {
     }
     private int filterIndex(){return radius==25?0:radius==50?1:radius==100?2:3;}
     private void select(int index) {
+        disposeMap();
         tab=index;sequence++;
         nav.removeAllViews();
         for(int i=0;i<LABELS.length;i++) {
@@ -259,19 +265,24 @@ public final class NativeDashboardActivity extends Activity {
         return best;
     }
     private void addNativeMap(JSONObject data){
-        NativeFiresView map=new NativeFiresView(this);
-        map.setFires(filteredFires(data),LATS[city],LONS[city],radius,hours);
-        page.addView(map,new LinearLayout.LayoutParams(-1,dp(300)));
+        disposeMap();
+        activeMap = new NativeMapPanel(this,data,LATS[city],LONS[city],radius,hours);
+        page.addView(activeMap,new LinearLayout.LayoutParams(-1,-2));
+        activeMap.onHostStart();
+        activeMap.onHostResume();
+    }
+    private void disposeMap(){
+        if(activeMap!=null){activeMap.close();activeMap=null;}
     }
     private void render(JSONObject data){
         switch(tab) {
             case 0:renderOverview(data);break;
             case 1:
                 card("Focos georreferenciados — projeção nativa",
-                     "A visualização 2D abaixo é produzida pelo Android diretamente a partir das coordenadas INPE. O terreno 3D real e a linha do tempo animada ainda não foram portados.");
+                     "A base cartográfica vetorial é renderizada pelo MapLibre Android. Gestos, inclinação, focos e camadas ambientais funcionam nativamente; terreno 3D real e linha do tempo animada ainda não foram portados.");
                 addNativeMap(data);fireList(data,10);break;
             case 2:
-                card("Comparação nativa","Focos no entorno versus valores meteorológicos do servidor. Não há painel Windy incorporado nem mapa-base de satélite nesta versão.");
+                card("Comparação nativa","Focos INPE e grade estimada PM2,5 sobre a mesma base vetorial MapLibre. Windy e imagens de satélite proprietárias não são incorporados.");
                 addNativeMap(data);
                 JSONObject met=data.optJSONObject("weather");
                 card("Vento","Velocidade: "+value(met,"speed"," km/h")+"\nDireção: "+value(met,"direction","°"));
@@ -301,6 +312,8 @@ public final class NativeDashboardActivity extends Activity {
     private void renderAir(JSONObject data){
         JSONObject air=nearestAir(data);
         card("Modelo regional, não sensor físico","PM2,5: "+value(air,"pm25"," µg/m³")+"\nPM10: "+value(air,"pm10"," µg/m³")+"\nÍndice AQI: "+value(air,"aqi","")+"\nReferência: "+clock(air==null?0:air.optLong("time")));
+        addNativeMap(data);
+        activeMap.showAirLayer();
         card("Sensores PurpleAir e IQAir","Os mapas interativos de terceiros não foram recriados como SDK nativo. Não atribua a este valor modelado a condição de leitura local de sensor.");
         showLink("PurpleAir • mapa oficial","https://map.purpleair.com/");
         showLink("IQAir • mapa oficial","https://www.iqair.com/br/air-quality-map");
@@ -471,5 +484,10 @@ public final class NativeDashboardActivity extends Activity {
     @Override public void onBackPressed() {
         if(tab!=0) select(0); else super.onBackPressed();
     }
-    @Override protected void onDestroy(){sequence++;executor.shutdownNow();super.onDestroy();}
+    @Override protected void onStart(){super.onStart();if(activeMap!=null)activeMap.onHostStart();}
+    @Override protected void onResume(){super.onResume();if(activeMap!=null)activeMap.onHostResume();}
+    @Override protected void onPause(){if(activeMap!=null)activeMap.onHostPause();super.onPause();}
+    @Override protected void onStop(){if(activeMap!=null)activeMap.onHostStop();super.onStop();}
+    @Override public void onLowMemory(){if(activeMap!=null)activeMap.onHostLowMemory();super.onLowMemory();}
+    @Override protected void onDestroy(){disposeMap();sequence++;executor.shutdownNow();super.onDestroy();}
 }
