@@ -24,10 +24,14 @@ jobs:
       - name: Confirmar Android SDK pré-instalado
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
-          command -v sdkmanager
-          sdkmanager --version
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          test -x "$SDKMANAGER"
+          dirname "$SDKMANAGER" >> "$GITHUB_PATH"
+          "$SDKMANAGER" --version
       - name: Instalar Android API 36
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Isolar pacote de teste do aplicativo principal
         run: |
           cat > /tmp/sentinela-preview.init.gradle <<'EOF'
