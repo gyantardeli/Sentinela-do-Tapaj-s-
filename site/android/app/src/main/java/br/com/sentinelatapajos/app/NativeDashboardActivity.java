@@ -189,7 +189,16 @@ public final class NativeDashboardActivity extends Activity {
                     card("Dados indisponíveis","Não foi possível consultar o servidor: "+
                          (e.getMessage()==null?"Falha de rede.":e.getMessage())+
                          "\nA ausência de dados não significa ausência de focos ou poluentes.");
-                    status.setText("Erro de consulta. Requer internet e acesso público à API.");
+                    status.setText("Servidor ambiental indisponível; fontes externas mantidas em painel próprio.");
+                    if(tab==2) addProvider(NativeProviderPanel.Provider.WINDY,
+                        NativeProviderPanel.Provider.WINDY, NativeProviderPanel.Provider.RADARCLIMA,
+                        NativeProviderPanel.Provider.PURPLEAIR, NativeProviderPanel.Provider.IQAIR,
+                        NativeProviderPanel.Provider.ACCUWEATHER);
+                    else if(tab==3) addProvider(NativeProviderPanel.Provider.PURPLEAIR,
+                        NativeProviderPanel.Provider.PURPLEAIR, NativeProviderPanel.Provider.IQAIR);
+                    else if(tab==4) addProvider(NativeProviderPanel.Provider.RADARCLIMA,
+                        NativeProviderPanel.Provider.RADARCLIMA, NativeProviderPanel.Provider.ACCUWEATHER,
+                        NativeProviderPanel.Provider.WINDY);
                 });
             }
         });
