@@ -2,7 +2,7 @@ name: Compilar APK Sentinela Tapajós - teste
 
 on:
   push:
-    branches: [main, feat/android-fontes-integradas-20261029]
+    branches: [main, feat/android-abas-site-20261030]
     paths: ['site/android/**', '.github/workflows/android-distribuicao.yml']
   workflow_dispatch:
 
@@ -44,6 +44,24 @@ jobs:
             }
           }
           EOF
+      - name: Validar conformidade das abas Android com o site
+        run: |
+          python3 - <<'PY'
+          import pathlib,re,sys
+          site=pathlib.Path('site/lib/panel-navigation.ts').read_text()
+          app=pathlib.Path('site/android/app/src/main/java/br/com/sentinelatapajos/app/NativeDashboardActivity.java').read_text()
+          panel_block=site.split('export const PANELS = [',1)[1].split('] as const;',1)[0]
+          actual=re.findall(r'label: "([^"]+)"',panel_block)
+          nav=app.split('private static final String[] LABELS={',1)[1].split('};',1)[0]
+          android=re.findall(r'"([^"]+)"',nav)
+          assert len(actual)==14, f'Esperadas 14 abas no site; encontradas {len(actual)}'
+          assert len(android)==15, f'Esperadas 14 abas e Apoie; encontradas {len(android)}'
+          assert actual==android[:14], 'Ordem ou nomes das abas divergem do site'
+          assert android[14]=='Apoie', 'Apoie deve ficar separado do menu'
+          assert 'private void openMenu()' in app and 'private void closeMenu()' in app
+          assert 'HorizontalScrollView' not in app
+          print('OK: 14 abas idênticas ao site, menu recolhível e Apoie separado.')
+          PY
       - name: Compilar APK assinado para testes
         working-directory: site/android
         run: |
@@ -65,13 +83,13 @@ jobs:
             exit 1
           fi
           mkdir -p dist
-          cp "$APK" dist/Sentinela_Tapajos_v1.8.0_Fontes_Integradas_Beta1.apk
+          cp "$APK" dist/Sentinela_Tapajos_v1.9.0_Abas_Originais_Beta1.apk
           sha256sum dist/*.apk | tee dist/SHA256SUMS.txt
           cat > dist/LEIA-ME.txt <<'EOF'
-          Sentinela Tapajos Android - versao 1.8.0-beta.1 (mapa MapLibre Native)
-          Fonte: branch feat/android-fontes-integradas-20261029.
+          Sentinela Tapajos Android - versao 1.9.0-beta.1 (mapa MapLibre Native)
+          Fonte: branch feat/android-abas-site-20261030.
           Pacote: br.com.sentinelatapajos.app.preview
-          15 telas Android nativas, 14 abas + Apoie. Requer internet.\n          Mapa nativo MapLibre com INPE/CAMS.\n          Painel Windy oficial embutido + navegadores internos de PurpleAir, IQAir, RadarClima e AccuWeather.\n          Conteudo dos terceiros e web, NAO SDK nativo. Sem 3D real, offline nem escrita administrativa.
+          Menu Android com as mesmas 14 abas e ordem do site + Apoie separado. Requer internet.\n          Mapa nativo MapLibre com INPE/CAMS.\n          Painel Windy oficial embutido + navegadores internos de PurpleAir, IQAir, RadarClima e AccuWeather.\n          Conteudo dos terceiros e web, NAO SDK nativo. Sem 3D real, offline nem escrita administrativa.
           APK de teste, assinado com chave debug do GitHub Actions.
           Instalavel paralelamente ao aplicativo principal.
           NAO e a versao de producao, nem adequada a Play Store.
@@ -81,7 +99,7 @@ jobs:
       - name: Disponibilizar ZIP com APK e comprovantes
         uses: actions/upload-artifact@v4
         with:
-          name: Sentinela-Tapajos-Fontes-Integradas-Beta1
+          name: Sentinela-Tapajos-Abas-Originais-Beta1
           path: dist/
           if-no-files-found: error
           retention-days: 30
