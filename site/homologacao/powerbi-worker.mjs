@@ -49,8 +49,32 @@ async function queryData(env,place,days,now){
  const metrics={fires:own.fires,fireDays:own.fireDays,pm25:own.pm25,airDays:own.airDays,sources:health.length};
  return {revision:"hml-inteligencia-ambiental-20261030",asOf:now,place,days,metrics,daily:own.days,cities:region.map(({days:ignore,...p})=>p),weather,health};
 }
+
+const HML_TOKEN_SHA256 = "f8c0b706a80e1ef74b501466f446e8dd6b67d14a92c4ce247464ca3ec523ffa5";
+async function verifyToken(token){
+ if(typeof token!=="string"||token.length>200||token.length<32)return false;
+ const hash=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
+ const bytes=new Uint8Array(hash),hex=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+ return hex===HML_TOKEN_SHA256;
+}
+async function gatePreview(request){
+ const url=new URL(request.url),cookie=(request.headers.get("Cookie")||"").split(";").map(x=>x.trim()).find(x=>x.startsWith("sentinela_hml_token="));
+ if(await verifyToken(cookie?.slice("sentinela_hml_token=".length)))return null;
+ const access=url.searchParams.get("access");
+ if(await verifyToken(access)){
+  return new Response(null,{status:303,headers:{
+   "Location":url.origin+"/",
+   "Set-Cookie":"sentinela_hml_token="+access+"; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=28800",
+   "Cache-Control":"private, no-store",
+   "Referrer-Policy":"no-referrer"
+  }});
+ }
+ return new Response('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Homologação restrita</title><body style="font:16px system-ui;background:#102b21;color:#eef7e9;padding:35px"><h1>Sentinela Tapajós · Homologação</h1><p>Endereço reservado para testes. Abra o link de acesso de homologação fornecido pelo administrador.</p><p><small>Esta proteção é baseada em link de acesso, não em identidade Cloudflare Zero Trust.</small></p></body></html>',{status:401,headers:{...CORS_HEADERS,"Content-Type":"text/html; charset=utf-8"}});
+}
+
 export default {
  async fetch(request,env){
+  const auth=await gatePreview(request); if(auth)return auth;
   const url=new URL(request.url);
   if(request.method!=="GET")return new Response("Método não autorizado",{status:405,headers:CORS_HEADERS});
   if(url.pathname==="/api/analytics"){
