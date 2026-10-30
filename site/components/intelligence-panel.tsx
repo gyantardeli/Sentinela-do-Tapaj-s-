@@ -48,8 +48,8 @@ export default function IntelligencePanel({ place, dashboard, refreshKey = 0, no
   const { data: history, loading, error, load } = useSnapshot<HistoryData>(query, refreshKey);
   const { data: sourceData, loading: sourcesLoading, error: sourcesError, load: loadSources } = useSnapshot<HealthData>("/api/source-health?days=" + days, refreshKey);
   const daily = history?.daily ?? [];
-  const fireComplete = daily.filter(hasFullFire);
-  const airComplete = daily.filter(fullAir);
+  const fireComplete = daily.filter(hasCompleteFire);
+  const airComplete = daily.filter(hasCompleteAir);
   const fireTotal = fireTotalForCoveredDays(daily);
   const airMean = meanPm25ForCoveredDays(daily);
   const weather = dashboard?.place.id === place.id ? dashboard.weather : null;
@@ -57,8 +57,8 @@ export default function IntelligencePanel({ place, dashboard, refreshKey = 0, no
   const weatherIsCurrent = !!weather && !!weatherStatus && !weatherStatus.stale && weatherStatus.status === "ok" && now > 0 && Math.abs(now - weather.time) <= 7200;
   const sourceRows = sourceData?.sources.filter(s => s.automatic) ?? [];
   const municipalities = useMemo(() => (history?.region ?? []).map(row => {
-    const full = row.daily.filter(hasFullFire);
-    const air = row.daily.filter(fullAir);
+    const full = row.daily.filter(hasCompleteFire);
+    const air = row.daily.filter(hasCompleteAir);
     return { id: row.placeId, name: PLACES.find(p => p.id === row.placeId)?.name ?? row.placeId, count: full.length ? fireTotalForCoveredDays(row.daily) : null, coverage: full.length, pm: air.length ? meanPm25ForCoveredDays(row.daily) : null, airCoverage: air.length };
   }).sort((a, b) => a.name.localeCompare(b.name, "pt-BR")), [history]);
   const missing = !history && !loading;
