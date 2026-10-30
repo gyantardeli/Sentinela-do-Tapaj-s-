@@ -19,7 +19,7 @@
     "check:priority1": "node scripts/check-priority1.mjs",
     "check:priority1-live": "node scripts/check-priority1-live.mjs",
     "check:online": "node scripts/check-online-interface.mjs && node scripts/check-online-runtime.mjs",
-    "check:ci": "node scripts/check-ci.mjs",
+    "check:ci": "node scripts/check-ci.mjs && node scripts/check-intelligence-homolog.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
