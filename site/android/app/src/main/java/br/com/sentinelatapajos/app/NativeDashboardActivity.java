@@ -11,7 +11,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -41,9 +41,36 @@ public final class NativeDashboardActivity extends Activity {
     private static final String ORIGIN="https://sentinela-tapajos-ar.gyantardeli.chatgpt.site";
     private static final String[] IDS={"overview","fire3d","maps","purpleair","weather","inpe","radar",
             "history","health","areas","alerts","collection","sources","diary","apoie"};
-    private static final String[] LABELS={"Visão geral","Mapa 3D","Mapas","Qualidade do ar",
-            "Previsão","Queimadas INPE","Radar regional","Histórico","Saúde das fontes",
-            "Áreas de interesse","Alertas","Coleta","Fontes e método","Diário","Apoie"};
+    // Espelha os 14 paineis de site/lib/panel-navigation.ts; Apoie permanece separado.
+    private static final String[] LABELS={"Visão geral","Mapa 3D · evolução","Comparar mapas","Qualidade do ar",
+            "Previsão do tempo","INPE · Queimadas","Radar regional","Histórico regional","Saúde das fontes",
+            "Áreas de interesse","Alertas da operação","Coleta","Fontes e método","Diário do Explorador","Apoie"};
+    private static final String[] HEADINGS={
+        "Sentinela Tapajós","O fogo no tempo e no terreno.","Duas perspectivas. Uma região.",
+        "Qualidade do ar no Tapajós","Previsão do tempo no Tapajós",
+        "Queimadas com a referência do INPE","Radar de notícias da região",
+        "A região ao longo do tempo.","Acompanhe a qualidade das fontes.",
+        "Suas áreas de interesse.","Acompanhe o que pede atenção.",
+        "Coleta de informações","Cada dado tem uma origem.","Diário do Explorador","Me paga um café? ☕"
+    };
+    private static final String[] DESCRIPTIONS={
+        "Queimadas, qualidade do ar, vento e notícias para acompanhar a região.",
+        "Explore detecções no mapa, acompanhe registros e a evolução do fogo. Sem relevo 3D real nesta beta.",
+        "Compare as detecções de calor com a circulação do vento e os poluentes no Windy.",
+        "Mapa PurpleAir de sensores de qualidade do ar, com legendas em português e referências.",
+        "AccuWeather, Clima & Radar e Windy para acompanhar o tempo na região.",
+        "Dados ambientais, risco de fogo e acesso ao monitoramento oficial do Programa Queimadas.",
+        "Notícias e comunicados sobre queimadas e incêndios, classificados por local e relevância.",
+        "Histórico de 7 e 30 dias para comparar detecções, modelo de partículas e notícias.",
+        "Confira respostas, atrasos, falhas e a cobertura real de cada canal monitorado.",
+        "Consulte áreas de interesse e seus focos. Edição de polígonos depende da versão web.",
+        "Consulte os avisos e limites de detecções, partículas e falhas de coleta.",
+        "Acompanhe verificações, horários e falhas da coleta.",
+        "Entenda o que foi observado, calculado e os limites de cada fonte.",
+        "Histórias, povos e expedições pela região do Tapajós.",
+        "Apoio voluntário ao monitoramento ambiental da Amazônia."
+    };
+    private static final String[] NAV_SYMBOLS={"◫","▤","▦","◉","☀","♨","◈","◷","✚","⌖","♢","↻","ⓘ","▣"};
     private static final String[] PLACES={"Itaituba","Jacareacanga","Novo Progresso","Rurópolis",
             "Placas","Aveiro","Trairão","Santarém"};
     private static final String[] PLACE_IDS={"itaituba","jacareacanga","novo-progresso",
@@ -54,7 +81,10 @@ public final class NativeDashboardActivity extends Activity {
             MUTED=Color.rgb(66,97,72), ORANGE=Color.rgb(186,84,35);
     private final ExecutorService executor=Executors.newSingleThreadExecutor();
     private int tab=0, city=0, radius=100, hours=24, days=7, sequence=0, diaryPage=0;
-    private LinearLayout page, nav;
+    private LinearLayout page, filtersBar;
+    private FrameLayout appFrame, menuOverlay;
+    private TextView currentPanel;
+    private Button filterButton;
     private Spinner cityControl;
     private TextView status;
     private boolean suppressCityEvents=false;
@@ -117,57 +147,165 @@ public final class NativeDashboardActivity extends Activity {
         }catch(Exception error) { status.setText("Não foi possível abrir o endereço externo."); }
     }
     private void buildShell() {
+        appFrame=new FrameLayout(this);
+        setContentView(appFrame);
         LinearLayout root=vertical();
         root.setBackgroundResource(R.drawable.sentinela_forest_background);
-        root.setFitsSystemWindows(true);setContentView(root);
-        LinearLayout header=horizontal();header.setPadding(dp(13),dp(8),dp(12),dp(6));header.setBackgroundColor(GREEN);
-        ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.guardian);
-        header.addView(logo,new LinearLayout.LayoutParams(dp(48),dp(48)));
-        TextView name=text("SENTINELA TAPAJÓS\nMonitoramento ambiental • Android",16,true,Color.WHITE);
-        name.setPadding(dp(12),0,0,0);header.addView(name);root.addView(header);
-        HorizontalScrollView scroller=new HorizontalScrollView(this);scroller.setHorizontalScrollBarEnabled(false);
-        nav=horizontal();nav.setPadding(dp(7),dp(5),dp(7),dp(5));scroller.addView(nav);root.addView(scroller);
-        LinearLayout filters=horizontal();filters.setPadding(dp(10),dp(2),dp(10),dp(2));
+        root.setFitsSystemWindows(true);
+        appFrame.addView(root,new FrameLayout.LayoutParams(-1,-1));
+
+        // Barra superior com menu recolhivel: mesma estrutura do site em celulares.
+        LinearLayout header=horizontal();
+        header.setPadding(dp(6),dp(8),dp(10),dp(8));
+        header.setBackgroundColor(GREEN);
+        Button menu=button("☰",this::openMenu);
+        menu.setTextSize(24);menu.setTextColor(Color.WHITE);
+        menu.setContentDescription("Abrir menu de abas do Sentinela");
+        menu.setBackgroundTintList(android.content.res.ColorStateList.valueOf(GREEN));
+        header.addView(menu,new LinearLayout.LayoutParams(dp(49),dp(52)));
+        ImageView logo=new ImageView(this);
+        logo.setImageResource(R.drawable.guardian);
+        logo.setContentDescription("Harpia guardiã do Tapajós");
+        header.addView(logo,new LinearLayout.LayoutParams(dp(43),dp(48)));
+        LinearLayout brand=vertical(); brand.setPadding(dp(10),0,0,0);
+        TextView title=text("SENTINELA TAPAJÓS",16,true,Color.WHITE);
+        title.setPadding(0,0,0,0);brand.addView(title);
+        currentPanel=text("Visão geral",12,false,0xffcbe5d3);
+        currentPanel.setPadding(0,0,0,0);brand.addView(currentPanel);
+        header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
+        root.addView(header);
+
+        filtersBar=horizontal();
+        filtersBar.setPadding(dp(10),dp(4),dp(10),dp(4));
+        filtersBar.setBackgroundColor(0xecebf2e8);
         cityControl=new Spinner(this);
         ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,PLACES);
         cityControl.setAdapter(adapter);
-        filters.addView(cityControl,new LinearLayout.LayoutParams(0,dp(48),1));
-        filters.addView(button("Raio / Período",()->new AlertDialog.Builder(this)
+        cityControl.setContentDescription("Município de referência");
+        filtersBar.addView(cityControl,new LinearLayout.LayoutParams(0,dp(51),1));
+        filterButton=button("Raio / Período",()->new AlertDialog.Builder(this)
                 .setTitle("Filtros dos focos")
                 .setSingleChoiceItems(new String[]{"25 km | 6 h","50 km | 12 h","100 km | 24 h","200 km | 24 h"},filterIndex(),
                 (dialog,selected)->{radius=new int[]{25,50,100,200}[selected];
-                    hours=new int[]{6,12,24,24}[selected];dialog.dismiss();select(tab);}).show()));
-        filters.addView(button("↻",()->select(tab)));
-        root.addView(filters);
+                    hours=new int[]{6,12,24,24}[selected];dialog.dismiss();select(tab);}).show());
+        filtersBar.addView(filterButton);
+        filtersBar.addView(button("↻",()->select(tab)));
+        root.addView(filtersBar);
         cityControl.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
             public void onNothingSelected(android.widget.AdapterView<?> parent){}
             public void onItemSelected(android.widget.AdapterView<?> parent,View view,int pos,long id){
                 if(!suppressCityEvents&&city!=pos){city=pos;select(tab);}
             }
         });
+
         status=text("Consulta online necessária. Sem cache local.",11,false,MUTED);
-        status.setPadding(dp(15),dp(3),dp(15),dp(3));root.addView(status);
-        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        page=vertical();page.setPadding(dp(15),dp(12),dp(15),dp(28));scroll.addView(page);
+        status.setPadding(dp(15),dp(7),dp(15),dp(6));
+        root.addView(status);
+        ScrollView scroll=new ScrollView(this);
+        scroll.setFillViewport(true);
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        page=vertical();
+        page.setPadding(dp(15),dp(12),dp(15),dp(28));
+        scroll.addView(page);
+    }
+    private void openMenu() {
+        if(menuOverlay!=null)return;
+        menuOverlay=new FrameLayout(this);
+        menuOverlay.setBackgroundColor(0x9c06180e);
+        menuOverlay.setOnClickListener(v->closeMenu());
+        appFrame.addView(menuOverlay,new FrameLayout.LayoutParams(-1,-1));
+        ScrollView navScroll=new ScrollView(this);
+        navScroll.setFillViewport(true);
+        navScroll.setBackgroundColor(0xff102c1e);
+        navScroll.setOnClickListener(v->{});
+        FrameLayout.LayoutParams panelParams=new FrameLayout.LayoutParams(
+            dp(300),-1,Gravity.START);
+        menuOverlay.addView(navScroll,panelParams);
+        LinearLayout drawer=vertical();
+        drawer.setPadding(dp(14),dp(24),dp(14),dp(20));
+        navScroll.addView(drawer);
+
+        LinearLayout drawerBrand=horizontal();
+        ImageView logo=new ImageView(this);
+        logo.setImageResource(R.drawable.guardian);
+        drawerBrand.addView(logo,new LinearLayout.LayoutParams(dp(46),dp(52)));
+        TextView brandName=text("SENTINELA\nTAPAJÓS",20,true,Color.WHITE);
+        brandName.setPadding(dp(12),0,0,0);
+        drawerBrand.addView(brandName);
+        drawer.addView(drawerBrand);
+        TextView caption=text("MONITORAMENTO AMBIENTAL",11,true,0xffa8cda9);
+        caption.setPadding(dp(8),dp(11),0,dp(9));
+        drawer.addView(caption);
+
+        for(int i=0;i<14;i++) {
+            final int next=i;
+            Button option=button(NAV_SYMBOLS[i]+"   "+LABELS[i],()->{
+                closeMenu();select(next);
+            });
+            option.setContentDescription("Abrir "+LABELS[i]);
+            option.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);
+            option.setPadding(dp(15),0,dp(8),0);
+            option.setTextSize(13);
+            option.setTextColor(i==tab?Color.WHITE:0xffc5d9be);
+            option.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                i==tab?0xff365c37:0xff173625));
+            LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(48));
+            lp.bottomMargin=dp(3);
+            drawer.addView(option,lp);
+        }
+        View separator=new View(this);
+        separator.setBackgroundColor(0xff426144);
+        LinearLayout.LayoutParams rule=new LinearLayout.LayoutParams(-1,dp(1));
+        rule.topMargin=dp(13);rule.bottomMargin=dp(12);
+        drawer.addView(separator,rule);
+        Button support=button("☕  Me paga um café?",()->{closeMenu();select(14);});
+        support.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);
+        support.setPadding(dp(15),0,dp(8),0);
+        support.setTextColor(0xffe7f4db);
+        support.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xff315d3b));
+        drawer.addView(support,new LinearLayout.LayoutParams(-1,dp(50)));
+
+        TextView region=text("REGIÃO MONITORADA",11,true,0xffa8cda9);
+        region.setPadding(dp(8),dp(22),0,0);
+        drawer.addView(region);
+        TextView location=text("Oeste do Pará · 8 sedes municipais\nReferência: "+PLACES[city],
+            13,false,0xffdde9d9);
+        location.setPadding(dp(8),dp(4),0,dp(15));
+        drawer.addView(location);
+        TextView footer=text("Origem e horário identificados\nDetecção · modelo · leitura local",
+            11,false,0xffb9d5be);
+        footer.setPadding(dp(8),dp(10),dp(8),dp(10));
+        drawer.addView(footer);
+    }
+    private void closeMenu() {
+        if(menuOverlay!=null) {
+            appFrame.removeView(menuOverlay);
+            menuOverlay=null;
+        }
+    }
+    private void renderHeading() {
+        addText(HEADINGS[tab],23,true,GREEN);
+        addText(DESCRIPTIONS[tab],13,false,MUTED);
+    }
+    private void updateTabChrome() {
+        currentPanel.setText(LABELS[tab]);
+        boolean showsFilters=tab<=5||tab==7;
+        filtersBar.setVisibility(showsFilters?View.VISIBLE:View.GONE);
+        filterButton.setVisibility((tab==3||tab==4)?View.GONE:View.VISIBLE);
     }
     private int filterIndex(){return radius==25?0:radius==50?1:radius==100?2:3;}
     private void select(int index) {
         disposeMap();
         disposeProvider();
+        if(index<0||index>=LABELS.length)return;
         tab=index;sequence++;
-        nav.removeAllViews();
-        for(int i=0;i<LABELS.length;i++) {
-            final int next=i;
-            Button b=button(LABELS[i],()->select(next));
-            b.setTextColor(i==tab?Color.WHITE:GREEN);
-            if(i==tab)b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(GREEN));
-            nav.addView(b);
-        }
+        closeMenu();
+        updateTabChrome();
         page.removeAllViews();
-        addText(LABELS[tab],23,true,GREEN);
-        addText("Consulta municipal: "+PLACES[city]+" | "+radius+" km | "+hours+" h",12,false,MUTED);
-        if(tab==13){renderDiary();return;}
-        if(tab==14){renderSupport();return;}
+        renderHeading();
+        if(tab<=5||tab==7)addText("Município: "+PLACES[city]+" · raio "+radius+" km",12,false,MUTED);
+        if(tab==13){status.setText("Diário do Explorador · oito páginas");renderDiary();return;}
+        if(tab==14){status.setText("Apoio voluntário ao projeto");renderSupport();return;}
         card("Consultando servidor…","Os horários e os estados das fontes serão informados após a resposta.");
         current=null; int request=sequence;
         final String route=routeForTab();
@@ -178,14 +316,14 @@ public final class NativeDashboardActivity extends Activity {
                 runOnUiThread(()->{if(request!=sequence||isFinishing())return;
                     current=packet;
                     page.removeAllViews();
-                    addText(LABELS[tab],23,true,GREEN);
-                    addText("Município: "+PLACES[city]+" · raio "+radius+" km",12,false,MUTED);
+                    renderHeading();
+                    if(tab<=5||tab==7)addText("Município: "+PLACES[city]+" · raio "+radius+" km",12,false,MUTED);
                     status.setText("Resposta recebida "+clock(System.currentTimeMillis()/1000)+" · "+route);
                     render(packet);
                 });
             }catch(Exception e) {
                 runOnUiThread(()->{if(request!=sequence||isFinishing())return;
-                    page.removeAllViews();addText(LABELS[tab],23,true,GREEN);
+                    page.removeAllViews();renderHeading();
                     card("Dados indisponíveis","Não foi possível consultar o servidor: "+
                          (e.getMessage()==null?"Falha de rede.":e.getMessage())+
                          "\nA ausência de dados não significa ausência de focos ou poluentes.");
@@ -495,7 +633,6 @@ public final class NativeDashboardActivity extends Activity {
         "https://brasil.mapbiomas.org/"
     };
     private void renderDiary(){
-        addText("Diário do Explorador",23,true,GREEN);
         card("Página "+(diaryPage+1)+" / 8 · "+DIARY_TITLES[diaryPage],DIARY_TEXT[diaryPage]);
         showLink("Consultar a referência institucional",DIARY_URLS[diaryPage]);
         LinearLayout controls=horizontal();
@@ -505,7 +642,6 @@ public final class NativeDashboardActivity extends Activity {
         addText("Adaptação editorial abreviada das oito páginas do Diário original. Ilustrações e interações do site ainda não foram portadas.",12,false,MUTED);
     }
     private void renderSupport(){
-        addText("Me paga um café? ☕",23,true,GREEN);
         card("Apoio voluntário",
              "O Sentinela fica de olho na Amazônia. Quem cuida de mapas, servidores e bugs às vezes precisa de um café — ou dois!\n\nA plataforma continua gratuita. Nenhuma chave Pix é inventada ou armazenada no APK.");
         card("Pix empresarial","Para verificar o favorecido e a disponibilidade do Pix, consulte a página oficial do projeto. A tela nativa não processa pagamentos.");
@@ -517,6 +653,7 @@ public final class NativeDashboardActivity extends Activity {
         }));
     }
     @Override public void onBackPressed() {
+        if(menuOverlay!=null){closeMenu();return;}
         if(activeProvider!=null&&activeProvider.canGoBack())activeProvider.goBack();
         else if(tab!=0) select(0);
         else super.onBackPressed();
