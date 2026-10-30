@@ -7,6 +7,7 @@ export const PANELS = [
   { id: "inpe", label: "INPE · Queimadas", hash: "#inpe", title: "Queimadas com a referência do INPE", description: "Dados ambientais, risco de fogo e acesso ao monitoramento oficial do Programa Queimadas." },
   { id: "radar", label: "Radar regional", hash: "#radar-regional", title: "Radar de notícias da região", description: "Notícias e comunicados sobre queimadas e incêndios, classificados por local e relevância." },
   { id: "history", label: "Histórico regional", hash: "#historico", title: "A região ao longo do tempo.", description: "Histórico de 7 e 30 dias para comparar detecções, modelo de partículas e notícias." },
+  { id: "intelligence", label: "Inteligência Ambiental", hash: "#inteligencia-ambiental", title: "Inteligência Ambiental", description: "Indicadores, tendências, comparação de municípios e homologação da integração Power BI." },
   { id: "health", label: "Saúde das fontes", hash: "#saude-das-fontes", title: "Acompanhe a qualidade das fontes.", description: "Confira respostas, atrasos, falhas e a cobertura real de cada canal monitorado." },
   { id: "areas", label: "Áreas de interesse", hash: "#areas", title: "Suas áreas de interesse.", description: "Defina coordenadas, polígonos e corredores para acompanhar focos dentro da área selecionada." },
   { id: "alerts", label: "Alertas da operação", hash: "#alertas", title: "Acompanhe o que pede atenção.", description: "Defina limites para detecções, partículas e interrupções da coleta. Consulte os avisos no painel." },
