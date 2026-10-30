@@ -636,8 +636,8 @@ public final class NativeDashboardActivity extends Activity {
         card("Página "+(diaryPage+1)+" / 8 · "+DIARY_TITLES[diaryPage],DIARY_TEXT[diaryPage]);
         showLink("Consultar a referência institucional",DIARY_URLS[diaryPage]);
         LinearLayout controls=horizontal();
-        controls.addView(button("← Anterior",()->{diaryPage=(diaryPage+7)%8;page.removeAllViews();renderDiary();}));
-        controls.addView(button("Próxima →",()->{diaryPage=(diaryPage+1)%8;page.removeAllViews();renderDiary();}));
+        controls.addView(button("← Anterior",()->{diaryPage=(diaryPage+7)%8;page.removeAllViews();renderHeading();renderDiary();}));
+        controls.addView(button("Próxima →",()->{diaryPage=(diaryPage+1)%8;page.removeAllViews();renderHeading();renderDiary();}));
         page.addView(controls);
         addText("Adaptação editorial abreviada das oito páginas do Diário original. Ilustrações e interações do site ainda não foram portadas.",12,false,MUTED);
     }
