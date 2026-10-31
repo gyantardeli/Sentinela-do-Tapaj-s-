@@ -77,7 +77,7 @@ export async function verifiedAdminIdentity(
       "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"],
     );
     const signed = new TextEncoder().encode(head + "." + body);
-    const signature = decodeBytes(sig);
+    const signature = new Uint8Array(decodeBytes(sig)).buffer;
     if (!await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, signature, signed)) return null;
     return { email: owner, userId: claims.sub };
   } catch {
