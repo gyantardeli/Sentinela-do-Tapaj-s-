@@ -5,8 +5,9 @@ import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
 import { connectorPreview } from "./build/connector-preview-plugin.mjs";
 
-const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
-  "00000000-0000-4000-8000-000000000000";
+// Ambiente externo isolado: não aplicar este arquivo ao projeto original Sites.
+const EXTERNAL_D1_DATABASE_ID = process.env.SENTINELA_EXTERNAL_D1_ID ||
+  "9367d435-5b35-49fa-86dd-943ceadd40c3";
 
 const { d1, r2 } = hostingConfig;
 
@@ -15,27 +16,23 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
-  ...(process.env.SENTINELA_EXTERNAL_WORKER_NAME
-    ? { name: process.env.SENTINELA_EXTERNAL_WORKER_NAME }
-    : {}),
+  name: process.env.SENTINELA_EXTERNAL_WORKER_NAME || "sentinela-do-tapajos",
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
-  ...(process.env.SENTINELA_EXTERNAL_D1_ID ? {
-    previews: {
-      d1_databases: [{
-        binding: "DB",
-        database_name: "sentinela-tapajos-staging",
-        database_id: process.env.SENTINELA_EXTERNAL_D1_ID,
-      }],
-      vars: { SENTINELA_PUBLIC_READ: "1" },
-    },
-  } : {}),
+  previews: {
+    d1_databases: [{
+      binding: "DB",
+      database_name: "sentinela-tapajos-staging",
+      database_id: EXTERNAL_D1_DATABASE_ID,
+    }],
+    vars: { SENTINELA_PUBLIC_READ: "1" },
+  },
   d1_databases: d1
     ? [
         {
           binding: d1,
           database_name: "site-creator-d1",
-          database_id: process.env.SENTINELA_EXTERNAL_D1_ID || SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
+          database_id: EXTERNAL_D1_DATABASE_ID,
         },
       ]
     : [],
