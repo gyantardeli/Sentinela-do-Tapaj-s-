@@ -28,9 +28,9 @@ export async function runWatchdog(mode:WatchdogCheck["mode"],now=Math.floor(Date
 }
 export async function readWatchdog(now=Math.floor(Date.now()/1000)):Promise<WatchdogData>{
   const [latest,independent,recent,schedule]=await Promise.all([
-    db().prepare("SELECT value FROM watchdog_checks ORDER BY checked_at DESC LIMIT 1").first<{value:string}>(),
+    db().prepare("SELECT value FROM watchdog_checks WHERE mode IN ('independent','manual') ORDER BY checked_at DESC LIMIT 1").first<{value:string}>(),
     db().prepare("SELECT value FROM watchdog_checks WHERE mode=? ORDER BY checked_at DESC LIMIT 1").bind("independent").first<{value:string}>(),
-    db().prepare("SELECT value FROM watchdog_checks ORDER BY checked_at DESC LIMIT 48").all<{value:string}>(),
+    db().prepare("SELECT value FROM watchdog_checks WHERE mode IN ('independent','manual') ORDER BY checked_at DESC LIMIT 48").all<{value:string}>(),
     db().prepare("SELECT value FROM radar_settings WHERE key=?").bind("watchdog:schedule").first<{value:string}>(),
   ]);
   const last=independent?JSON.parse(independent.value) as WatchdogCheck:null;
