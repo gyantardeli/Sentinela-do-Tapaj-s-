@@ -20,6 +20,16 @@ const localBindingConfig = {
     : {}),
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
+  ...(process.env.SENTINELA_EXTERNAL_D1_ID ? {
+    previews: {
+      d1_databases: [{
+        binding: "DB",
+        database_name: "sentinela-tapajos-staging",
+        database_id: process.env.SENTINELA_EXTERNAL_D1_ID,
+      }],
+      vars: { SENTINELA_PUBLIC_READ: "1" },
+    },
+  } : {}),
   d1_databases: d1
     ? [
         {
