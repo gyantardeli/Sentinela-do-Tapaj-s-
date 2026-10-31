@@ -1,9 +1,10 @@
 import handler from "vinext/server/fetch-handler";
+import { verifiedAdminIdentity } from "./admin-access";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 export default {
-  fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+  async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.
@@ -31,6 +32,25 @@ export default {
         publicHeaders.delete(key);
       }
     }
+    // A session is promoted to administrator only after RSA signature,
+    // audience, issuer, expiry and owner email have all been verified.
+    const owner = await verifiedAdminIdentity(request, env);
+    if (owner) {
+      const method = request.method.toUpperCase();
+      if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+        const origin = request.headers.get("origin");
+        const fetchSite = request.headers.get("sec-fetch-site");
+        const sameOrigin = new URL(request.url).origin;
+        if (origin !== sameOrigin && !(origin === null && fetchSite === "same-origin")) {
+          return Response.json({ success: false, error: "Origem de alteração não autorizada." },
+            { status: 403, headers: { "Cache-Control": "no-store" } });
+        }
+      }
+      publicHeaders.set("oai-authenticated-user-id", owner.userId);
+      publicHeaders.set("oai-authenticated-user-email", owner.email);
+    }
+    // Never forward a client-supplied Access assertion to application logic.
+    publicHeaders.delete("cf-access-jwt-assertion");
     const publicRequest = new Request(request, { headers: publicHeaders });
     return runWithConnectorBinding(binding, () => handler.fetch(publicRequest, env, ctx));
   },
