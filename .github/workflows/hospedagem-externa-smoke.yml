@@ -1,0 +1,59 @@
+name: Validar hospedagem externa do Sentinela
+
+on:
+  push:
+    branches: [sentinela-hospedagem-externa]
+    paths:
+      - 'site/**'
+      - '.github/workflows/hospedagem-externa-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Consultas públicas e proteção de escrita
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      BASE_URL: https://sentinela-hospedagem-externa-sentinela-do-tapajos.gyantardeli.workers.dev
+    steps:
+      - name: Aguardar publicação da revisão com D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 35); do
+            status=$(curl -sS -L --max-time 15 -o /tmp/access.json -w '%{http_code}' "$BASE_URL/api/access" || true)
+            if [ "$status" = "200" ] && jq -e '.publicRead == true and .canManage == false' /tmp/access.json >/dev/null 2>&1; then
+              echo "Acesso de leitura pública confirmado."
+              exit 0
+            fi
+            echo "Tentativa $i/35: status $status; aguardando preview com configuração independente."
+            sleep 15
+          done
+          echo "Falha: preview sem acesso público configurado."
+          cat /tmp/access.json || true
+          exit 1
+      - name: Interface e APIs com dados reais
+        shell: bash
+        run: |
+          set -euo pipefail
+          for endpoint in "/" "/api/health" "/api/dashboard?place=itaituba"; do
+            status=$(curl -sS -L --max-time 65 --retry 2 --retry-delay 4 -o /tmp/sentinela-body -w '%{http_code}' "$BASE_URL$endpoint")
+            echo "$endpoint => HTTP $status"
+            test "$status" = "200"
+          done
+      - name: Rejeitar alteração anônima e identidade forjada
+        shell: bash
+        run: |
+          set -euo pipefail
+          for kind in anonymous forged; do
+            args=()
+            if [ "$kind" = "forged" ]; then
+              args=(-H "oai-authenticated-user-id: attacker" -H "oai-authenticated-user-email: fake@example.com")
+            fi
+            code=$(curl -sS --max-time 20 -X POST "${args[@]}" -o /tmp/write.json -w '%{http_code}' "$BASE_URL/api/access")
+            echo "$kind => HTTP $code"
+            test "$code" = "403"
+          done
