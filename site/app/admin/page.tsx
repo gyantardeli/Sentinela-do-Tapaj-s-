@@ -7,7 +7,7 @@ export default function AdminPage() {
   useEffect(() => {
     fetch("/api/access", { cache: "no-store", credentials: "same-origin" })
       .then(r => r.ok ? r.json() : Promise.reject())
-      .then(data => setState(data.canManage === true ? "allowed" : "denied"))
+      .then((data: unknown) => setState(typeof data === "object" && data !== null && "canManage" in data && data.canManage === true ? "allowed" : "denied"))
       .catch(() => setState("denied"));
   }, []);
   return (
