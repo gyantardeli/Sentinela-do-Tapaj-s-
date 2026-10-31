@@ -23,6 +23,15 @@ export default {
         },
       };
     }
-    return runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    // Hospedagem externa: o cliente controla os cabeçalhos HTTP.
+    // A identidade do ChatGPT Sites não está disponível aqui; impedir spoofing.
+    const publicHeaders = new Headers(request.headers);
+    for (const key of publicHeaders.keys()) {
+      if (key.toLowerCase().startsWith("oai-authenticated-user-")) {
+        publicHeaders.delete(key);
+      }
+    }
+    const publicRequest = new Request(request, { headers: publicHeaders });
+    return runWithConnectorBinding(binding, () => handler.fetch(publicRequest, env, ctx));
   },
 };
