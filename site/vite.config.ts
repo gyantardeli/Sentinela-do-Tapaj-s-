@@ -19,6 +19,7 @@ const localBindingConfig = {
   name: process.env.SENTINELA_EXTERNAL_WORKER_NAME || "sentinela-do-tapajos",
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
+  vars: { SENTINELA_PUBLIC_READ: "1" },
   previews: {
     d1_databases: [{
       binding: "DB",
