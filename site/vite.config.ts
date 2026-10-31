@@ -15,6 +15,9 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
+  ...(process.env.SENTINELA_EXTERNAL_WORKER_NAME
+    ? { name: process.env.SENTINELA_EXTERNAL_WORKER_NAME }
+    : {}),
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
@@ -22,7 +25,7 @@ const localBindingConfig = {
         {
           binding: d1,
           database_name: "site-creator-d1",
-          database_id: SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
+          database_id: process.env.SENTINELA_EXTERNAL_D1_ID || SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
         },
       ]
     : [],
