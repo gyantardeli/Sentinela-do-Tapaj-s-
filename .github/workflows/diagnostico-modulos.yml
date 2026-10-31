@@ -1,0 +1,31 @@
+name: Diagnosticar APIs dos módulos do Sentinela
+
+on:
+  push:
+    branches: [sentinela-hospedagem-externa]
+    paths:
+      - '.github/workflows/diagnostico-modulos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  endpoints:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verificar retornos dos módulos sem alterar dados
+        shell: bash
+        env:
+          BASE: https://sentinela-do-tapajos.gyantardeli.workers.dev
+        run: |
+          set -u
+          for path in '/api/source-health?days=7' '/api/watchdog' '/api/alerts' '/api/environment' '/api/health' '/api/radar' '/api/access' '/api/dashboard?place=itaituba'; do
+            echo "::group::$path"
+            status=$(curl -sS -L --retry 1 --max-time 55 -o /tmp/sentinela-api.json -w '%{http_code}' -H 'Accept: application/json' "$BASE$path")
+            echo "status=$status bytes=$(wc -c </tmp/sentinela-api.json)"
+            head -c 1800 /tmp/sentinela-api.json
+            echo
+            echo "::endgroup::"
+          done
