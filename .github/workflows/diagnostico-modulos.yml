@@ -5,6 +5,8 @@ on:
     branches: [sentinela-hospedagem-externa]
     paths:
       - '.github/workflows/diagnostico-modulos.yml'
+      - 'site/lib/watchdog-store.ts'
+      - 'site/components/watchdog-panel.tsx'
   workflow_dispatch:
 
 permissions:
@@ -29,3 +31,71 @@ jobs:
             echo
             echo "::endgroup::"
           done
+
+  panel-regression:
+    name: Verificar esquema de monitoramento e abas no navegador
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Aguardar nova versão corrigida no endereço público
+        shell: bash
+        env:
+          BASE: https://sentinela-do-tapajos.gyantardeli.workers.dev
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 45); do
+            curl -sS -L --retry 1 --max-time 20 "$BASE/api/watchdog" -o /tmp/watchdog.json
+            if jq -e '.latest != null and (.latest.mode == "independent" or .latest.mode == "manual") and (.latest.issues | type == "array") and ([.checks[] | select(.mode != "independent" and .mode != "manual")] | length == 0)' /tmp/watchdog.json >/dev/null; then
+              echo "Contrato das verificações independentes confirmado."
+              exit 0
+            fi
+            echo "Versão anterior ou contrato incompatível (tentativa $i)"
+            sleep 12
+          done
+          jq '{latest: .latest, checks: [.checks[0], .checks[1]]}' /tmp/watchdog.json
+          exit 1
+      - name: Preparar navegador Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v google-chrome >/dev/null; then
+            command -v google-chrome
+          elif command -v google-chrome-stable >/dev/null; then
+            command -v google-chrome-stable
+          else
+            echo "Chrome não está disponível no runner."
+            exit 1
+          fi
+          npm install --no-audit --no-fund --prefix /tmp/sentinela-browser playwright-core@1.58.2
+      - name: Carregar Saúde, Alertas e Coleta com JavaScript ativo
+        shell: bash
+        env:
+          BASE: https://sentinela-do-tapajos.gyantardeli.workers.dev
+        run: |
+          set -euo pipefail
+          cat > /tmp/sentinela-qa.js <<'JS'
+          const {chromium} = require('/tmp/sentinela-browser/node_modules/playwright-core');
+          (async () => {
+            const exe = process.env.CHROME_PATH || '/usr/bin/google-chrome';
+            const browser = await chromium.launch({headless:true,executablePath:exe,args:['--no-sandbox']});
+            const page = await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+            const errors = [];
+            page.on('pageerror',e=>errors.push(e.message));
+            const checks = [
+              {hash:'#saude-fontes',need:'Saiba quais fontes responderam'},
+              {hash:'#alertas',need:'Histórico dos avisos'},
+              {hash:'#coleta',need:'Monitor independente da coleta'}
+            ];
+            for(const c of checks) {
+              const url=process.env.BASE+'/'+c.hash;
+              await page.goto(url,{waitUntil:'domcontentloaded',timeout:65000});
+              await page.waitForTimeout(1800);
+              const text=await page.locator('body').innerText();
+              const found=text.includes(c.need);
+              console.log(JSON.stringify({hash:c.hash,found,needed:c.need,bodySample:text.slice(0,400),errors}));
+              if(!found||errors.length)throw Error('Falha ao renderizar aba '+c.hash+': '+errors.join(' | '));
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable)" node /tmp/sentinela-qa.js
