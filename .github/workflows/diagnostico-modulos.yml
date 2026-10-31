@@ -82,7 +82,7 @@ jobs:
             const errors = [];
             page.on('pageerror',e=>errors.push(e.message));
             const checks = [
-              {hash:'#saude-fontes',need:'Saiba quais fontes responderam'},
+              {hash:'#saude-das-fontes',need:'Saiba quais fontes responderam'},
               {hash:'#alertas',need:'Histórico dos avisos'},
               {hash:'#coleta',need:'Monitor independente da coleta'}
             ];
