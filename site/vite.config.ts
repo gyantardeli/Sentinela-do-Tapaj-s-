@@ -19,14 +19,22 @@ const localBindingConfig = {
   name: process.env.SENTINELA_EXTERNAL_WORKER_NAME || "sentinela-do-tapajos",
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
-  vars: { SENTINELA_PUBLIC_READ: "1" },
+  vars: {
+    SENTINELA_PUBLIC_READ: "1",
+    SENTINELA_ACCESS_AUD: "a75a791b12be9257aa87123fe22cd3df1156ec99864d500c2200a5113425a250",
+    SENTINELA_ACCESS_TEAM_DOMAIN: "https://sentinela-tapajos.cloudflareaccess.com",
+  },
   previews: {
     d1_databases: [{
       binding: "DB",
       database_name: "sentinela-tapajos-staging",
       database_id: EXTERNAL_D1_DATABASE_ID,
     }],
-    vars: { SENTINELA_PUBLIC_READ: "1" },
+    vars: {
+      SENTINELA_PUBLIC_READ: "1",
+      SENTINELA_ACCESS_AUD: "a75a791b12be9257aa87123fe22cd3df1156ec99864d500c2200a5113425a250",
+      SENTINELA_ACCESS_TEAM_DOMAIN: "https://sentinela-tapajos.cloudflareaccess.com",
+    },
   },
   d1_databases: d1
     ? [
