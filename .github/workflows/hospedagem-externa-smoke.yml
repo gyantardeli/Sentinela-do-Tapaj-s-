@@ -57,3 +57,46 @@ jobs:
             echo "$kind => HTTP $code"
             test "$code" = "403"
           done
+
+  production:
+    name: Validar endereço principal externo
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      BASE_URL: https://sentinela-do-tapajos.gyantardeli.workers.dev
+    steps:
+      - name: Aguardar atualização completa em produção
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 40); do
+            access=$(curl -sS -L --max-time 15 -o /tmp/access.json -w '%{http_code}' "$BASE_URL/api/access" || true)
+            health=$(curl -sS -L --max-time 30 -o /tmp/health.json -w '%{http_code}' "$BASE_URL/api/health" || true)
+            if [ "$access" = "200" ] && [ "$health" = "200" ] && jq -e '.publicRead == true and .canManage == false' /tmp/access.json >/dev/null 2>&1; then
+              echo "Produção: acesso público e API com sucesso."
+              exit 0
+            fi
+            echo "Tentativa $i/40: access=$access health=$health"
+            sleep 15
+          done
+          exit 1
+      - name: Validar painel e consultas reais
+        shell: bash
+        run: |
+          set -euo pipefail
+          for endpoint in "/" "/api/dashboard?place=itaituba" "/api/radar"; do
+            code=$(curl -sS -L --max-time 65 --retry 2 --retry-delay 4 -o /tmp/response -w '%{http_code}' "$BASE_URL$endpoint")
+            echo "$endpoint => HTTP $code"
+            test "$code" = "200"
+          done
+      - name: Verificar escrita administrativa negada
+        shell: bash
+        run: |
+          set -euo pipefail
+          code=$(curl -sS --max-time 20 -X POST \
+            -H 'oai-authenticated-user-id: spoofed' \
+            -H 'oai-authenticated-user-email: forged@example.com' \
+            -o /tmp/write.json -w '%{http_code}' "$BASE_URL/api/access")
+          echo "Tentativa de falsificar identidade: HTTP $code"
+          test "$code" = "403"
