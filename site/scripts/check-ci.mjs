@@ -18,7 +18,8 @@ const checks = [
   "check-rss1",
   "check-public-access",
   "check-online-runtime",
-  "check-mobile"
+  "check-mobile",
+  "check-web-analytics"
 ];
 for (const name of checks) {
   console.log(`\n=== ${name} ===`);

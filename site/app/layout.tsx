@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import "./dashboard-refresh.css";
 import "./fire-replay.css";
@@ -9,6 +10,10 @@ import "./purpleair.css";
 import "./air-quality-map.css";
 import "./site-access.css";
 import SiteAccessNotice from "../components/site-access-notice";
+
+// Identificador público do Cloudflare Web Analytics do domínio de produção.
+// Manter no código-fonte para sobreviver aos próximos deployments.
+const CLOUDFLARE_WEB_ANALYTICS_TOKEN = "1e88520ee2864d3ea301ea7a158e1409";
 
 export const metadata: Metadata = {
   title: "Sentinela Tapajós · Monitoramento Ambiental",
@@ -31,7 +36,19 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head><meta name="theme-color" content="#061f1b" /></head>
-      <body className="antialiased">{children}<SiteAccessNotice /></body>
+      <body className="antialiased">
+        {children}
+        <SiteAccessNotice />
+        <Script
+          id="sentinela-cloudflare-web-analytics"
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          strategy="afterInteractive"
+          data-cf-beacon={JSON.stringify({
+            token: CLOUDFLARE_WEB_ANALYTICS_TOKEN,
+            spa: true,
+          })}
+        />
+      </body>
     </html>
   );
 }
